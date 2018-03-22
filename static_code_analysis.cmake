@@ -16,7 +16,7 @@ ELSE()
 ENDIF()
 
 IF(EXISTS "${CPPCHECK_PATH}")
-  SET(CMAKE_CXX_CPPCHECK "${CPPCHECK_PATH}" "--std=c++14" "--enable=warning,performance")
+  SET(CMAKE_CXX_CPPCHECK "${CPPCHECK_PATH}" "--std=c++14" "--enable=warning,performance,portability,style")
 ENDIF()
 
 IF(EXISTS /usr/bin/include-what-you-use)
