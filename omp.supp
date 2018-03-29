@@ -1,0 +1,8 @@
+{
+   GOMP_parallel
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:GOMP_parallel
+   ...
+}
