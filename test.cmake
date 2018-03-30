@@ -14,7 +14,7 @@ INCLUDE(${CMAKE_CURRENT_LIST_DIR}/compiler.cmake)
 
 include(FindPackageHandleStandardArgs)
 find_path(VALGRIND_PATH valgrind PATHS /usr/bin /usr/local/bin)
-find_package_handle_standard_args(valgrind VALGRIND_PATH)
+find_package_handle_standard_args(valgrind DEFAULT_MSG VALGRIND_PATH)
 
 FILE(GLOB suppression_files ${CMAKE_CURRENT_LIST_DIR}/*.supp)
 
@@ -27,5 +27,7 @@ function(add_test_with_runtime_analysis name binary)
   if(valgrind_FOUND)
     separate_arguments(memcheck_command)
     add_test(NAME memcheck_${name} COMMAND ${memcheck_command} ./${binary} ${ARGN})
+  else()
+    add_test(NAME ${name} COMMAND ./${binary} ${ARGN})
   endif()
 endfunction(add_test_with_runtime_analysis)
