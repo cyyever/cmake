@@ -16,7 +16,7 @@ include(FindPackageHandleStandardArgs)
 find_path(VALGRIND_PATH valgrind PATHS /usr/bin /usr/local/bin)
 find_package_handle_standard_args(valgrind DEFAULT_MSG VALGRIND_PATH)
 
-FILE(GLOB suppression_files ${CMAKE_CURRENT_LIST_DIR}/*.supp)
+FILE(GLOB suppression_files ${CMAKE_CURRENT_LIST_DIR}/valgrind_supp/*.supp)
 
 set(memcheck_command "${VALGRIND_PATH}/valgrind --error-exitcode=1 --trace-children=yes --gen-suppressions=all --track-fds=yes --leak-check=full")
 foreach(suppression_file ${suppression_files})
