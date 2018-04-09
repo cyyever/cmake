@@ -40,7 +40,6 @@ function(add_test_with_runtime_analysis name binary)
   add_dependencies(check ${name})
 endfunction(add_test_with_runtime_analysis)
 
-message(STATUS ${CMAKE_FILES_DIRECTORY})
 if(ENABLE_CODE_COVERAGE AND NOT TARGET code_coverage) 
   ADD_CUSTOM_TARGET(code_coverage ALL 
     COMMAND mkdir ${CMAKE_CURRENT_BINARY_DIR}/code_coverage && gcovr -r ${CMAKE_SOURCE_DIR} --object-directory=`find ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}  -name '*.gcno' -printf '%h\\n'  -quit` --html --html-details -o ${CMAKE_CURRENT_BINARY_DIR}/code_coverage/index.html
