@@ -1,5 +1,5 @@
 IF (NOT WIN32)
-  return
+  return()
 endif()
 
 #統一安裝目錄，免得不斷設置path環境變量
