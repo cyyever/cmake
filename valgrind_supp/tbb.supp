@@ -1,0 +1,13 @@
+{
+   tbb worker
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   fun:allocate_dtv
+   fun:_dl_allocate_tls
+   fun:allocate_stack
+   ...
+   fun:_ZN3tbb8internal3rml14private_worker14wake_or_launchEv
+   ...
+}
+
