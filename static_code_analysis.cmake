@@ -17,11 +17,12 @@ IF(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   add_compile_options("/analyze")
 ENDIF()
 
-IF (WIN32)
-  if(NOT TARGET scan_build)
+IF (NOT WIN32)
+  FIND_PACKAGE(scanbuild)
+  if(NOT TARGET scan_build AND scanbuild_FOUND)
     ADD_CUSTOM_TARGET(scan_build
-      COMMAND cmake -DCMAKE_CXX_COMPILER=/usr/share/clang/scan-build-7/libexec/c++-analyzer -DCMAKE_C_COMPILER=/usr/share/clang/scan-build-7/libexec/ccc-analyzer ${CMAKE_BINARY_DIR}
-      COMMAND scan-build ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}
+      COMMAND cmake -DCMAKE_CXX_COMPILER=${cpp_analyzer_BINARY} -DCMAKE_C_COMPILER=${ccc_analyzer_BINARY} ${CMAKE_BINARY_DIR}
+      COMMAND ${scanbuild_BINARY} ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}
       )
   endif()
 endif()
