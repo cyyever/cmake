@@ -16,3 +16,12 @@ endif()
 IF(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   add_compile_options("/analyze")
 ENDIF()
+
+IF (WIN32)
+  if(NOT TARGET scan_build)
+    ADD_CUSTOM_TARGET(scan_build
+      COMMAND cmake -DCMAKE_CXX_COMPILER=/usr/share/clang/scan-build-7/libexec/c++-analyzer -DCMAKE_C_COMPILER=/usr/share/clang/scan-build-7/libexec/ccc-analyzer ${CMAKE_BINARY_DIR}
+      COMMAND scan-build ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}
+      )
+  endif()
+endif()
