@@ -23,6 +23,6 @@ IF(EXISTS /usr/bin/include-what-you-use)
   SET(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "include-what-you-use")
 ENDIF()
 
-IF(MSVC)
+IF(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   add_compile_options("/analyze")
 ENDIF()
