@@ -13,10 +13,6 @@ if(cppcheck_FOUND)
   SET(CMAKE_CXX_CPPCHECK "${cppcheck_BINARY}" "--std=c++14" "--enable=warning,performance,portability,style")
 endif()
 
-IF(EXISTS /usr/bin/include-what-you-use)
-  SET(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "include-what-you-use")
-ENDIF()
-
 IF(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   add_compile_options("/analyze")
 ENDIF()
