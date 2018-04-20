@@ -6,3 +6,21 @@
    fun:GOMP_parallel
    ...
 }
+
+{
+   unaddressable byte
+   Memcheck:Param
+   sched_setaffinity(mask)
+   fun:syscall
+   obj:*libomp.so*
+   ...
+}
+
+{
+   GOMP_parallel
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:GOMP_parallel_loop_dynamic
+   ...
+}
