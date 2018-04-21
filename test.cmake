@@ -48,10 +48,9 @@ function(add_test_with_runtime_analysis)
     endif()
 
     if(NOT ${has_test})
-      set(${this_NO_RUNTIME_ANALYSIS} TRUE)
+      set(this_NO_RUNTIME_ANALYSIS TRUE)
     endif()
   endif()
-
   if(${this_NO_RUNTIME_ANALYSIS})
     set(name ${this_TARGET})
     add_test(NAME ${name} WORKING_DIRECTORY $<TARGET_FILE_DIR:${this_TARGET}> COMMAND $<TARGET_FILE:${this_TARGET}> ${this_ARGS})
