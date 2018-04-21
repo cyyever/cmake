@@ -7,17 +7,6 @@ if(NOT TARGET check)
   ADD_CUSTOM_TARGET(check ALL COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -C $<CONFIGURATION>)
 endif()
 
-#IF(${CMAKE_HOST_SYSTEM_NAME} EQUAL "Linux")
-#  #apt-get install extra-cmake-modules
-#  FIND_PACKAGE(ECM REQUIRED)
-#  LIST(APPEND CMAKE_MODULE_PATH "${ECM_MODULE_DIR}")
-#
-#  #給測試增加llvm sanitizer
-#  include(ECMEnableSanitizers)
-#  #set(ECM_ENABLE_SANITIZERS 'address;leak;undefined')
-#  set(ECM_ENABLE_SANITIZERS 'undefined;leak')
-#ENDIF()
-
 LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/module)
 
 FIND_PACKAGE(valgrind)
@@ -33,7 +22,8 @@ macro(add_valgrind_suppression_dir dir)
   endforeach()
 endmacro()
 
-function(add_test_with_runtime_analysis name target)
+function(add_test_with_runtime_analysis target)
+  set(name ${target})
   if(valgrind_FOUND)
     set(memcheck_command "${valgrind_BINARY} --error-exitcode=1 --trace-children=yes --gen-suppressions=all --track-fds=yes --leak-check=full")
     foreach(suppression_file ${suppression_files})
