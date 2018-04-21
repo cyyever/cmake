@@ -2,9 +2,8 @@
 #
 # The following are set after configuration is done:
 #  ubsan_FOUND
-#  ubsan_BINARY
 
 include(FindPackageHandleStandardArgs)
-find_path(ubsan_DIR libubsan.so PATHS /usr/lib /usr/local/lib)
-find_package_handle_standard_args(ubsan DEFAULT_MSG ubsan_DIR)
 
+FILE(GLOB ubsan_lib_paths /usr/lib/libubsan.so.* /usr/local/lib/libubsan.so.* /usr/lib/x86_64-linux-gnu/libubsan.so.*)
+find_package_handle_standard_args(ubsan DEFAULT_MSG ubsan_lib_paths)
