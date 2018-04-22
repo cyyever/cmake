@@ -1,4 +1,3 @@
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/compiler.cmake)
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/code_coverage.cmake)
 
 ENABLE_TESTING()
