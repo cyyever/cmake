@@ -136,7 +136,7 @@ if(ENABLE_GNU_CODE_COVERAGE AND NOT TARGET code_coverage)
     ADD_CUSTOM_TARGET(code_coverage ALL
       COMMAND mkdir -p ${CMAKE_BINARY_DIR}/code_coverage
       COMMAND ${lcov_BINARY} --capture --directory ${CMAKE_BINARY_DIR} --output-file coverage.info
-      COMMAND genhtml coverage.info --output-directory ${CMAKE_BINARY_DIR}/code_coverage
+      COMMAND ${genhtml_BINARY} coverage.info --output-directory ${CMAKE_BINARY_DIR}/code_coverage
       DEPENDS check)
   elseif(gcovr_FOUND)
     ADD_CUSTOM_TARGET(code_coverage ALL 
