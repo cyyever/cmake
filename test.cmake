@@ -130,7 +130,8 @@ endfunction()
 
 FIND_PACKAGE(gcovr)
 FIND_PACKAGE(lcov)
-if(ENABLE_CODE_COVERAGE AND NOT TARGET code_coverage)
+
+if(ENABLE_GNU_CODE_COVERAGE AND NOT TARGET code_coverage)
   if(lcov_FOUND)
     ADD_CUSTOM_TARGET(code_coverage ALL
       COMMAND mkdir -p ${CMAKE_BINARY_DIR}/code_coverage
@@ -142,4 +143,11 @@ if(ENABLE_CODE_COVERAGE AND NOT TARGET code_coverage)
       COMMAND mkdir -p ${CMAKE_BINARY_DIR}/code_coverage && ${gcovr_BINARY} -r ${CMAKE_SOURCE_DIR} --object-directory=`find ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY} -name '*.gcno' -print0 -quit | xargs -0 -n 1 dirname ` --html --html-details -o ${CMAKE_BINARY_DIR}/code_coverage/index.html
       DEPENDS check)
   endif()
+endif()
+
+
+if(ENABLE_LLVM_CODE_COVERAGE AND NOT TARGET code_coverage)
+    ADD_CUSTOM_TARGET(code_coverage ALL
+      COMMAND llvm-profdata merge -sparse default.profraw -o default.profdata
+      DEPENDS check)
 endif()
