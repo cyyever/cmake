@@ -148,6 +148,7 @@ endif()
 
 if(ENABLE_LLVM_CODE_COVERAGE AND NOT TARGET code_coverage)
     ADD_CUSTOM_TARGET(code_coverage ALL
-      COMMAND llvm-profdata merge -sparse default.profraw -o default.profdata
+      COMMAND llvm-profdata merge -sparse `find -name default.profraw` -o default.profdata
+      COMMAND llvm-cov show -instr-profile=`find -name default.profdata` -format=html -output-dir=${CMAKE_BINARY_DIR}/code_coverage `find ${CMAKE_BINARY_DIR} -name '*.so'`
       DEPENDS check)
 endif()
