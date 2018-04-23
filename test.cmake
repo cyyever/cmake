@@ -129,8 +129,17 @@ function(add_test_with_runtime_analysis)
 endfunction()
 
 FIND_PACKAGE(gcovr)
-if(ENABLE_CODE_COVERAGE AND NOT TARGET code_coverage AND gcovr_FOUND)
-  ADD_CUSTOM_TARGET(code_coverage ALL 
-    COMMAND mkdir -p ${CMAKE_BINARY_DIR}/code_coverage && ${gcovr_BINARY} -r ${CMAKE_SOURCE_DIR} --object-directory=`find ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY} -name '*.gcno' -print0 -quit | xargs -0 -n 1 dirname ` --html --html-details -o ${CMAKE_BINARY_DIR}/code_coverage/index.html
-    DEPENDS check)
+FIND_PACKAGE(lcov)
+if(ENABLE_CODE_COVERAGE AND NOT TARGET code_coverage)
+  if(lcov_FOUND)
+    ADD_CUSTOM_TARGET(code_coverage ALL
+      COMMAND mkdir -p ${CMAKE_BINARY_DIR}/code_coverage
+      COMMAND ${lcov_BINARY} --capture --directory ${CMAKE_BINARY_DIR} --output-file coverage.info
+      COMMAND genhtml coverage.info --output-directory ${CMAKE_BINARY_DIR}/code_coverage
+      DEPENDS check)
+  elseif(gcovr_FOUND)
+    ADD_CUSTOM_TARGET(code_coverage ALL 
+      COMMAND mkdir -p ${CMAKE_BINARY_DIR}/code_coverage && ${gcovr_BINARY} -r ${CMAKE_SOURCE_DIR} --object-directory=`find ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY} -name '*.gcno' -print0 -quit | xargs -0 -n 1 dirname ` --html --html-details -o ${CMAKE_BINARY_DIR}/code_coverage/index.html
+      DEPENDS check)
+  endif()
 endif()
