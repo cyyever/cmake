@@ -131,6 +131,8 @@ function(add_test_with_runtime_analysis)
 
     if(${has_test})
       set(this_WITH_CPU_ANALYSIS TRUE)
+    else()
+      set(this_WITH_CPU_ANALYSIS FALSE)
     endif()
   endif()
 
@@ -146,6 +148,8 @@ function(add_test_with_runtime_analysis)
 
     if(${has_test})
       set(this_WITH_GPU_ANALYSIS TRUE)
+    else()
+      set(this_WITH_GPU_ANALYSIS FALSE)
     endif()
   endif()
 
