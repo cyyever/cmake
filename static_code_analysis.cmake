@@ -10,7 +10,9 @@ ENDIF()
 
 FIND_PACKAGE(cppcheck)
 if(cppcheck_FOUND)
-  SET(CMAKE_CXX_CPPCHECK "${cppcheck_BINARY}" "--std=c++14" "--enable=warning,performance,portability,style")
+  add_custom_target(do_cppcheck ALL
+    COMMAND ${cppcheck_BINARY} --project=${CMAKE_BINARY_DIR}/compile_commands.json --std=c++14 --enable=all
+    DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json)
 endif()
 
 IF(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
