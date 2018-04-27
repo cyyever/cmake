@@ -23,9 +23,9 @@ function(add_fuzzing)
 
   target_compile_options(${this_TARGET} PRIVATE "-fsanitize=fuzzer")
   target_compile_options(${this_TARGET} PRIVATE "-fsanitize=address")
-  set_target_properties(${this_TARGET} PROPERTIES LINK_FLAGS "-fsanitize=address")
+  set_target_properties(${this_TARGET} PROPERTIES LINK_FLAGS "-fsanitize=address,fuzzer")
   TARGET_LINK_LIBRARIES(${this_TARGET} PRIVATE Threads::Threads)
-  TARGET_LINK_LIBRARIES(${this_TARGET} PRIVATE /usr/lib/llvm-7/lib/libFuzzer.a)
+  set_target_properties(${this_TARGET} PROPERTIES INTERPROCEDURAL_OPTIMIZATION FALSE)
 
   set(name "fuzzing_${this_TARGET}")
   add_test(NAME ${name} WORKING_DIRECTORY $<TARGET_FILE_DIR:${this_TARGET}> COMMAND $<TARGET_FILE:${this_TARGET}> -jobs=4 -max_total_time=60)
