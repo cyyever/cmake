@@ -14,10 +14,8 @@ if(clangtidy_FOUND)
 ENDIF()
 
 FIND_PACKAGE(cppcheck)
-if(NOT TARGET do_cppcheck AND cppcheck_FOUND)
-  add_custom_target(do_cppcheck ALL
-    COMMAND ${cppcheck_BINARY} --project=${CMAKE_BINARY_DIR}/compile_commands.json --std=c++14 --enable=all
-    DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json)
+if(cppcheck_FOUND)
+   SET(CMAKE_CXX_CPPCHECK "${cppcheck_BINARY}" "--std=c++14" "--enable=all")
 endif()
 
 FIND_PACKAGE(scanbuild)

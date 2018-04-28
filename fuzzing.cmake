@@ -1,5 +1,3 @@
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/compiler.cmake)
-
 IF(NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   message(WARNING "only clang can use libFuzzer")
   return()
