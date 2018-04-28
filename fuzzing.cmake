@@ -5,8 +5,8 @@ endif()
 
 ENABLE_TESTING()
 
-if(NOT TARGET fuzz_test)
-  ADD_CUSTOM_TARGET(fuzz_test ALL COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -C $<CONFIGURATION>)
+if(NOT TARGET fuzzing)
+  ADD_CUSTOM_TARGET(fuzzing ALL COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -C $<CONFIGURATION>)
 endif()
 
 FIND_PACKAGE(Threads REQUIRED)
@@ -27,4 +27,5 @@ function(add_fuzzing)
 
   set(name "fuzzing_${this_TARGET}")
   add_test(NAME ${name} WORKING_DIRECTORY $<TARGET_FILE_DIR:${this_TARGET}> COMMAND $<TARGET_FILE:${this_TARGET}> -jobs=4 -max_total_time=60)
+  add_dependencies(fuzzing ${this_TARGET})
 endfunction()
