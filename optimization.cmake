@@ -1,3 +1,4 @@
+cmake_policy(SET CMP0069 NEW)
 include(CheckIPOSupported)
 check_ipo_supported(RESULT result OUTPUT output LANGUAGES C CXX)
 if(result)
