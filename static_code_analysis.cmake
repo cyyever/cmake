@@ -21,7 +21,7 @@ endif()
 FIND_PACKAGE(scanbuild)
 if(NOT TARGET scan_build AND scanbuild_FOUND)
   ADD_CUSTOM_TARGET(scan_build
-    COMMAND cmake -DCMAKE_CXX_COMPILER=${cpp_analyzer_BINARY} -DCMAKE_C_COMPILER=${ccc_analyzer_BINARY} ${CMAKE_BINARY_DIR}
+    COMMAND "${CMAKE_COMMAND}" -DCMAKE_CXX_COMPILER=${cpp_analyzer_BINARY} -DCMAKE_C_COMPILER=${ccc_analyzer_BINARY} ${CMAKE_BINARY_DIR}
     COMMAND ${scanbuild_BINARY} ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}
     )
 endif()
