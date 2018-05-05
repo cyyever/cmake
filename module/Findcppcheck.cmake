@@ -8,7 +8,7 @@ include(FindPackageHandleStandardArgs)
 
 if(WIN32)
   set(_PF86 "ProgramFiles(x86)")
-  find_path(cppcheck_DIR cppcheck.exe PATHS "$ENV{PROGRAMFILES}/Cppcheck" "$ENV{${_PF86}}/Cppcheck" "$ENV{ProgramW6432}/Cppcheck"  )
+  find_path(cppcheck_DIR cppcheck.exe PATHS "$ENV{PROGRAMFILES}/Cppcheck" "$ENV{${_PF86}}/Cppcheck" "$ENV{ProgramW6432}/Cppcheck")
 else()
   find_path(cppcheck_DIR cppcheck PATHS /usr/bin /usr/local/bin)
 endif()
