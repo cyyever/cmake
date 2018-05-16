@@ -1,4 +1,6 @@
-if(NOT CMAKE_BUILD_TYPE STREQUAL Debug)
+option(ENABLE_CODE_COVERAGE "Enable code coverage" OFF)
+
+if(NOT ENABLE_CODE_COVERAGE)
   return()
 endif()
 
