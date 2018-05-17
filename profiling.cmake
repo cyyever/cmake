@@ -1,15 +1,11 @@
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/util.cmake)
 
-ENABLE_TESTING()
-
-if(NOT TARGET profiling)
-  ADD_CUSTOM_TARGET(profiling ALL COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -C $<CONFIGURATION>)
-endif()
-
 FIND_PACKAGE(gprof)
+FIND_PACKAGE(ltrace)
+FIND_PACKAGE(strace)
 
 function(add_profiling)
-  set(cpu_profiling_tools GPROF)
+  set(cpu_profiling_tools GPROF LTRACE STRACE)
   set(gpu_profiling_tools NVPROF)
   cmake_parse_arguments(this "" "TARGET;${cpu_profiling_tools} ${gpu_profiling_tools}" "ARGS" ${ARGN})
   if("${this_TARGET}" STREQUAL "")
@@ -55,6 +51,24 @@ function(add_profiling)
     set(this_GPROF FALSE)
   endif()
 
+  if("${this_LTRACE}" STREQUAL "")
+    set(this_LTRACE TRUE)
+  elseif(${this_LTRACE} AND NOT ltrace_FOUND)
+    message(WARNING "no ltrace")
+    set(this_LTRACE FALSE)
+  endif()
+
+  if("${this_STRACE}" STREQUAL "")
+    set(this_STRACE TRUE)
+  elseif(${this_STRACE} AND NOT strace_FOUND)
+    message(WARNING "no strace")
+    set(this_STRACE FALSE)
+  endif()
+
+  if("${this_NVPROF}" STREQUAL "")
+    set(this_NVPROF FALSE)
+  endif()
+
   set(has_profiling FALSE)
   foreach(tool IN LISTS cpu_profiling_tools gpu_profiling_tools)
     if(NOT ${this_${tool}})
@@ -64,14 +78,31 @@ function(add_profiling)
     set(new_target "${tool}_${this_TARGET}")
     clone_target(OLD_TARGET ${this_TARGET} NEW_TARGET ${new_target})
     set(new_target_command $<TARGET_FILE:${new_target}>)
-    set(has_profiling TRUE)
+    set(profiling_output_file ${CMAKE_BINARY_DIR}/profiling_output/${new_target}.txt)
 
     if(tool STREQUAL GPROF)
       target_compile_options(${new_target} PRIVATE "-pg")
       set_target_properties(${new_target} PROPERTIES LINK_FLAGS "-pg")
-      add_test(NAME "${new_target}" WORKING_DIRECTORY $<TARGET_FILE_DIR:${new_target}> COMMAND ${new_target_command} ${this_ARGS} && ${gprof_BINARY} $<TARGET_FILE:${new_target}> gmon.out)
+
+      add_custom_target("${tool}_${this_TARGET}_output" ALL
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/profiling_output
+	COMMAND ${new_target_command} ${this_ARGS}
+	COMMAND	${gprof_BINARY} -p --brief $<TARGET_FILE:${new_target}> `find ${CMAKE_BINARY_DIR} -name gmon.out` > ${profiling_output_file}
+	DEPENDS ${new_target})
+      set(has_profiling TRUE)
+    elseif(tool STREQUAL LTRACE)
+      add_custom_target("${tool}_${this_TARGET}_output" ALL
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/profiling_output
+	COMMAND ${ltrace_BINARY} -c --demangle -o ${profiling_output_file} ${new_target_command} ${this_ARGS}
+	DEPENDS ${new_target})
+      set(has_profiling TRUE)
+    elseif(tool STREQUAL STRACE)
+      add_custom_target("${tool}_${this_TARGET}_output" ALL
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/profiling_output
+	COMMAND ${strace_BINARY} -c -o ${profiling_output_file} ${new_target_command} ${this_ARGS}
+	DEPENDS ${new_target})
+      set(has_profiling TRUE)
     endif()
-    add_dependencies(profiling ${new_target})
   endforeach()
 
   if(NOT has_profiling)
