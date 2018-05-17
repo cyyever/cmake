@@ -10,12 +10,18 @@ if(NOT TARGET fuzzing)
 endif()
 
 FIND_PACKAGE(Threads REQUIRED)
+FIND_PACKAGE(asan REQUIRED)
 
 function(add_fuzzing)
   set(oneValueArgs TARGET)
   cmake_parse_arguments(this "" "${oneValueArgs}" "" ${ARGN})
   if("${this_TARGET}" STREQUAL "")
     message(FATAL_ERROR "no target specified")
+    return()
+  endif()
+
+  if(NOT TARGET ${this_TARGET})
+    message(FATAL_ERROR "${this_TARGET} is not a target")
     return()
   endif()
 
