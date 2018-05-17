@@ -3,6 +3,7 @@ INCLUDE(${CMAKE_CURRENT_LIST_DIR}/util.cmake)
 FIND_PACKAGE(gprof)
 FIND_PACKAGE(ltrace)
 FIND_PACKAGE(strace)
+FIND_PACKAGE(CUDA)
 
 function(add_profiling)
   set(cpu_profiling_tools GPROF LTRACE STRACE)
@@ -67,6 +68,9 @@ function(add_profiling)
 
   if("${this_NVPROF}" STREQUAL "")
     set(this_NVPROF FALSE)
+  elseif(${this_NVPROF} AND NOT CUDA_FOUND)
+    message(WARNING "no CUDA")
+    set(this_NVPROF FALSE)
   endif()
 
   set(has_profiling FALSE)
@@ -100,6 +104,12 @@ function(add_profiling)
       add_custom_target("${tool}_${this_TARGET}_output" ALL
 	COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/profiling_output
 	COMMAND ${strace_BINARY} -c -o ${profiling_output_file} ${new_target_command} ${this_ARGS}
+	DEPENDS ${new_target})
+      set(has_profiling TRUE)
+    elseif(tool STREQUAL NVPROF)
+      add_custom_target("${tool}_${this_TARGET}_output" ALL
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/profiling_output
+	COMMAND ${CUDA_TOOLKIT_ROOT_DIR}/bin/nvprof --profile-from-start off --log-file ${profiling_output_file} ${new_target_command} ${this_ARGS}
 	DEPENDS ${new_target})
       set(has_profiling TRUE)
     endif()
