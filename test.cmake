@@ -30,11 +30,16 @@ function(add_test_with_runtime_analysis)
   set(cpu_analysis_tools MEMCHECK UBSAN HELGRIND ASAN TSAN)
   set(gpu_analysis_tools CUDA-MEMCHECK CUDA-SYNCCHECK CUDA-INITCHECK CUDA-RACECHECK)
   cmake_parse_arguments(this "" "TARGET;WITH_CPU_ANALYSIS;WITH_GPU_ANALYSIS;${cpu_analysis_tools} ${gpu_analysis_tools}" "ARGS" ${ARGN})
-  message(STATUS "TARGET WITH_CPU_ANALYSIS WITH_GPU_ANALYSIS ${cpu_analysis_tools} ${gpu_analysis_tools}")
   if("${this_TARGET}" STREQUAL "")
     message(FATAL_ERROR "no target specified")
     return()
   endif()
+
+  if(NOT TARGET ${this_TARGET})
+    message(FATAL_ERROR "${this_TARGET} is not a target")
+    return()
+  endif()
+
   separate_arguments(this_ARGS)
 
   if("${this_WITH_CPU_ANALYSIS}" STREQUAL "")
@@ -183,23 +188,16 @@ function(add_test_with_runtime_analysis)
   add_dependencies(check ${this_TARGET})
 endfunction()
 
-FIND_PACKAGE(gcovr)
-FIND_PACKAGE(lcov)
-
 if(ENABLE_GNU_CODE_COVERAGE AND NOT TARGET code_coverage)
+  FIND_PACKAGE(lcov)
   if(lcov_FOUND)
     ADD_CUSTOM_TARGET(code_coverage ALL
       COMMAND mkdir -p ${CMAKE_BINARY_DIR}/code_coverage
       COMMAND ${lcov_BINARY} --capture --directory ${CMAKE_BINARY_DIR} --output-file coverage.info
       COMMAND ${genhtml_BINARY} coverage.info --output-directory ${CMAKE_BINARY_DIR}/code_coverage
       DEPENDS check)
-  elseif(gcovr_FOUND)
-    ADD_CUSTOM_TARGET(code_coverage ALL 
-      COMMAND mkdir -p ${CMAKE_BINARY_DIR}/code_coverage && ${gcovr_BINARY} -r ${CMAKE_SOURCE_DIR} --object-directory=`find ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY} -name '*.gcno' -print0 -quit | xargs -0 -n 1 dirname ` --html --html-details -o ${CMAKE_BINARY_DIR}/code_coverage/index.html
-      DEPENDS check)
   endif()
 endif()
-
 
 if(ENABLE_LLVM_CODE_COVERAGE AND NOT TARGET code_coverage)
     ADD_CUSTOM_TARGET(code_coverage ALL

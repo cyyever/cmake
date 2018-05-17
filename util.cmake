@@ -15,7 +15,6 @@ function(clone_target)
     return()
   endif()
 
-
   get_target_property(property_var ${this_OLD_TARGET} TYPE)
 
   if(property_var STREQUAL EXECUTABLE)
@@ -26,8 +25,6 @@ function(clone_target)
   endif()
   
   get_target_property(property_var ${this_OLD_TARGET} SOURCES)
-
-
 
   # get all targets
   execute_process(COMMAND ${CMAKE_COMMAND} --help-property-list OUTPUT_VARIABLE CMAKE_PROPERTY_LIST)
