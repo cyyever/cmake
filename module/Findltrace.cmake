@@ -5,9 +5,5 @@
 #  ltrace_BINARY
 
 include(FindPackageHandleStandardArgs)
-find_path(ltrace_DIR ltrace PATHS /usr/bin /usr/local/bin)
-find_package_handle_standard_args(ltrace DEFAULT_MSG ltrace_DIR)
-
-if(ltrace_FOUND)
-  set(ltrace_BINARY "${ltrace_DIR}/ltrace")
-endif()
+find_program(ltrace_BINARY ltrace PATHS /usr/bin /usr/local/bin)
+find_package_handle_standard_args(ltrace DEFAULT_MSG ltrace_BINARY)

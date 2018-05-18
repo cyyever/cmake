@@ -5,9 +5,5 @@
 #  strace_BINARY
 
 include(FindPackageHandleStandardArgs)
-find_path(strace_DIR strace PATHS /usr/bin /usr/local/bin)
-find_package_handle_standard_args(strace DEFAULT_MSG strace_DIR)
-
-if(strace_FOUND)
-  set(strace_BINARY "${strace_DIR}/strace")
-endif()
+find_program(strace_BINARY strace PATHS /usr/bin /usr/local/bin)
+find_package_handle_standard_args(strace DEFAULT_MSG strace_BINARY)
