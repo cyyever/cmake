@@ -12,21 +12,13 @@ find_program(scanbuild_BINARY scan-build PATHS /usr/bin /usr/local/bin $ENV{PROG
 find_package_handle_standard_args(scanbuild DEFAULT_MSG scanbuild_BINARY)
 
 if(scanbuild_FOUND)
-  execute_process(COMMAND readlink -f ${scanbuild_BINARY}
-  OUTPUT_VARIABLE full_path)
+  get_filename_component(scanbuild_BINARY ${scanbuild_BINARY} REALPATH)
+  get_filename_component(scanbuild_BIN_DIR ${scanbuild_BINARY} DIRECTORY)
+  get_filename_component(parent_dir ${scanbuild_BINARY} DIRECTORY)
+  get_filename_component(scanbuild_DIR ${scanbuild_BIN_DIR} DIRECTORY)
+  message(${scanbuild_DIR})
 
-  execute_process(COMMAND dirname -z ${full_path}
-  OUTPUT_VARIABLE parent_dir)
-
-execute_process(COMMAND dirname -z ${parent_dir}
-  RESULT_VARIABLE res
-  OUTPUT_VARIABLE scan_build_dir)
-  IF(res STREQUAL "0")
-    find_path(ccc_analyzer_DIR ccc-analyzer PATHS "${scan_build_dir}/libexec")
-    find_package_handle_standard_args(scanbuild DEFAULT_MSG ccc_analyzer_DIR)
-    if(scanbuild_FOUND)
-      set(ccc_analyzer_BINARY "${ccc_analyzer_DIR}/ccc-analyzer")
-      set(cpp_analyzer_BINARY "${ccc_analyzer_DIR}/c++-analyzer")
-    endif()
-  endif()
+  find_program(ccc_analyzer_BINARY ccc-analyzer PATHS ${scanbuild_DIR}/libexec)
+  find_program(cpp_analyzer_BINARY c++-analyzer PATHS ${scanbuild_DIR}/libexec)
+  find_package_handle_standard_args(scanbuild DEFAULT_MSG ccc_analyzer_BINARY cpp_analyzer_BINARY)
 endif()
