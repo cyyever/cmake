@@ -5,9 +5,9 @@
 #  cudamemcheck_BINARY
 
 include(FindPackageHandleStandardArgs)
-find_path(cudamemcheck_DIR cuda-memcheck PATHS /usr/local/cuda/bin)
-find_package_handle_standard_args(cudamemcheck DEFAULT_MSG cudamemcheck_DIR)
+FIND_PACKAGE(CUDA)
 
-if(cudamemcheck_FOUND)
-  set(cudamemcheck_BINARY "${cudamemcheck_DIR}/cuda-memcheck")
+if(CUDA_FOUND)
+  find_program(cudamemcheck_BINARY cuda-memcheck PATHS ${CUDA_TOOLKIT_ROOT_DIR}/bin)
+  find_package_handle_standard_args(cudamemcheck DEFAULT_MSG cudamemcheck_BINARY)
 endif()
