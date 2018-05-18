@@ -8,12 +8,10 @@
 
 include(FindPackageHandleStandardArgs)
 
-find_path(scanbuild_DIR scan-build PATHS /usr/bin /usr/local/bin)
-find_package_handle_standard_args(scanbuild DEFAULT_MSG scanbuild_DIR)
+find_program(scanbuild_BINARY scan-build PATHS /usr/bin /usr/local/bin $ENV{PROGRAMFILES}/LLVM/bin $ENV{${_PF86}}/LLVM/bin $ENV{ProgramW6432}/LLVM/bin)
+find_package_handle_standard_args(scanbuild DEFAULT_MSG scanbuild_BINARY)
 
 if(scanbuild_FOUND)
-  set(scanbuild_BINARY "${scanbuild_DIR}/scan-build")
-
   execute_process(COMMAND readlink -f ${scanbuild_BINARY}
   OUTPUT_VARIABLE full_path)
 
