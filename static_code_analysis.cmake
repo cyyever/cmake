@@ -25,3 +25,5 @@ if(NOT TARGET scan_build AND scanbuild_FOUND)
     COMMAND ${scanbuild_BINARY} ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}
     )
 endif()
+
+FIND_PACKAGE(pvsstudio)
