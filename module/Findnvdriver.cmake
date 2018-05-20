@@ -4,7 +4,8 @@
 #  nvdriver_FOUND
 
 include(FindPackageHandleStandardArgs)
-find_program(nvidiasmi_BINARY nvidia-smi PATHS /usr/bin /usr/local/bin)
+set(_PF86 "ProgramFiles(x86)")
+find_program(nvidiasmi_BINARY nvidia-smi PATHS /usr/bin /usr/local/bin "$ENV{PROGRAMFILES}/NVIDIA Corporation/NVSMI")
 find_package_handle_standard_args(nvidiasmi DEFAULT_MSG nvidiasmi_BINARY)
 
 set(nvdriver_FOUND FALSE)
