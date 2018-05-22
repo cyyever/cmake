@@ -4,6 +4,17 @@
 #  asan_FOUND
 
 include(FindPackageHandleStandardArgs)
+include(CheckCSourceRuns)
 
-FILE(GLOB asan_lib_paths /usr/lib/libasan.so.* /usr/local/lib/libasan.so.* /usr/lib/x86_64-linux-gnu/libasan.so.*)
-find_package_handle_standard_args(asan DEFAULT_MSG asan_lib_paths)
+set(CMAKE_REQUIRED_FLAGS "-fsanitize=address")
+set(CMAKE_REQUIRED_LIBRARIES "asan")
+
+check_c_source_runs("
+#include <stdio.h>
+int main() {
+printf(\"hello world!\");
+ return 0;
+}
+" resultVar)
+
+set(asan_FOUND (resultVar STREQUAL "1"))
