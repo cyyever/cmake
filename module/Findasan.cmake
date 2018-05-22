@@ -3,7 +3,6 @@
 # The following are set after configuration is done:
 #  asan_FOUND
 
-include(FindPackageHandleStandardArgs)
 include(CheckCSourceRuns)
 
 set(CMAKE_REQUIRED_FLAGS "-fsanitize=address")
@@ -15,6 +14,6 @@ int main() {
 printf(\"hello world!\");
  return 0;
 }
-" resultVar)
+" asan_res)
 
-set(asan_FOUND (resultVar STREQUAL "1"))
+set(asan_FOUND (asan_res STREQUAL "1"))

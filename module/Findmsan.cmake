@@ -1,12 +1,18 @@
 # - Try to find asan
 #
 # The following are set after configuration is done:
-#  asan_FOUND
+#  msan_FOUND
 
-include(FindPackageHandleStandardArgs)
+include(CheckCSourceRuns)
 
-IF(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  set(msan_FOUND TRUE)
-else()
-  set(msan_FOUND FALSE)
-endif()
+set(CMAKE_REQUIRED_FLAGS "-fsanitize=memory")
+
+check_c_source_runs("
+#include <stdio.h>
+int main() {
+printf(\"hello world!\");
+ return 0;
+}
+" msan_res)
+
+set(msan_FOUND (msan_res STREQUAL "1"))
