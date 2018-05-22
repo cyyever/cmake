@@ -18,13 +18,13 @@ function(clone_target)
   get_target_property(property_var ${this_OLD_TARGET} TYPE)
 
   if(property_var STREQUAL EXECUTABLE)
+    get_target_property(property_var ${this_OLD_TARGET} SOURCES)
     add_executable(${this_NEW_TARGET} ${property_var})
   else()
     message(FATAL_ERROR "can't clone target type ${property_var}")
     return()
   endif()
   
-  get_target_property(property_var ${this_OLD_TARGET} SOURCES)
 
   # get all targets
   execute_process(COMMAND ${CMAKE_COMMAND} --help-property-list OUTPUT_VARIABLE CMAKE_PROPERTY_LIST)

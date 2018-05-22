@@ -16,4 +16,6 @@ printf(\"hello world!\");
 }
 " asan_res)
 
+unset(CMAKE_REQUIRED_FLAGS)
+unset(CMAKE_REQUIRED_LIBRARIES)
 set(asan_FOUND (asan_res STREQUAL "1"))

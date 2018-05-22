@@ -15,4 +15,5 @@ printf(\"hello world!\");
 }
 " msan_res)
 
+unset(CMAKE_REQUIRED_FLAGS)
 set(msan_FOUND (msan_res STREQUAL "1"))
