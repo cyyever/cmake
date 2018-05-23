@@ -5,5 +5,9 @@
 #  strace_BINARY
 
 include(FindPackageHandleStandardArgs)
-find_program(strace_BINARY strace PATHS /usr/bin /usr/local/bin)
-find_package_handle_standard_args(strace DEFAULT_MSG strace_BINARY)
+if(NOT WIN32)
+  find_program(strace_BINARY strace PATHS /usr/bin /usr/local/bin)
+  find_package_handle_standard_args(strace DEFAULT_MSG strace_BINARY)
+else()
+  set(strace_FOUND FALSE)
+endif()

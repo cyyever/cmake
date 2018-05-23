@@ -3,7 +3,19 @@
 # The following are set after configuration is done:
 #  tsan_FOUND
 
-include(FindPackageHandleStandardArgs)
+include(CheckCSourceRuns)
 
-FILE(GLOB tsan_lib_paths /usr/lib/libtsan.so.* /usr/local/lib/libtsan.so.* /usr/lib/x86_64-linux-gnu/libtsan.so.*)
-find_package_handle_standard_args(tsan DEFAULT_MSG tsan_lib_paths)
+set(CMAKE_REQUIRED_FLAGS "-fsanitize=thread")
+set(CMAKE_REQUIRED_LIBRARIES "tsan")
+
+check_c_source_runs("
+#include <stdio.h>
+int main() {
+printf(\"hello world!\");
+ return 0;
+}
+" tsan_res)
+
+unset(CMAKE_REQUIRED_FLAGS)
+unset(CMAKE_REQUIRED_LIBRARIES)
+set(tsan_FOUND (tsan_res STREQUAL "1"))
