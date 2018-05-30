@@ -10,7 +10,7 @@ LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/module)
 
 FIND_PACKAGE(clangtidy)
 if(clangtidy_FOUND)
-  SET(CMAKE_CXX_CLANG_TIDY "${clangtidy_BINARY}" "-extra-arg-before=-std=c++17" "-analyze-temporary-dtors" "-checks=*,-fuchsia-default-arguments")
+  SET(CMAKE_CXX_CLANG_TIDY "${clangtidy_BINARY}" "-extra-arg-before=-std=c++17" "-checks=*,-fuchsia-default-arguments")
 ENDIF()
 
 FIND_PACKAGE(cppcheck)
