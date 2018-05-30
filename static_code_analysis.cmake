@@ -10,26 +10,27 @@ LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/module)
 
 FIND_PACKAGE(clangtidy)
 if(clangtidy_FOUND)
-  SET(CMAKE_CXX_CLANG_TIDY "${clangtidy_BINARY}" "-extra-arg-before=-std=c++17" "-checks=*,-fuchsia-default-arguments")
   if(runclangtidy_FOUND AND NOT WIN32)
     ADD_CUSTOM_TARGET(do-run-clang-tidy ALL
       COMMAND ${runclangtidy_BINARY} -p ${CMAKE_BINARY_DIR} "-extra-arg-before=-std=c++17" "-checks=*,-fuchsia-default-arguments" > ${CMAKE_BINARY_DIR}/run-clang-tidy.txt
       DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       )
+  else()
+    SET(CMAKE_CXX_CLANG_TIDY "${clangtidy_BINARY}" "-extra-arg-before=-std=c++17" "-checks=*,-fuchsia-default-arguments")
   endif()
 ENDIF()
 
 FIND_PACKAGE(cppcheck)
 if(cppcheck_FOUND)
-   SET(CMAKE_CXX_CPPCHECK "${cppcheck_BINARY}" "--std=c++14" "--enable=all" "--inconclusive")
-
   if(NOT WIN32)
     ADD_CUSTOM_TARGET(do_cppcheck ALL
       COMMAND ${cppcheck_BINARY} --project=${CMAKE_BINARY_DIR}/compile_commands.json --std=c++14 --enable=all --inconclusive 2> ${CMAKE_BINARY_DIR}/do_cppcheck.txt
       DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       )
+  else()
+   SET(CMAKE_CXX_CPPCHECK "${cppcheck_BINARY}" "--std=c++14" "--enable=all" "--inconclusive")
   endif()
 endif()
 
