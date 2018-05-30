@@ -16,7 +16,6 @@ if(scanbuild_FOUND)
   get_filename_component(scanbuild_BIN_DIR ${scanbuild_BINARY} DIRECTORY)
   get_filename_component(parent_dir ${scanbuild_BINARY} DIRECTORY)
   get_filename_component(scanbuild_DIR ${scanbuild_BIN_DIR} DIRECTORY)
-  message(${scanbuild_DIR})
 
   find_program(ccc_analyzer_BINARY ccc-analyzer PATHS ${scanbuild_DIR}/libexec)
   find_program(cpp_analyzer_BINARY c++-analyzer PATHS ${scanbuild_DIR}/libexec)
