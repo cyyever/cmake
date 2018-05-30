@@ -15,7 +15,15 @@ ENDIF()
 
 FIND_PACKAGE(cppcheck)
 if(cppcheck_FOUND)
-   SET(CMAKE_CXX_CPPCHECK "${cppcheck_BINARY}" "--std=c++14" "--enable=all")
+   SET(CMAKE_CXX_CPPCHECK "${cppcheck_BINARY}" "--std=c++14" "--enable=all" "--inconclusive")
+
+  if(NOT WIN32)
+    ADD_CUSTOM_TARGET(do_cppcheck ALL
+      COMMAND ${cppcheck_BINARY} --project=${CMAKE_BINARY_DIR}/compile_commands.json --std=c++14 --enable=all --inconclusive > ${CMAKE_BINARY_DIR}/do_cppcheck.txt
+      DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      )
+  endif()
 endif()
 
 FIND_PACKAGE(scanbuild)
