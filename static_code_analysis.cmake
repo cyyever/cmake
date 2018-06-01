@@ -25,7 +25,7 @@ FIND_PACKAGE(cppcheck)
 if(cppcheck_FOUND)
   if(NOT WIN32 AND NOT TARGET do-cppcheck) 
     ADD_CUSTOM_TARGET(do-cppcheck ALL
-      COMMAND ${cppcheck_BINARY} --project=${CMAKE_BINARY_DIR}/compile_commands.json --std=c++14 --enable=all --inconclusive 2> ${CMAKE_BINARY_DIR}/do_cppcheck.txt
+      COMMAND ${cppcheck_BINARY} --project=${CMAKE_BINARY_DIR}/compile_commands.json --std=c++14 --enable=all --inconclusive 2> ${CMAKE_BINARY_DIR}/do-cppcheck.txt
       DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       )
@@ -47,7 +47,7 @@ FIND_PACKAGE(powershell)
 
 if(pvsstudio_FOUND)
   if(NOT WIN32)
-    ADD_CUSTOM_TARGET(do-pvs-studio-analysis ALL
+    ADD_CUSTOM_TARGET(do-pvs-studio-analysis
       COMMAND grep '"file":' ${CMAKE_BINARY_DIR}/compile_commands.json | sed -e 's/"file"://' | xargs -I source_file sed -i -e '1i // This is an open source non-commercial project. Dear PVS-Studio, please check it.' -e '1i // PVS-Studio Static Code Analyzer for C, C++ and C\#: http://www.viva64.com' source_file
       COMMAND ${pvs-studio-analyzer_BINARY} analyze -a 31 -o ${CMAKE_BINARY_DIR}/pvs-studio.log -j8 || true
       COMMAND grep '"file":' ${CMAKE_BINARY_DIR}/compile_commands.json | sed -e 's/"file"://' | xargs -I source_file sed -i -e '/.* This is an open source non-commercial project. Dear PVS-Studio, please check it./d' -e '/.* PVS-Studio Static Code Analyzer for C, C++.*/d' source_file
@@ -56,7 +56,7 @@ if(pvsstudio_FOUND)
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       )
   elseif(powershell_FOUND)
-    ADD_CUSTOM_TARGET(do-pvs-studio-analysis ALL
+    ADD_CUSTOM_TARGET(do-pvs-studio-analysis
       COMMAND ${powershell_BINARY} grep 'ClCompile Include' --include='*.vcxproj.filters' -r ${CMAKE_BINARY_DIR} | sed -e 's/.*ClCompile Include="/"/' | sed -e 's/">.*/"/' | xargs -I source_file sed -i -e '1i // This is an open source non-commercial project. Dear PVS-Studio, please check it.' -e '1i // PVS-Studio Static Code Analyzer for C, C++ and C\#: http://www.viva64.com' source_file
       COMMAND ${PVS-Studio_Cmd_BINARY} --incremental ScanAndAnalyze --target ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.sln --progress -o ${CMAKE_BINARY_DIR}/pvs-studio.log || true
       COMMAND ${PlogConverter_BINARY} -t FullHtml,Tasks -o ${CMAKE_BINARY_DIR} -n pvs-studio-report ${CMAKE_BINARY_DIR}/pvs-studio.log 
