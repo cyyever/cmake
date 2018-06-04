@@ -18,13 +18,12 @@ if(TensorFlow_DIR STREQUAL "")
 endif()
 
 find_path(TensorFlow_PB_INCLUDE_DIR NAMES tensorflow PATHS ${TensorFlow_DIR}/bazel-genfiles)
-find_path(TensorFlow_ORIGIN_INCLUDE_DIR NAMES tensorflow/core PATHS ${TensorFlow_DIR})
 
 find_library(TensorFlow_LIBRARY NAMES tensorflow_cc PATHS ${TensorFlow_DIR}/bazel-bin/tensorflow)
 
 EXECUTE_PROCESS(COMMAND bazel info output_base WORKING_DIRECTORY ${TensorFlow_DIR} OUTPUT_VARIABLE OUTPUT_BASE OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-set(TensorFlow_INCLUDE_DIR ${TensorFlow_PB_INCLUDE_DIR} ${TensorFlow_ORIGIN_INCLUDE_DIR} ${OUTPUT_BASE}/external/eigen_archive)
+set(TensorFlow_INCLUDE_DIR ${TensorFlow_PB_INCLUDE_DIR} ${TensorFlow_DIR} ${OUTPUT_BASE}/external/eigen_archive)
 
 find_package_handle_standard_args(TensorFlow DEFAULT_MSG TensorFlow_INCLUDE_DIR TensorFlow_LIBRARY)
 
