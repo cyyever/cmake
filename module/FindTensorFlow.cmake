@@ -29,7 +29,7 @@ find_library(TensorFlow_LIBRARY NAMES tensorflow_cc PATHS ${TensorFlow_DIR}/baze
 
 EXECUTE_PROCESS(COMMAND bazel info output_base WORKING_DIRECTORY ${TensorFlow_DIR} OUTPUT_VARIABLE OUTPUT_BASE OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-set(TensorFlow_PB_INCLUDE_DIR "${TensorFlow_DIR}/bazel-genfiles/tensorflow")
+set(TensorFlow_PB_INCLUDE_DIR "${TensorFlow_DIR}/bazel-genfiles")
 set(TensorFlow_INCLUDE_DIR ${TensorFlow_PB_INCLUDE_DIR} ${TensorFlow_DIR} ${OUTPUT_BASE}/external/eigen_archive)
 message("aaaa ${TensorFlow_INCLUDE_DIR}")
 
