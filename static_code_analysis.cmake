@@ -38,7 +38,8 @@ FIND_PACKAGE(scan-build)
 if(NOT TARGET do-scan-build AND scan-build_FOUND)
   ADD_CUSTOM_TARGET(do-scan-build
     COMMAND ${CMAKE_COMMAND} -DCMAKE_CXX_COMPILER=${cpp_analyzer_BINARY} -DCMAKE_C_COMPILER=${ccc_analyzer_BINARY} ${CMAKE_BINARY_DIR}
-    COMMAND ${scan-build_BINARY} ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}
+    COMMAND mkdir -p ${CMAKE_BINARY_DIR}/scan-build-result
+    COMMAND ${scan-build_BINARY} -o ${CMAKE_BINARY_DIR}/scan-build-result ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}
     )
 endif()
 
