@@ -6,7 +6,6 @@
 include(CheckCSourceRuns)
 
 set(CMAKE_REQUIRED_FLAGS "-fsanitize=thread")
-set(CMAKE_REQUIRED_LIBRARIES "tsan")
 
 check_c_source_runs("
 #include <stdio.h>

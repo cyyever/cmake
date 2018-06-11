@@ -6,7 +6,6 @@
 include(CheckCSourceRuns)
 
 set(CMAKE_REQUIRED_FLAGS "-fsanitize=address")
-set(CMAKE_REQUIRED_LIBRARIES "asan")
 
 check_c_source_runs("
 #include <stdio.h>
