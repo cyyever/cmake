@@ -53,6 +53,7 @@ if(pvsstudio_FOUND)
       COMMAND ${pvs-studio-analyzer_BINARY} analyze -a 31 -o ${CMAKE_BINARY_DIR}/pvs-studio.log -j8 || true
       COMMAND grep '"file":' ${CMAKE_BINARY_DIR}/compile_commands.json | sed -e 's/"file"://' | xargs -I source_file sed -i -e '/.* This is an open source non-commercial project. Dear PVS-Studio, please check it./d' -e '/.* PVS-Studio Static Code Analyzer for C, C++.*/d' source_file
       COMMAND ${plog-converter_BINARY} -t tasklist -a 'GA:1,2,3;64:1,2,3;OP:1,2,3;CS:1,2,3' -o ${CMAKE_BINARY_DIR}/pvs-studio-report.txt ${CMAKE_BINARY_DIR}/pvs-studio.log
+      COMMAND rm ${CMAKE_BINARY_DIR}/pvs-studio.log
       DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       )
