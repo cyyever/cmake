@@ -215,6 +215,7 @@ if(ENABLE_GNU_CODE_COVERAGE AND NOT TARGET code_coverage)
       COMMAND mkdir -p ${CMAKE_BINARY_DIR}/code_coverage
       COMMAND ${lcov_BINARY} --capture --directory ${CMAKE_BINARY_DIR} --output-file coverage.info
       COMMAND ${genhtml_BINARY} coverage.info --output-directory ${CMAKE_BINARY_DIR}/code_coverage
+      COMMAND rm coverage.info
       DEPENDS check)
   endif()
 endif()
@@ -223,5 +224,6 @@ if(ENABLE_LLVM_CODE_COVERAGE AND NOT TARGET code_coverage)
     ADD_CUSTOM_TARGET(code_coverage ALL
       COMMAND llvm-profdata merge -sparse `find -name default.profraw` -o default.profdata
       COMMAND llvm-cov show -instr-profile=`find -name default.profdata` -format=html -output-dir=${CMAKE_BINARY_DIR}/code_coverage `find ${CMAKE_BINARY_DIR} -name '*.so'` `find ${CMAKE_BINARY_DIR} -executable -type f`
+      COMMAND rm `find -name default.profraw` default.profdata
       DEPENDS check)
 endif()
