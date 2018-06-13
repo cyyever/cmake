@@ -154,6 +154,7 @@ function(add_test_with_runtime_analysis)
     set(new_target_command $<TARGET_FILE:${new_target}>)
     set(has_test TRUE)
 
+    target_compile_options(${new_target} PRIVATE "-fno-omit-frame-pointer")
     if(tool STREQUAL ASAN)
       target_compile_options(${new_target} PRIVATE "-fsanitize=address")
       set_target_properties(${new_target} PROPERTIES LINK_FLAGS "-fsanitize=address")
