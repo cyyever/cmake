@@ -28,6 +28,8 @@ macro(add_valgrind_suppression_dir dir)
   endforeach()
 endmacro()
 
+option(DISABLE_RUNTIME_ANALYSIS "Disable all run time analysis" OFF)
+
 function(add_test_with_runtime_analysis)
   set(cpu_analysis_tools MEMCHECK UBSAN HELGRIND ASAN TSAN DRMEMORY MSAN)
   set(gpu_analysis_tools CUDA-MEMCHECK CUDA-SYNCCHECK CUDA-INITCHECK CUDA-RACECHECK)
@@ -141,6 +143,11 @@ function(add_test_with_runtime_analysis)
   elseif(${this_CUDA-RACECHECK} AND NOT cudamemcheck_FOUND)
     message(WARNING "no cuda-memcheck")
     set(this_CUDA-RACECHECK FALSE)
+  endif()
+
+  if(DISABLE_RUNTIME_ANALYSIS)
+    set(cpu_analysis_tools )
+    set(gpu_analysis_tools )
   endif()
 
   set(has_test FALSE)

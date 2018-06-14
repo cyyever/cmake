@@ -11,7 +11,7 @@ LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/module)
 FIND_PACKAGE(clang-tidy)
 if(clang-tidy_FOUND)
   if(run-clang-tidy_FOUND AND NOT WIN32)
-    ADD_CUSTOM_TARGET(do-run-clang-tidy ALL
+    ADD_CUSTOM_TARGET(do-run-clang-tidy
       COMMAND ${run-clang-tidy_BINARY} -p ${CMAKE_BINARY_DIR} "-extra-arg-before=-std=c++17" "-checks=*,-fuchsia-default-arguments" > ${CMAKE_BINARY_DIR}/run-clang-tidy.txt
       DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -24,7 +24,7 @@ ENDIF()
 FIND_PACKAGE(cppcheck)
 if(cppcheck_FOUND)
   if(NOT WIN32 AND NOT TARGET do-cppcheck) 
-    ADD_CUSTOM_TARGET(do-cppcheck ALL
+    ADD_CUSTOM_TARGET(do-cppcheck
       COMMAND ${cppcheck_BINARY} --project=${CMAKE_BINARY_DIR}/compile_commands.json --std=c++14 --enable=all --inconclusive 2> ${CMAKE_BINARY_DIR}/do-cppcheck.txt
       DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
