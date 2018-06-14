@@ -197,13 +197,19 @@ function(add_test_with_runtime_analysis)
       set(racecheck_command ${cudamemcheck_BINARY} --tool racecheck --leak-check full --error-exitcode 1 --flush-to-disk yes)
       set(new_target_command "${racecheck_command};$<TARGET_FILE:${new_target}>")
     endif()
-    add_test(NAME "${new_target}" WORKING_DIRECTORY $<TARGET_FILE_DIR:${new_target}> COMMAND ${new_target_command} ${this_ARGS})
+    add_test(NAME ${new_target} WORKING_DIRECTORY $<TARGET_FILE_DIR:${new_target}> COMMAND ${new_target_command} ${this_ARGS})
+    if(ENABLE_LLVM_CODE_COVERAGE)
+      set_tests_properties(${new_target} PROPERTIES ENVIRONMENT LLVM_PROFILE_FILE=${CMAKE_BINARY_DIR}/profraw_dir/%p.profraw)
+    endif()
     add_dependencies(check ${new_target})
   endforeach()
 
   if(NOT has_test)
     set(name ${this_TARGET})
     add_test(NAME ${name} WORKING_DIRECTORY $<TARGET_FILE_DIR:${this_TARGET}> COMMAND $<TARGET_FILE:${this_TARGET}> ${this_ARGS})
+    if(ENABLE_LLVM_CODE_COVERAGE)
+      set_tests_properties(${name} PROPERTIES ENVIRONMENT LLVM_PROFILE_FILE=${CMAKE_BINARY_DIR}/profraw_dir/%p.profraw)
+    endif()
   endif()
   add_dependencies(check ${this_TARGET})
 endfunction()
@@ -222,8 +228,11 @@ endif()
 
 if(ENABLE_LLVM_CODE_COVERAGE AND NOT TARGET code_coverage)
     ADD_CUSTOM_TARGET(code_coverage ALL
-      COMMAND llvm-profdata merge -sparse `find -name default.profraw` -o default.profdata
+      COMMAND llvm-profdata merge -sparse `find -name '*.profraw'` -o default.profdata
       COMMAND llvm-cov show -instr-profile=`find -name default.profdata` -format=html -output-dir=${CMAKE_BINARY_DIR}/code_coverage `find ${CMAKE_BINARY_DIR} -name '*.so'` `find ${CMAKE_BINARY_DIR} -executable -type f`
-      COMMAND rm `find -name default.profraw` default.profdata
-      DEPENDS check)
+      COMMAND rm `find -name '*.profraw'`
+      COMMAND rm default.profdata
+      DEPENDS check
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      )
 endif()
