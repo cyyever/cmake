@@ -17,13 +17,10 @@ if(TensorFlow_DIR STREQUAL "")
   find_path(TensorFlow_DIR NAMES tensorflow PATHS /opt)
   find_package_handle_standard_args(TensorFlow DEFAULT_MSG TensorFlow_DIR)
   if(TENSORFLOW_FOUND)
-    message("aaaa ${TensorFlow_DIR}")
     set(TensorFlow_DIR "${TensorFlow_DIR}/tensorflow")
     set(TensorFlow_DIR "${TensorFlow_DIR}" CACHE PATH "Folder contains TensorFlow")
-    message("aaaa ${TensorFlow_DIR}")
   endif()
 endif()
-message("aaaa ${TensorFlow_DIR}")
 
 find_library(TensorFlow_LIBRARY NAMES tensorflow_cc PATHS ${TensorFlow_DIR}/bazel-bin/tensorflow)
 
@@ -31,11 +28,8 @@ EXECUTE_PROCESS(COMMAND bazel info output_base WORKING_DIRECTORY ${TensorFlow_DI
 
 set(TensorFlow_PB_INCLUDE_DIR "${TensorFlow_DIR}/bazel-genfiles")
 set(TensorFlow_INCLUDE_DIR ${TensorFlow_PB_INCLUDE_DIR} ${TensorFlow_DIR} ${OUTPUT_BASE}/external/eigen_archive)
-message("aaaa ${TensorFlow_INCLUDE_DIR}")
 
 find_package_handle_standard_args(TensorFlow DEFAULT_MSG TensorFlow_INCLUDE_DIR TensorFlow_LIBRARY)
-message("aaaa ${TensorFlow_INCLUDE_DIR}")
-message("aaaaaaaaaaaa ${TensorFlow_LIBRARY}  ")
 
 if(TENSORFLOW_FOUND)
     set(TensorFlow_INCLUDE_DIRS ${TensorFlow_INCLUDE_DIR})
