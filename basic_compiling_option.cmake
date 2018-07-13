@@ -1,4 +1,6 @@
-SET(CMAKE_CXX_STANDARD 17)
+if(NOT DEFINED CMAKE_CXX_STANDARD)
+  SET(CMAKE_CXX_STANDARD 17)
+endif()
 
 if(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE Debug CACHE STRING "Build Type" FORCE)
@@ -10,5 +12,4 @@ ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   add_compile_options("-Wall" "-Wextra" "-Wshadow" "-Wnon-virtual-dtor" "-Wpedantic" "-fmax-errors=1")
 ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   add_compile_options("/MP" "/utf-8" "/W4" "/wd4514" "/wd4571")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /sdl")
 ENDIF()
