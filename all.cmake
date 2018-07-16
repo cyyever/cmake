@@ -1,4 +1,5 @@
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/basic_compiling_option.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/debug.cmake)
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/linker.cmake)
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/optimization.cmake)
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/static_code_analysis.cmake)
