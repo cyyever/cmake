@@ -17,4 +17,8 @@ printf(\"hello world!\");
 
 unset(CMAKE_REQUIRED_FLAGS)
 unset(CMAKE_REQUIRED_LIBRARIES)
-set(asan_FOUND (asan_res STREQUAL "1"))
+IF(asan_res STREQUAL "1")
+  set(asan_FOUND TRUE)
+else()
+  set(asan_FOUND FALSE)
+endif()
