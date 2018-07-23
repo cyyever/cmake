@@ -13,3 +13,10 @@ ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   add_compile_options("/MP" "/utf-8" "/W4" "/wd4514" "/wd4571")
 ENDIF()
+
+#fix compiler bug
+IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  if (CMAKE_CXX_COMPILER_VERSION MATCHES "^8.*" OR CMAKE_C_COMPILER_VERSION MATCHES "^8.*")
+    add_compile_options("-fno-tree-vrp" "-fno-inline" "-fno-tree-fre")
+  endif()
+endif()
