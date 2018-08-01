@@ -34,3 +34,16 @@
    ...
    obj:*/libcuda.so*
 }
+
+{
+   libcuart
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:calloc
+   ...
+   fun:__pthread_once_slow
+   ...
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+}
+
