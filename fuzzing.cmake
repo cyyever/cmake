@@ -105,8 +105,11 @@ function(add_fuzzing)
       set(ENV{MAX_FUZZING_TIME} 60)
     endif()
 
+
     set(name "fuzzing_${new_target}")
     add_test(NAME ${name} WORKING_DIRECTORY $<TARGET_FILE_DIR:${new_target}> COMMAND $<TARGET_FILE:${new_target}> -jobs=4 -max_total_time=$ENV{MAX_FUZZING_TIME})
+    get_target_property(new_env ${this_TARGET} ENVIRONMENT)
+    set_tests_properties(${name} PROPERTIES ENVIRONMENT "${new_env}")
     add_dependencies(fuzzing ${new_target})
   endforeach()
 endfunction()
