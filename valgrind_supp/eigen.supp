@@ -1,0 +1,8 @@
+{
+   pool_leak
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:_ZN5Eigen26NonBlockingThreadPoolTemplIN10tensorflow6thread16EigenEnvironmentEE10WorkerLoopEi
+   ...
+}
