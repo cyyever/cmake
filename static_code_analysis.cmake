@@ -12,7 +12,7 @@ FIND_PACKAGE(clang-tidy)
 if(clang-tidy_FOUND)
   if(run-clang-tidy_FOUND AND NOT WIN32)
     ADD_CUSTOM_TARGET(do-run-clang-tidy
-      COMMAND ${run-clang-tidy_BINARY} -p ${CMAKE_BINARY_DIR} "-extra-arg-before=-std=c++17" "-checks=*,-fuchsia-default-arguments,-clang-analyzer-cplusplus.NewDeleteLeaks" > ${CMAKE_BINARY_DIR}/run-clang-tidy.txt
+      COMMAND ${run-clang-tidy_BINARY} -p ${CMAKE_BINARY_DIR} "-extra-arg-before=-std=c++17" "-checks=*,-fuchsia-default-arguments,-clang-analyzer-cplusplus.NewDeleteLeaks,-clang-diagnostic-ignored-optimization-argument,-readability-implicit-bool-conversion,-llvm-namespace-comment,-google-readability-namespace-comments" > ${CMAKE_BINARY_DIR}/run-clang-tidy.txt
       DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       )
