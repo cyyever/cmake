@@ -18,4 +18,8 @@ printf(\"hello world!\");
 
 unset(CMAKE_REQUIRED_FLAGS)
 unset(CMAKE_REQUIRED_LIBRARIES)
-set(ubsan_FOUND (ubsan_res STREQUAL "1"))
+IF(ubsan_res STREQUAL "1")
+  set(ubsan_FOUND TRUE)
+else()
+  set(ubsan_FOUND FALSE)
+endif()
