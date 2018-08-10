@@ -7,7 +7,7 @@ INCLUDE(${CMAKE_CURRENT_LIST_DIR}/util.cmake)
 ENABLE_TESTING()
 
 if(NOT TARGET fuzzing)
-  ADD_CUSTOM_TARGET(fuzzing ALL COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -C $<CONFIGURATION>)
+  ADD_CUSTOM_TARGET(fuzzing ALL COMMAND ${CMAKE_CTEST_COMMAND} --no-compress-output --output-on-failure -C $<CONFIGURATION>)
 endif()
 
 FIND_PACKAGE(Threads REQUIRED)
