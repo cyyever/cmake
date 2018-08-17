@@ -10,15 +10,17 @@ LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/module)
 
 FIND_PACKAGE(clang-tidy)
 if(clang-tidy_FOUND)
-  set(CHECKES "-checks=*,-fuchsia-default-arguments,-clang-analyzer-cplusplus.NewDeleteLeaks,-clang-diagnostic-ignored-optimization-argument,-readability-implicit-bool-conversion,-llvm-namespace-comment,-google-readability-namespace-comments,-cppcoreguidelines-owning-memory,-cert-err58-cpp,-fuchsia-statically-constructed-objects,-clang-diagnostic-gnu-zero-variadic-macro-arguments")
+  set(EXTRA-ARGS -extra-arg='-std=c++2a' -extra-arg='-Qunused-arguments')
+  set(CHECKES "-checks='*,-fuchsia-default-arguments,-clang-analyzer-cplusplus.NewDeleteLeaks,-clang-diagnostic-ignored-optimization-argument,-readability-implicit-bool-conversion,-llvm-namespace-comment,-google-readability-namespace-comments,-cppcoreguidelines-owning-memory,-cert-err58-cpp,-fuchsia-statically-constructed-objects,-clang-diagnostic-gnu-zero-variadic-macro-arguments'")
   if(run-clang-tidy_FOUND AND NOT WIN32)
     ADD_CUSTOM_TARGET(do-run-clang-tidy
-      COMMAND ${run-clang-tidy_BINARY} -p ${CMAKE_BINARY_DIR} "-quiet" "-extra-arg=-std=c++2a" ${CHECKES} > ${CMAKE_BINARY_DIR}/run-clang-tidy.txt
+      COMMAND sed -i 's/-fno-tree-fre//' ${CMAKE_BINARY_DIR}/compile_commands.json
+      COMMAND ${run-clang-tidy_BINARY} -p ${CMAKE_BINARY_DIR} "-quiet" ${EXTRA-ARGS} ${CHECKES} > ${CMAKE_BINARY_DIR}/run-clang-tidy.txt
       DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       )
   else()
-    SET(CMAKE_CXX_CLANG_TIDY "${clang-tidy_BINARY}" "-extra-arg=-std=c++2a" ${CHECKES})
+    SET(CMAKE_CXX_CLANG_TIDY "${clang-tidy_BINARY}" ${EXTRA-ARGS} ${CHECKES})
   endif()
 ENDIF()
 
