@@ -153,6 +153,7 @@ function(add_test_with_runtime_analysis)
   if(ENABLE_LLVM_CODE_COVERAGE)
     LIST(APPEND new_env LLVM_PROFILE_FILE=${CMAKE_BINARY_DIR}/profraw_dir/%p.profraw)
   endif()
+  LIST(APPEND new_env ASAN_OPTIONS=protect_shadow_gap=0)
 
   set(has_test FALSE)
   foreach(tool IN LISTS cpu_analysis_tools gpu_analysis_tools)
