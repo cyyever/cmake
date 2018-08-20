@@ -11,7 +11,7 @@ LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/module)
 FIND_PACKAGE(clang-tidy)
 if(clang-tidy_FOUND)
   set(EXTRA-ARGS -extra-arg='-std=c++2a' -extra-arg='-Qunused-arguments')
-  set(CHECKES "-checks='*,-fuchsia-default-arguments,-clang-analyzer-cplusplus.NewDeleteLeaks,-clang-diagnostic-ignored-optimization-argument,-readability-implicit-bool-conversion,-llvm-namespace-comment,-google-readability-namespace-comments,-cppcoreguidelines-owning-memory,-cert-err58-cpp,-fuchsia-statically-constructed-objects,-clang-diagnostic-gnu-zero-variadic-macro-arguments,-cppcoreguidelines-pro-bounds-pointer-arithmetic'")
+  set(CHECKES "-checks='*,-fuchsia-default-arguments,-clang-analyzer-cplusplus.NewDeleteLeaks,-clang-diagnostic-ignored-optimization-argument,-readability-implicit-bool-conversion,-llvm-namespace-comment,-google-readability-namespace-comments,-cppcoreguidelines-owning-memory,-cert-err58-cpp,-fuchsia-statically-constructed-objects,-clang-diagnostic-gnu-zero-variadic-macro-arguments,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-avoid-magic-numbers,-hicpp-vararg,-readability-magic-numbers'")
   if(run-clang-tidy_FOUND AND NOT WIN32)
     ADD_CUSTOM_TARGET(do-run-clang-tidy
       COMMAND sed -i 's/-fno-tree-fre//' ${CMAKE_BINARY_DIR}/compile_commands.json
