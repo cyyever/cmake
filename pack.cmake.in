@@ -1,0 +1,2 @@
+include(BundleUtilities)
+FIXUP_BUNDLE($ENV{APP} "" "")
