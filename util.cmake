@@ -1,5 +1,5 @@
 function(clone_target)
-  set(oneValueArgs TARGET OLD_TARGET NEW_TARGET)
+  set(oneValueArgs OLD_TARGET NEW_TARGET)
   cmake_parse_arguments(this "" "${oneValueArgs}" "" ${ARGN})
   if("${this_OLD_TARGET}" STREQUAL "")
     message(FATAL_ERROR "no OLD_TARGET specified")
