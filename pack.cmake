@@ -19,10 +19,9 @@ function(pack_executable)
     return()
   endif()
 
-  ADD_CUSTOM_COMMAND(TARGET ${this_EXE_TARGET} PRE_LINK
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/bundle
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${this_EXE_TARGET}> ${CMAKE_BINARY_DIR}/bundle
+  set(name "deploy_${this_EXE_TARGET}")
+  add_custom_target(${name} ALL
     COMMAND env APP=$<TARGET_FILE:${this_EXE_TARGET}> ${CMAKE_COMMAND} -P ${pack_cmake_dir}/pack.cmake.in
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
+ add_dependencies(${name} ${this_EXE_TARGET})
 endfunction()
