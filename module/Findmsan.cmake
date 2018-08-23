@@ -16,4 +16,9 @@ printf(\"hello world!\");
 " msan_res)
 
 unset(CMAKE_REQUIRED_FLAGS)
-set(msan_FOUND (msan_res STREQUAL "1"))
+unset(CMAKE_REQUIRED_LIBRARIES)
+IF(msan_res STREQUAL "1")
+  set(msan_FOUND TRUE)
+else()
+  set(msan_FOUND FALSE)
+endif()
