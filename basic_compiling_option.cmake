@@ -11,7 +11,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 IF(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  add_compile_options("-Weverything" "-Wno-c++98-compat" "-Wno-c++98-compat-pedantic" "-Wno-weak-vtables" "-Wno-disabled-macro-expansion" "-Wno-reserved-id-macro" "-Wno-global-constructors" "-Wno-exit-time-destructors" -Wno-double-promotion -Wno-padded -ferror-limit=1)
+  add_compile_options("-Weverything" "-Wno-c++98-compat" "-Wno-c++98-compat-pedantic" "-Wno-weak-vtables" "-Wno-disabled-macro-expansion" "-Wno-reserved-id-macro" "-Wno-global-constructors" "-Wno-exit-time-destructors" -Wno-double-promotion -Wno-padded -Wno-gnu-zero-variadic-macro-arguments -ferror-limit=1)
 ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   add_compile_options("-Wall" "-Wextra" "-Wshadow" "-Wnon-virtual-dtor" "-Wpedantic" "-fmax-errors=1")
 ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
