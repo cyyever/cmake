@@ -24,3 +24,13 @@
    fun:GOMP_parallel_loop_dynamic
    ...
 }
+
+{
+   GOMP_parallel
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:strdup
+   ...
+   fun:GOMP_parallel
+}

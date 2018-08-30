@@ -21,6 +21,8 @@ if(valgrind_FOUND)
   FILE(GLOB suppression_files ${CMAKE_CURRENT_LIST_DIR}/valgrind_supp/*.supp)
 endif()
 
+FILE(GLOB lsan_suppression_file ${CMAKE_CURRENT_LIST_DIR}/lsan.supp)
+
 macro(add_valgrind_suppression_dir dir)
   FILE(GLOB tmp_suppression_files ${dir}/*.supp)
   FOREACH(file ${tmp_suppression_files})
@@ -154,6 +156,7 @@ function(add_test_with_runtime_analysis)
     LIST(APPEND new_env LLVM_PROFILE_FILE=${CMAKE_BINARY_DIR}/profraw_dir/%p.profraw)
   endif()
   LIST(APPEND new_env ASAN_OPTIONS=protect_shadow_gap=0)
+  LIST(APPEND new_env LSAN_OPTIONS=suppressions=${lsan_suppression_file})
 
   set(has_test FALSE)
   foreach(tool IN LISTS cpu_analysis_tools gpu_analysis_tools)
