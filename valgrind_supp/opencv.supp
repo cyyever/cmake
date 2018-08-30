@@ -11,3 +11,18 @@
    ...
 }
 
+{
+   has_wake_signal
+   Helgrind:Race
+   fun:_ZN2cv10ThreadPool3runERKNS_5RangeERKNS_16ParallelLoopBodyEd
+   fun:_ZN2cv21parallel_for_pthreadsERKNS_5RangeERKNS_16ParallelLoopBodyEd
+   ...
+}
+
+{
+   has_wake_signal
+   Helgrind:Race
+   fun:_ZN2cv12WorkerThread11thread_bodyEv
+   fun:_ZN2cv12WorkerThread19thread_loop_wrapperEPv
+   ...
+}
