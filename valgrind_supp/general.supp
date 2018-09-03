@@ -1,0 +1,9 @@
+{
+   race
+   Helgrind:Race
+   ...
+   fun:__cxa_finalize
+   ...
+   fun:__run_exit_handlers
+   ...
+}
