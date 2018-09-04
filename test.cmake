@@ -59,6 +59,11 @@ function(add_test_with_runtime_analysis)
     set(this_WITH_GPU_ANALYSIS TRUE)
   endif()
 
+  IF(ENABLE_CODE_COVERAGE)
+    set(this_WITH_CPU_ANALYSIS FALSE)
+    set(this_WITH_GPU_ANALYSIS FALSE)
+  ENDIF()
+
   #set default values for runtime analysis
   if(NOT this_WITH_CPU_ANALYSIS)
     foreach(tool IN LISTS cpu_analysis_tools)
