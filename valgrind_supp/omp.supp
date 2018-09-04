@@ -34,3 +34,11 @@
    ...
    fun:GOMP_parallel
 }
+
+{
+   race
+   Helgrind:Race
+   ...
+   obj:*libomp.so*
+   ...
+}
