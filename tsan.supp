@@ -3,3 +3,4 @@ race:cv::ThreadPool::run(cv::Range const&, cv::ParallelLoopBody const&, double)
 race:cv::ParallelJob::execute(bool)
 race:cv::detail::PtrOwnerImpl<cv::ParallelJob
 race:cv::DefaultDeleter<cv::ParallelJob>
+race:cv::WorkerThread::thread_body
