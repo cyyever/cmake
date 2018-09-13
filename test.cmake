@@ -123,7 +123,7 @@ function(add_test_with_runtime_analysis)
   endif()
 
   if("${this_MSAN}" STREQUAL "")
-    set(this_MSAN FALSE)
+    set(this_MSAN ${msan_FOUND})
   elseif(${this_MSAN} AND NOT msan_FOUND)
     message(WARNING "no msan")
     set(this_MSAN FALSE)
