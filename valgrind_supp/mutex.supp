@@ -51,3 +51,12 @@
    fun:_ZNSt13__future_base13_State_baseV2D1Ev
    ...
 }
+
+{
+   shared_ptr
+   Helgrind:Race
+   ...
+   fun:_ZNSt14__shared_countILN9__gnu_cxx12_Lock_policyE2EED2Ev
+   ...
+}
+
