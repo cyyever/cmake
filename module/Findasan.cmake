@@ -3,6 +3,11 @@
 # The following are set after configuration is done:
 #  asan_FOUND
 
+IF(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  set(asan_FOUND FALSE)
+  return()
+endif()
+
 include(CheckCSourceRuns)
 
 set(CMAKE_REQUIRED_FLAGS "-fsanitize=address")
