@@ -1,4 +1,7 @@
 thread:libcuda.so
+race:libcuda.so
+race:libtensorflow_framework.so
+race:libtensorflow_cc.so
 race:cv::ThreadPool::run(cv::Range const&, cv::ParallelLoopBody const&, double)
 race:cv::ParallelJob::execute(bool)
 race:cv::detail::PtrOwnerImpl<cv::ParallelJob
