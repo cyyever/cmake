@@ -1,5 +1,6 @@
 IF(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  add_compile_options("/analyze")
+  add_compile_options("/analyze" "/analyze:plugin EspXEngine.dll")
+  add_compile_options("/wd26446" "/wd26481")
 ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_compile_options("-Wthread-safety")
 ENDIF()
