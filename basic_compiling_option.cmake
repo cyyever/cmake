@@ -20,7 +20,7 @@ ENDIF()
 
 #fix compiler bug
 IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  if (CMAKE_CXX_COMPILER_VERSION MATCHES "^8\.[0-1]\..*" OR CMAKE_C_COMPILER_VERSION MATCHES "^8\.[0-1]\..*")
+  if (CMAKE_CXX_COMPILER_VERSION MATCHES "^8\\.[0-1]\\..*" OR CMAKE_C_COMPILER_VERSION MATCHES "^8\\.[0-1]\\..*")
     add_compile_options("-fno-tree-vrp" "-fno-inline" "-fno-tree-fre")
   endif()
 endif()
