@@ -15,7 +15,7 @@ IF(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   add_compile_options("-Wall" "-Wextra" "-Wshadow" "-Wnon-virtual-dtor" "-Wpedantic" "-fmax-errors=1")
 ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  add_compile_options("/MP" "/utf-8" "/W4" "/wd4514" "/wd4571")
+  add_compile_options("/permissive-" "/MP" "/utf-8" "/W4" "/wd4514" "/wd4571")
 ENDIF()
 
 #fix compiler bug
