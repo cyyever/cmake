@@ -23,14 +23,14 @@ printf(\"hello world!\");
 
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 if ("C" IN_LIST languages)
-  check_c_source_runs("${source_code}" asan_res)
+  check_c_source_runs("${source_code}" run_res)
 else()
-  check_cxx_source_runs("${source_code}" asan_res)
+  check_cxx_source_runs("${source_code}" run_res)
 endif()
 
 unset(CMAKE_REQUIRED_FLAGS)
 unset(CMAKE_REQUIRED_LIBRARIES)
-IF(asan_res STREQUAL "1")
+IF(run_res STREQUAL "1")
   set(asan_FOUND TRUE)
 else()
   set(asan_FOUND FALSE)
