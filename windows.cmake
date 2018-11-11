@@ -7,6 +7,7 @@ if(WITH_VCPKG)
   LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/module)
   FIND_PACKAGE(vcpkg REQUIRED)
   INCLUDE(${vcpkg_toolchain_file})
+  INCLUDE_DIRECTORIES(${vcpkg_dir}/installed/${VCPKG_TARGET_TRIPLET}/include)
 endif()
 
 #保证测试代码能找到dll
