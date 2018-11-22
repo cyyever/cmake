@@ -6,7 +6,7 @@
 #  vcpkg_toolchain_file
 
 include(FindPackageHandleStandardArgs)
-find_file(vcpkg_dir vcpkg PATHS c:/code)
+find_file(vcpkg_dir vcpkg PATHS c:/code ~)
 find_package_handle_standard_args(vcpkg DEFAULT_MSG vcpkg_dir)
 if(vcpkg_FOUND)
   find_file(vcpkg_toolchain_file vcpkg.cmake PATHS ${vcpkg_dir}/scripts/buildsystems)
