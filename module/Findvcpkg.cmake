@@ -5,8 +5,8 @@
 #  vcpkg_dir
 #  vcpkg_toolchain_file
 
+include(FindPackageHandleStandardArgs)
 if(NOT DEFINED vcpkg_dir)
-  include(FindPackageHandleStandardArgs)
   find_file(vcpkg_dir vcpkg PATHS c:/code ~)
   find_package_handle_standard_args(vcpkg DEFAULT_MSG vcpkg_dir)
   if(NOT vcpkg_FOUND)
