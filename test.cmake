@@ -21,9 +21,8 @@ if(valgrind_FOUND)
   FILE(GLOB suppression_files ${CMAKE_CURRENT_LIST_DIR}/valgrind_supp/*.supp)
 endif()
 
-FILE(GLOB lsan_suppression_file ${CMAKE_CURRENT_LIST_DIR}/lsan.supp)
-FILE(GLOB tsan_suppression_file ${CMAKE_CURRENT_LIST_DIR}/tsan.supp)
-FILE(GLOB msan_suppression_file ${CMAKE_CURRENT_LIST_DIR}/msan.supp)
+FILE(GLOB lsan_suppression_file ${CMAKE_CURRENT_LIST_DIR}/sanitizer_supp/lsan.supp)
+FILE(GLOB tsan_suppression_file ${CMAKE_CURRENT_LIST_DIR}/sanitizer_supp/tsan.supp)
 
 macro(add_valgrind_suppression_dir dir)
   FILE(GLOB tmp_suppression_files ${dir}/*.supp)
