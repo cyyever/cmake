@@ -1,3 +1,4 @@
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/build_type.cmake)
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/basic_compiling_option.cmake)
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/debug.cmake)
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/linker.cmake)
