@@ -19,10 +19,6 @@ foreach(sanitizer_name IN LISTS sanitizers)
   endforeach()
 endforeach()
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  return()
-endif()
-
 function (check_sanitizer sanitizer_name)
   set(CMAKE_REQUIRED_FLAGS "-fsanitize=${sanitizer_name}")
   set(source_code [==[
