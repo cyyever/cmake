@@ -26,7 +26,7 @@ function(clone_target)
   endif()
   
 
-  # get all targets
+  # get all properties
   execute_process(COMMAND ${CMAKE_COMMAND} --help-property-list OUTPUT_VARIABLE CMAKE_PROPERTY_LIST)
   # Convert command output into a CMake list
   STRING(REGEX REPLACE "[\n\r]" ";" CMAKE_PROPERTY_LIST "${CMAKE_PROPERTY_LIST}")
