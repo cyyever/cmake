@@ -1,49 +1,49 @@
 # Find google sanitizers
 #
 # This module sets the following variables:
-#  address_sanitizer_<LANG>_FOUND
-#  thread_sanitizer_<LANG>_FOUND
-#  undefined_sanitizer_<LANG>_FOUND
-#  leak_sanitizer_<LANG>_FOUND
-
+#  address_sanitizer_FOUND
+#  thread_sanitizer_FOUND
+#  undefined_sanitizer_FOUND
+#  leak_sanitizer_FOUND
 include_guard()
-
-include(CheckCSourceRuns)
-include(CheckCXXSourceRuns)
-
+include(FindPackageHandleStandardArgs)
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
-set(sanitizers address thread undefined leak)
-foreach(sanitizer_name IN LISTS sanitizers)
-  foreach(lang IN LISTS languages)
-    set(${sanitizer_name}_sanitizer_${lang}_FOUND FALSE)
-  endforeach()
-endforeach()
+if("C" IN LISTS languages)
+  include(CheckCSourceRuns)
+elseif("CXX" IN LISTS languages)
+  include(CheckCXXSourceRuns)
+else()
+  message(FATAL_ERROR "FindGoogleSanitizer only works if either C or CXX language is enabled")
+endif()
 
-function (check_sanitizer sanitizer_name)
+function (check_sanitizer sanitizer_name sanitizer_run_res)
   set(CMAKE_REQUIRED_FLAGS "-fsanitize=${sanitizer_name}")
   set(source_code [==[
-  #include <stdio.h>
-  int main() {
+    #include <stdio.h>
+    int main() {
     printf("hello world!");
     return 0;
-  }
-  ]==])
+    }
+    ]==])
 
   set(CMAKE_REQUIRED_QUIET ON)
-  foreach(lang IN LISTS languages)
-    if(lang STREQUAL "C")
-      check_c_source_runs("${source_code}" run_res)
-    elseif(lang STREQUAL "CXX")
-      check_cxx_source_runs("${source_code}" run_res)
-    else()
-      continue()
-    endif()
-    if(run_res)
-      set(${sanitizer_name}_sanitizer_${lang}_FOUND TRUE PARENT_SCOPE)
-    endif()
-  endforeach()
+  if("C" IN LISTS languages)
+    check_c_source_runs("${source_code}" ${sanitizer_run_res})
+  elseif("CXX" IN LISTS languages)
+    check_cxx_source_runs("${source_code}" ${sanitizer_run_res})
+  endif()
 endfunction()
 
+set(sanitizers address thread undefined leak)
 foreach(sanitizer_name IN LISTS sanitizers)
-  check_sanitizer(${sanitizer_name})
+  check_sanitizer(${sanitizer_name} run_res)
+  FIND_PACKAGE_HANDLE_STANDARD_ARGS(${sanitizer_name}_sanitizer DEFAULT_MSG run_res)
+  if(${sanitizer_name}_sanitizer)
+    add_library(GoogleSanitizer::${sanitizer_name} INTERFACE IMPORTED)
+    set_property(TARGET GoogleSanitizer::${sanitizer_name}
+      PROPERTY INTERFACE_LINK_LIBRARIES 
+      $<$<COMPILE_LANGUAGE:CXX>:-fsanitize=${sanitizer_name}>
+      $<$<COMPILE_LANGUAGE:C>:-fsanitize=${sanitizer_name}>
+      )
+  endif()
 endforeach()
