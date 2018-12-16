@@ -5,12 +5,8 @@
 #  MicrosoftGSL::GSL
 
 include(FindPackageHandleStandardArgs)
-find_file(MicrosoftGSL_dir gsl PATHS "${CMAKE_INSTALL_PREFIX}/include")
-find_package_handle_standard_args(MicrosoftGSL DEFAULT_MSG MicrosoftGSL_dir)
-if(MicrosoftGSL_FOUND)
-  find_file(MicrosoftGSL_headers FILES gsl gsl_algorithm gsl_assert gsl_byte gsl_util PATHS "${MicrosoftGSL_dir}")
-  find_package_handle_standard_args(GSL DEFAULT_MSG MicrosoftGSL_dir MicrosoftGSL_headers)
-endif()
+find_path(MicrosoftGSL_dir NAMES gsl_algorithm PATH_SUFFIXES gsl)
+find_package_handle_standard_args(GSL DEFAULT_MSG MicrosoftGSL_dir)
 if(MicrosoftGSL_FOUND AND NOT TARGET MicrosoftGSL::GSL)
   add_library(MicrosoftGSL::GSL INTERFACE IMPORTED)
   set_property(TARGET MicrosoftGSL::GSL
