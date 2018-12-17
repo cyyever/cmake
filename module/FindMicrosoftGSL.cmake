@@ -3,7 +3,7 @@
 # The following are set after configuration is done:
 #  MicrosoftGSL_FOUND
 #  MicrosoftGSL::GSL
-
+include_guard()
 include(FindPackageHandleStandardArgs)
 find_path(MicrosoftGSL_dir NAMES gsl_algorithm PATH_SUFFIXES gsl)
 find_package_handle_standard_args(GSL DEFAULT_MSG MicrosoftGSL_dir)
