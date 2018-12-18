@@ -1,13 +1,18 @@
-# - Try to find cudamemcheck
+# - Try to find CUDA-MEMCHECK
 #
 # The following are set after configuration is done:
-#  cudamemcheck_FOUND
-#  cudamemcheck_BINARY
+#  CUDA-MEMCHECK_FOUND
+#  CUDA-MEMCHECK::cuda-memcheck
 
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE(CUDA)
+if(NOT DEFINED CUDA_TOOLKIT_ROOT_DIR)
+  message(FATAL_ERROR "CUDA language is not enabled")
+  return()
+endif()
 
-if(CUDA_FOUND)
-  find_program(cudamemcheck_BINARY cuda-memcheck PATHS ${CUDA_TOOLKIT_ROOT_DIR}/bin)
-  find_package_handle_standard_args(cudamemcheck DEFAULT_MSG cudamemcheck_BINARY)
+find_program(CUDA-MEMCHECK_BINARY cuda-memcheck PATHS ${CUDA_TOOLKIT_ROOT_DIR}/bin)
+find_package_handle_standard_args(CUDA-MEMCHECK DEFAULT_MSG CUDA-MEMCHECK_BINARY)
+if(CUDA-MEMCHECK_FOUND AND NOT TARGET CUDA-MEMCHECK::cuda-memcheck)
+  add_executable(CUDA-MEMCHECK::cuda-memcheck IMPORTED)
+  set_property(TARGET CUDA-MEMCHECK::cuda-memcheck PROPERTY IMPORTED_LOCATION "${CUDA-MEMCHECK_BINARY}")
 endif()
