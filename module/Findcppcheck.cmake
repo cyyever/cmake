@@ -2,10 +2,13 @@
 #
 # The following are set after configuration is done:
 #  cppcheck_FOUND
-#  cppcheck_BINARY
+#  cppcheck::cppcheck
 
+include_guard()
 include(FindPackageHandleStandardArgs)
-
-set(_PF86 "ProgramFiles(x86)")
-find_program(cppcheck_BINARY cppcheck PATHS "$ENV{PROGRAMFILES}/Cppcheck" "$ENV{${_PF86}}/Cppcheck" "$ENV{ProgramW6432}/Cppcheck")
+find_program(cppcheck_BINARY NAMES cppcheck PATH_SUFFIXES "Cppcheck")
 find_package_handle_standard_args(cppcheck DEFAULT_MSG cppcheck_BINARY)
+if(cppcheck_FOUND AND NOT TARGET cppcheck::cppcheck)
+  add_executable(cppcheck::cppcheck IMPORTED)
+  set_property(TARGET cppcheck::cppcheck PROPERTY IMPORTED_LOCATION "${cppcheck_BINARY}")
+endif()

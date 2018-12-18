@@ -6,8 +6,8 @@
 #  run-clang-tidy_FOUND
 #  ClangTools::run-clang-tidy
 
+include_guard()
 include(FindPackageHandleStandardArgs)
-
 find_program(clang-tidy_BINARY NAMES clang-tidy PATH_SUFFIXES "LLVM/bin")
 find_package_handle_standard_args(clang-tidy DEFAULT_MSG clang-tidy_BINARY)
 if(clang-tidy_FOUND AND NOT TARGET ClangTools::clang-tidy)
