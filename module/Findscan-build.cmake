@@ -6,6 +6,7 @@
 #  ccc_analyzer_BINARY
 #  cpp_analyzer_BINARY
 
+include_guard()
 include(FindPackageHandleStandardArgs)
 
 find_program(scan-build_BINARY scan-build PATHS /usr/bin /usr/local/bin $ENV{PROGRAMFILES}/LLVM/bin $ENV{${_PF86}}/LLVM/bin $ENV{ProgramW6432}/LLVM/bin)

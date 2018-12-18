@@ -2,12 +2,13 @@
 #
 # The following are set after configuration is done:
 #  strace_FOUND
-#  strace_BINARY
+#  strace::strace
 
+include_guard()
 include(FindPackageHandleStandardArgs)
-if(NOT WIN32)
-  find_program(strace_BINARY strace PATHS /usr/bin /usr/local/bin)
-  find_package_handle_standard_args(strace DEFAULT_MSG strace_BINARY)
-else()
-  set(strace_FOUND FALSE)
+find_program(strace_BINARY strace)
+find_package_handle_standard_args(strace DEFAULT_MSG strace_BINARY)
+if(strace_FOUND AND NOT TARGET strace::strace)
+  add_executable(strace::strace IMPORTED)
+  set_property(TARGET strace::strace PROPERTY IMPORTED_LOCATION "${strace_BINARY}")
 endif()

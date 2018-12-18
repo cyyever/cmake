@@ -6,6 +6,7 @@
 #  PVS-Studio::analyzer
 #  PVS-Studio::plog-converter
 
+include_guard()
 include(FindPackageHandleStandardArgs)
 
 find_program(plog-converter_BINARY PlogConverter plog-converter PATH_SUFFIXES PVS-Studio)

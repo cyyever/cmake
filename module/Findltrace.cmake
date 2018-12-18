@@ -4,6 +4,7 @@
 #  ltrace_FOUND
 #  ltrace_BINARY
 
+include_guard()
 include(FindPackageHandleStandardArgs)
 if(NOT WIN32)
   find_program(ltrace_BINARY ltrace PATHS /usr/bin /usr/local/bin)

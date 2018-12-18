@@ -5,6 +5,7 @@
 #  vcpkg_dir
 #  vcpkg_toolchain_file
 
+include_guard()
 include(FindPackageHandleStandardArgs)
 if(NOT DEFINED vcpkg_dir)
   find_file(vcpkg_dir vcpkg PATHS c:/code ~)

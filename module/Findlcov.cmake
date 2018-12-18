@@ -5,6 +5,7 @@
 #  lcov_BINARY
 #  genhtml_BINARY
 
+include_guard()
 include(FindPackageHandleStandardArgs)
 find_program(lcov_BINARY lcov PATHS /usr/bin /usr/local/bin)
 find_program(genhtml_BINARY genhtml PATHS /usr/bin /usr/local/bin)

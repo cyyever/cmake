@@ -4,6 +4,7 @@
 #  CUDA-MEMCHECK_FOUND
 #  CUDA-MEMCHECK::cuda-memcheck
 
+include_guard()
 include(FindPackageHandleStandardArgs)
 if(NOT DEFINED CUDA_TOOLKIT_ROOT_DIR)
   message(FATAL_ERROR "CUDA language is not enabled")
