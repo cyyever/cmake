@@ -10,7 +10,7 @@ endif()
 LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/module)
 
 FIND_PACKAGE(valgrind)
-FIND_PACKAGE(cudamemcheck)
+FIND_PACKAGE(CUDA-MEMCHECK)
 FIND_PACKAGE(GoogleSanitizer)
 
 if(valgrind_FOUND)

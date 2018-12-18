@@ -1,5 +1,5 @@
 include_guard()
-find_package(Doxygen)
+find_package(Doxygen QUIET)
 
 if(DOXYGEN_FOUND AND NOT TARGET generate-document)
   add_custom_target(generate-document

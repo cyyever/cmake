@@ -4,7 +4,6 @@ LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/module)
 FIND_PACKAGE(gprof)
 FIND_PACKAGE(ltrace)
 FIND_PACKAGE(strace)
-FIND_PACKAGE(CUDA)
 
 function(add_profiling)
   set(cpu_profiling_tools GPROF LTRACE STRACE)
