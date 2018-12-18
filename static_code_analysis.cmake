@@ -52,7 +52,7 @@ if(NOT TARGET do-scan-build AND scan-build_FOUND)
     )
 endif()
 
-FIND_PACKAGE(pvsstudio)
+FIND_PACKAGE(PVS-Studio)
 FIND_PACKAGE(powershell)
 
 if(pvsstudio_FOUND)
