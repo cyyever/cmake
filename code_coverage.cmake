@@ -42,12 +42,15 @@ if(NOT TARGET generate_code_coverage_report)
 	)
     endif()
   elseif(ENABLE_LLVM_CODE_COVERAGE)
-    add_custom_target(generate_code_coverage_report
-      COMMAND llvm-profdata merge -sparse `find -name '*.profraw'` -o default.profdata
-      COMMAND llvm-cov show -instr-profile=`find -name default.profdata` -format=html -output-dir=./code_coverage `find . -name '*.so'` `find . -executable -type f`
-      COMMAND rm `find -name '*.profraw'`
-      COMMAND rm default.profdata
-      BYPRODUCTS code_coverage_report
-      )
+    find_package(LLVM QUIET)
+    if(LLVM_FOUND)
+      add_custom_target(generate_code_coverage_report
+	COMMAND llvm-profdata merge -sparse `find -name '*.profraw'` -o default.profdata
+	COMMAND llvm-cov show -instr-profile=`find -name default.profdata` -format=html -output-dir=./code_coverage `find . -name '*.so'` `find . -executable -type f`
+	COMMAND rm `find -name '*.profraw'`
+	COMMAND rm default.profdata
+	BYPRODUCTS code_coverage_report
+	)
+    endif()
   endif()
 endif()
