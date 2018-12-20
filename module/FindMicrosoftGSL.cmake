@@ -6,7 +6,7 @@
 include_guard()
 include(FindPackageHandleStandardArgs)
 find_path(MicrosoftGSL_dir NAMES gsl_algorithm PATH_SUFFIXES gsl)
-find_package_handle_standard_args(GSL DEFAULT_MSG MicrosoftGSL_dir)
+find_package_handle_standard_args(MicrosoftGSL DEFAULT_MSG MicrosoftGSL_dir)
 if(MicrosoftGSL_FOUND AND NOT TARGET MicrosoftGSL::GSL)
   add_library(MicrosoftGSL::GSL INTERFACE IMPORTED)
   set_property(TARGET MicrosoftGSL::GSL
