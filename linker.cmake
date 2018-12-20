@@ -1,1 +1,2 @@
+include_guard(GLOBAL)
 SET(CMAKE_LINK_WHAT_YOU_USE TRUE)
