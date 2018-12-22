@@ -4,9 +4,9 @@
 #  cppcheck_FOUND
 #  cppcheck::cppcheck
 
+include_guard()
 include(FindPackageHandleStandardArgs)
-
-find_program(cppcheck_BINARY NAMES cppcheck)
+find_program(cppcheck_BINARY NAMES cppcheck PATH_SUFFIXES "Cppcheck")
 find_package_handle_standard_args(cppcheck DEFAULT_MSG cppcheck_BINARY)
 if(cppcheck_FOUND AND NOT TARGET cppcheck::cppcheck)
   add_executable(cppcheck::cppcheck IMPORTED)

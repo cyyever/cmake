@@ -10,9 +10,8 @@ endif()
 LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/module)
 
 FIND_PACKAGE(valgrind)
-FIND_PACKAGE(cudamemcheck)
+FIND_PACKAGE(CUDA-MEMCHECK)
 FIND_PACKAGE(GoogleSanitizer)
-FIND_PACKAGE(drmemory)
 
 if(valgrind_FOUND)
   FILE(GLOB suppression_files ${CMAKE_CURRENT_LIST_DIR}/valgrind_supp/*.supp)
@@ -35,7 +34,7 @@ function(add_test_with_runtime_analysis)
     return()
   endif()
 
-  set(cpu_analysis_tools MEMCHECK UBSAN HELGRIND ASAN TSAN DRMEMORY)
+  set(cpu_analysis_tools MEMCHECK UBSAN HELGRIND ASAN TSAN)
   set(gpu_analysis_tools CUDA-MEMCHECK CUDA-SYNCCHECK CUDA-INITCHECK CUDA-RACECHECK)
   set(oneValueArgs TARGET WITH_CPU_ANALYSIS WITH_GPU_ANALYSIS ${cpu_analysis_tools} ${gpu_analysis_tools})
   cmake_parse_arguments(this "" "${oneValueArgs}" "ARGS" ${ARGN})
@@ -82,13 +81,6 @@ function(add_test_with_runtime_analysis)
   elseif(${this_MEMCHECK} AND NOT valgrind_FOUND)
     message(WARNING "no valgrind")
     set(this_MEMCHECK FALSE)
-  endif()
-
-  if("${this_DRMEMORY}" STREQUAL "")
-    set(this_DRMEMORY ${drmemory_FOUND})
-  elseif(${this_DRMEMORY} AND NOT drmemory_FOUND)
-    message(WARNING "no drmemory")
-    set(this_DRMEMORY FALSE)
   endif()
 
   if(this_TSAN AND NOT thread_sanitizer_FOUND)
@@ -171,9 +163,6 @@ function(add_test_with_runtime_analysis)
     elseif(tool STREQUAL TSAN)
       target_compile_options(${new_target} PRIVATE "-fsanitize=thread")
       set_target_properties(${new_target} PROPERTIES LINK_FLAGS "-fsanitize=thread")
-    elseif(tool STREQUAL DRMEMORY)
-      set(drmemory_command ${drmemory_BINARY} -logdir ${CMAKE_BINARY_DIR} -ignore_kernel -exit_code_if_errors 1 -batch -perturb --)
-      set(new_target_command "${drmemory_command};$<TARGET_FILE:${new_target}>")
     elseif(tool STREQUAL MEMCHECK)
       set(memcheck_command "${valgrind_BINARY} --error-exitcode=1 --trace-children=yes --gen-suppressions=all --track-fds=yes --leak-check=full")
       foreach(suppression_file ${suppression_files})
@@ -214,25 +203,3 @@ function(add_test_with_runtime_analysis)
   add_dependencies(check ${this_TARGET})
 endfunction()
 
-if(ENABLE_GNU_CODE_COVERAGE AND NOT TARGET code_coverage)
-  FIND_PACKAGE(lcov)
-  if(lcov_FOUND)
-    ADD_CUSTOM_TARGET(code_coverage ALL
-      COMMAND mkdir -p ${CMAKE_BINARY_DIR}/code_coverage
-      COMMAND ${lcov_BINARY} --capture --directory ${CMAKE_BINARY_DIR} --output-file coverage.info
-      COMMAND ${genhtml_BINARY} coverage.info --output-directory ${CMAKE_BINARY_DIR}/code_coverage
-      COMMAND rm coverage.info
-      DEPENDS check)
-  endif()
-endif()
-
-if(ENABLE_LLVM_CODE_COVERAGE AND NOT TARGET code_coverage)
-    ADD_CUSTOM_TARGET(code_coverage ALL
-      COMMAND llvm-profdata merge -sparse `find -name '*.profraw'` -o default.profdata
-      COMMAND llvm-cov show -instr-profile=`find -name default.profdata` -format=html -output-dir=${CMAKE_BINARY_DIR}/code_coverage `find ${CMAKE_BINARY_DIR} -name '*.so'` `find ${CMAKE_BINARY_DIR} -executable -type f`
-      COMMAND rm `find -name '*.profraw'`
-      COMMAND rm default.profdata
-      DEPENDS check
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-      )
-endif()
