@@ -149,7 +149,7 @@ function(add_test_with_runtime_analysis)
     endif()
 
     set(new_target "${tool}_${this_TARGET}")
-    clone_target(OLD_TARGET ${this_TARGET} NEW_TARGET ${new_target})
+    clone_executable(${this_TARGET} ${new_target})
     set(new_target_command $<TARGET_FILE:${new_target}>)
     set(has_test TRUE)
 
@@ -202,4 +202,3 @@ function(add_test_with_runtime_analysis)
   endif()
   add_dependencies(check ${this_TARGET})
 endfunction()
-
