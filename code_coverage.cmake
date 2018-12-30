@@ -46,9 +46,7 @@ if(NOT TARGET generate_code_coverage_report)
     if(LLVM_FOUND)
       add_custom_target(generate_code_coverage_report
 	COMMAND llvm-profdata merge -sparse `find -name '*.profraw'` -o default.profdata
-	COMMAND llvm-cov show -instr-profile=`find -name default.profdata` -format=html -output-dir=./code_coverage `find . -name '*.so'` `find . -executable -type f`
-	COMMAND rm `find -name '*.profraw'`
-	COMMAND rm default.profdata
+	COMMAND llvm-cov show -instr-profile=default.profdata -format=html -output-dir=./code_coverage_report -object `find ./test -executable -type f`
 	BYPRODUCTS code_coverage_report
 	)
     endif()

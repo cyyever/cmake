@@ -42,7 +42,7 @@ set(sanitizers address thread undefined leak)
 foreach(sanitizer_name IN LISTS sanitizers)
   check_sanitizer(${sanitizer_name} run_res)
   FIND_PACKAGE_HANDLE_STANDARD_ARGS(${sanitizer_name}_sanitizer DEFAULT_MSG run_res)
-  if(${sanitizer_name}_sanitizer_FOUND)
+  if(${sanitizer_name}_sanitizer_FOUND AND NOT TARGET GoogleSanitizer::${sanitizer_name})
     add_library(GoogleSanitizer::${sanitizer_name} INTERFACE IMPORTED)
     target_compile_options( GoogleSanitizer::${sanitizer_name}
       INTERFACE
