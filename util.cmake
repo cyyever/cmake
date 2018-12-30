@@ -37,17 +37,3 @@ function(clone_executable old_target new_target)
     set_target_properties(${new_target} PROPERTIES "${property}" "${property_value}")
   ENDFOREACH()
 endfunction()
-
-function(target_add_address_sanitizer target_variable)
-  cmake_parse_arguments("" "" "RESULT_VARIABLE" "" ${ARGN})
-  find_package(GoogleSanitizer)
-
-  if(address_sanitizer_FOUND)
-    target_compile_options("${target_variable}" PRIVATE "-fsanitize=address")
-    target_link_options("${target_variable}" PRIVATE "-fsanitize=address")
-  endif()
-
-  if(NOT "${RESULT_VARIABLE}" STREQUAL "")
-    set("${RESULT_VARIABLE}" ${address_sanitizer_FOUND})
-  endif()
-endfunction()
