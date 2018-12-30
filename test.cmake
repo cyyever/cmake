@@ -9,9 +9,9 @@ endif()
 
 LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/module)
 
-FIND_PACKAGE(valgrind)
-FIND_PACKAGE(CUDA-MEMCHECK)
-FIND_PACKAGE(GoogleSanitizer)
+find_package(valgrind)
+find_package(CUDA-MEMCHECK)
+find_package(GoogleSanitizer)
 
 if(valgrind_FOUND)
   FILE(GLOB suppression_files ${CMAKE_CURRENT_LIST_DIR}/valgrind_supp/*.supp)
@@ -155,8 +155,7 @@ function(add_test_with_runtime_analysis)
 
     target_compile_options(${new_target} PRIVATE "-fno-omit-frame-pointer")
     if(tool STREQUAL ASAN)
-      target_compile_options(${new_target} PRIVATE "-fsanitize=address")
-      set_target_properties(${new_target} PROPERTIES LINK_FLAGS "-fsanitize=address")
+      target_add_address_sanitizer(${new_target})
     elseif(tool STREQUAL UBSAN)
       target_compile_options(${new_target} PRIVATE "-fsanitize=undefined")
       set_target_properties(${new_target} PROPERTIES LINK_FLAGS "-fsanitize=undefined")
