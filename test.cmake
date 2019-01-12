@@ -1,13 +1,8 @@
-include(${CMAKE_CURRENT_LIST_DIR}/code_coverage.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/util.cmake)
-
+include_guard()
 enable_testing()
 
-if(NOT TARGET check)
-  add_custom_target(check ALL COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -C $<CONFIGURATION>)
-endif()
-
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/module)
+include(${CMAKE_CURRENT_LIST_DIR}/code_coverage.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/util.cmake)
 
 file(GLOB lsan_suppression_file ${CMAKE_CURRENT_LIST_DIR}/sanitizer_supp/lsan.supp)
 file(GLOB tsan_suppression_file ${CMAKE_CURRENT_LIST_DIR}/sanitizer_supp/tsan.supp)
@@ -180,7 +175,6 @@ function(add_test_with_runtime_analysis)
     endif()
     add_test(NAME ${new_target} COMMAND ${new_target_command} ${this_ARGS})
     set_tests_properties(${new_target} PROPERTIES ENVIRONMENT "${new_env}")
-    add_dependencies(check ${new_target})
   endforeach()
 
   if(NOT has_test)
@@ -188,5 +182,4 @@ function(add_test_with_runtime_analysis)
     add_test(NAME ${name} WORKING_DIRECTORY $<TARGET_FILE_DIR:${this_TARGET}> COMMAND $<TARGET_FILE:${this_TARGET}> ${this_ARGS})
     set_tests_properties(${name} PROPERTIES ENVIRONMENT "${new_env}")
   endif()
-  add_dependencies(check ${this_TARGET})
 endfunction()

@@ -1,3 +1,4 @@
+include_guard(GLOBAL)
 function(clone_executable old_target new_target) 
   if(NOT TARGET ${old_target})
     message(FATAL_ERROR "${old_target} is not a target")
