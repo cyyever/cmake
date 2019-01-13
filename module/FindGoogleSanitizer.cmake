@@ -12,48 +12,51 @@
 include_guard()
 include(FindPackageHandleStandardArgs)
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
-if("C" IN_LIST languages)
-  include(CheckCSourceRuns)
-elseif("CXX" IN_LIST languages)
-  include(CheckCXXSourceRuns)
-else()
-  message(FATAL_ERROR "FindGoogleSanitizer only works if either C or CXX language is enabled")
-endif()
 
-function (check_sanitizer sanitizer_name sanitizer_run_res)
+set(source_code [==[
+  #include <stdio.h>
+  int main() {
+  printf("hello world!");
+  return 0;
+  }
+  ]==])
+
+foreach(sanitizer_name IN ITEMS address thread undefined leak)
   set(CMAKE_REQUIRED_FLAGS "-fsanitize=${sanitizer_name}")
-  set(source_code [==[
-    #include <stdio.h>
-    int main() {
-    printf("hello world!");
-    return 0;
-    }
-    ]==])
 
+  set(_c_res)
+  set(_cxx_res)
   set(CMAKE_REQUIRED_QUIET ON)
-  if("C" IN_LIST languages)
-    check_c_source_runs("${source_code}" ${sanitizer_run_res})
-  elseif("CXX" IN_LIST languages)
-    check_cxx_source_runs("${source_code}" ${sanitizer_run_res})
+  if("CXX" IN_LIST languages)
+    include(CheckCXXSourceRuns)
+    check_cxx_source_runs("${_source_code}" _cxx_res)
   endif()
-endfunction()
+  if("C" IN_LIST languages)
+    include(CheckCSourceRuns)
+    check_c_source_runs("${_source_code}" _c_res)
+  endif()
 
-set(sanitizers address thread undefined leak)
-foreach(sanitizer_name IN LISTS sanitizers)
-  check_sanitizer(${sanitizer_name} run_res)
-  FIND_PACKAGE_HANDLE_STANDARD_ARGS(${sanitizer_name}_sanitizer DEFAULT_MSG run_res)
+  set(_run_res 0)
+  if(_c_res OR _cxx_res)
+    set(_run_res 1)
+  endif()
+
+  find_package_handle_standard_args(${sanitizer_name}_sanitizer DEFAULT_MSG _run_res)
   if(${sanitizer_name}_sanitizer_FOUND AND NOT TARGET GoogleSanitizer::${sanitizer_name})
     add_library(GoogleSanitizer::${sanitizer_name} INTERFACE IMPORTED)
-    target_compile_options( GoogleSanitizer::${sanitizer_name}
+    target_compile_options(GoogleSanitizer::${sanitizer_name}
       INTERFACE
-      $<$<COMPILE_LANGUAGE:CXX>:-fsanitize=${sanitizer_name}>
-      $<$<COMPILE_LANGUAGE:C>:-fsanitize=${sanitizer_name}>
+      $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$_cxx_res>>:${CMAKE_REQUIRED_FLAGS}>
+      $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$_c_res>>:${CMAKE_REQUIRED_FLAGS}>
       -fno-omit-frame-pointer
       )
-    target_link_options( GoogleSanitizer::${sanitizer_name}
+    target_link_options(GoogleSanitizer::${sanitizer_name}
       INTERFACE
-      $<$<COMPILE_LANGUAGE:CXX>:-fsanitize=${sanitizer_name}>
-      $<$<COMPILE_LANGUAGE:C>:-fsanitize=${sanitizer_name}>
+      $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$_cxx_res>>:${CMAKE_REQUIRED_FLAGS}>
+      $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$_c_res>>:${CMAKE_REQUIRED_FLAGS}>
+      -fno-omit-frame-pointer
       )
   endif()
 endforeach()
+
+set(CMAKE_REQUIRED_FLAGS)
