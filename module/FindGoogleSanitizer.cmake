@@ -13,7 +13,7 @@ include_guard()
 include(FindPackageHandleStandardArgs)
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 
-set(source_code [==[
+set(_source_code [==[
   #include <stdio.h>
   int main() {
   printf("hello world!");
@@ -22,6 +22,11 @@ set(source_code [==[
   ]==])
 
 foreach(sanitizer_name IN ITEMS address thread undefined leak)
+  if(TARGET GoogleSanitizer::${sanitizer_name})
+    set(${sanitizer_name}_sanitizer TRUE)
+    continue()
+  endif()
+
   set(CMAKE_REQUIRED_FLAGS "-fsanitize=${sanitizer_name}")
 
   set(_c_res)
@@ -42,7 +47,7 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak)
   endif()
 
   find_package_handle_standard_args(${sanitizer_name}_sanitizer DEFAULT_MSG _run_res)
-  if(${sanitizer_name}_sanitizer_FOUND AND NOT TARGET GoogleSanitizer::${sanitizer_name})
+  if(${sanitizer_name}_sanitizer_FOUND)
     add_library(GoogleSanitizer::${sanitizer_name} INTERFACE IMPORTED)
     target_compile_options(GoogleSanitizer::${sanitizer_name}
       INTERFACE
