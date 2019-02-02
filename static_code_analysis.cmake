@@ -22,19 +22,15 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/module)
 
 find_package(ClangTools QUIET)
-if(clang-tidy_FOUND)
+if(clang-tidy_FOUND AND run-clang-tidy_FOUND AND NOT TARGET do-run-clang-tidy)
   set(EXTRA-ARGS -extra-arg='-std=c++2a' -extra-arg='-Qunused-arguments')
   set(CHECKES "-checks='*,-fuchsia-default-arguments,-clang-analyzer-cplusplus.NewDeleteLeaks,-clang-diagnostic-ignored-optimization-argument,-readability-implicit-bool-conversion,-llvm-namespace-comment,-google-readability-namespace-comments,-cppcoreguidelines-owning-memory,-cert-err58-cpp,-fuchsia-statically-constructed-objects,-clang-diagnostic-gnu-zero-variadic-macro-arguments,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-avoid-magic-numbers,-hicpp-vararg,-readability-magic-numbers,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-hicpp-no-array-decay'")
-  if(run-clang-tidy_FOUND AND NOT TARGET do-run-clang-tidy)
     add_custom_target(
       do-run-clang-tidy
-      COMMAND ClangTools::run-clang-tidy -p ${CMAKE_BINARY_DIR} "-quiet" ${EXTRA-ARGS} ${CHECKES} > ./run-clang-tidy.txt
+      COMMAND ClangTools::run-clang-tidy -clang-tidy-binary "$<TARGET_FILE:ClangTools::clang-tidy>" -p ${CMAKE_BINARY_DIR} "-quiet" ${EXTRA-ARGS} ${CHECKES} > ./run-clang-tidy.txt
       DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       )
-  else()
-    set(CMAKE_CXX_CLANG_TIDY ClangTools::clang-tidy ${EXTRA-ARGS} ${CHECKES})
-  endif()
 endif()
 
 find_package(cppcheck QUIET)
