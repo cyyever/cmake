@@ -1,6 +1,10 @@
 include_guard()
+
 enable_testing()
 include(${CMAKE_CURRENT_LIST_DIR}/util.cmake)
+
+find_package(libFuzzer)
+find_package(GoogleSanitizer)
 
 file(GLOB lsan_suppression_file ${CMAKE_CURRENT_LIST_DIR}/sanitizer_supp/lsan.supp)
 file(GLOB tsan_suppression_file ${CMAKE_CURRENT_LIST_DIR}/sanitizer_supp/tsan.supp)
@@ -21,12 +25,10 @@ function(add_fuzzing)
     return()
   endif()
 
-  find_package(libFuzzer)
   if(NOT libFuzzer_FOUND)
     message(FATAL_ERROR "no libFuzzer found")
   endif()
 
-  find_package(GoogleSanitizer)
   if("${this_ASAN}" STREQUAL "")
     set(this_ASAN ${address_sanitizer_FOUND})
   elseif(this_ASAN AND NOT address_sanitizer_FOUND)

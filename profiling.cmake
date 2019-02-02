@@ -1,6 +1,9 @@
 include_guard()
 include(${CMAKE_CURRENT_LIST_DIR}/util.cmake)
 
+find_package(gprof)
+find_package(ltrace)
+find_package(strace)
 
 function(add_profiling)
   set(cpu_profiling_tools GPROF LTRACE STRACE)
@@ -41,7 +44,6 @@ function(add_profiling)
   endif()
 
 
-  find_package(gprof)
   if("${this_GPROF}" STREQUAL "")
     set(this_GPROF TRUE)
   elseif(${this_GPROF} AND NOT gprof_FOUND)
@@ -49,7 +51,6 @@ function(add_profiling)
     set(this_GPROF FALSE)
   endif()
 
-  find_package(ltrace)
   if("${this_LTRACE}" STREQUAL "")
     set(this_LTRACE TRUE)
   elseif(${this_LTRACE} AND NOT ltrace_FOUND)
@@ -57,7 +58,6 @@ function(add_profiling)
     set(this_LTRACE FALSE)
   endif()
 
-  find_package(strace)
   if("${this_STRACE}" STREQUAL "")
     set(this_STRACE TRUE)
   elseif(${this_STRACE} AND NOT strace_FOUND)

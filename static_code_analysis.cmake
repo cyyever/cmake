@@ -1,7 +1,7 @@
 include_guard(GLOBAL)
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 
-option(WITH_MSVC_RULESET "use ruleset for static analysis" ON)
+option(WITH_MSVC_RULESET "use ruleset for static analysis" OFF)
 foreach(lang IN ITEMS C CXX)
   if(lang IN_LIST languages)
     if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")

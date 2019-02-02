@@ -4,8 +4,11 @@ enable_testing()
 include(${CMAKE_CURRENT_LIST_DIR}/code_coverage.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/util.cmake)
 
+find_package(GoogleSanitizer)
 file(GLOB lsan_suppression_file ${CMAKE_CURRENT_LIST_DIR}/sanitizer_supp/lsan.supp)
 file(GLOB tsan_suppression_file ${CMAKE_CURRENT_LIST_DIR}/sanitizer_supp/tsan.supp)
+
+find_package(valgrind)
 
 macro(add_valgrind_suppression_dir dir)
   file(GLOB tmp_suppression_files ${dir}/*.supp)
@@ -58,7 +61,6 @@ function(add_test_with_runtime_analysis)
     endforeach()
   endif()
 
-  find_package(valgrind)
   if(valgrind_FOUND)
     file(GLOB valgrind_suppression_files ${CMAKE_CURRENT_LIST_DIR}/valgrind_supp/*.supp)
   endif()
@@ -76,7 +78,6 @@ function(add_test_with_runtime_analysis)
     set(this_HELGRIND FALSE)
   endif()
 
-  find_package(GoogleSanitizer)
   if("${this_ASAN}" STREQUAL "")
     set(this_ASAN ${address_sanitizer_FOUND})
   elseif(this_ASAN AND NOT address_sanitizer_FOUND)
