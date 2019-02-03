@@ -45,7 +45,7 @@ endif()
 find_package(iwyu QUIET)
 if(iwyu_tool_FOUND AND NOT TARGET do-include-what-you-use)
   add_custom_target(do-include-what-you-use
-    COMMAND iwyu::iwyu_tool -p ${CMAKE_BINARY_DIR} > ./do-include-what-you-use.txt
+    COMMAND iwyu::iwyu_tool -p ${CMAKE_BINARY_DIR} -- --transitive_includes_only > ./do-include-what-you-use.txt
     DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
