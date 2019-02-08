@@ -26,7 +26,8 @@ function(add_fuzzing)
   endif()
 
   if(NOT libFuzzer_FOUND)
-    message(FATAL_ERROR "no libFuzzer found")
+    message(WARNING "no libFuzzer found,skip fuzzing")
+    return()
   endif()
 
   if("${this_ASAN}" STREQUAL "")
@@ -37,7 +38,7 @@ function(add_fuzzing)
   endif()
 
   if("${this_TSAN}" STREQUAL "")
-    set(this_TSAN ${thread_sanitizer_FOUND})
+    set(this_TSAN FALSE)
   elseif(this_TSAN AND NOT thread_sanitizer_FOUND)
     message(WARNING "no tsan")
     set(this_TSAN FALSE)

@@ -52,3 +52,5 @@ if(libFuzzer_FOUND AND NOT TARGET libFuzzer::libFuzzer)
 endif()
 
 set(CMAKE_REQUIRED_FLAGS)
+unset(_c_res CACHE)
+unset(_cxx_res CACHE)

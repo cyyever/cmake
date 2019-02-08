@@ -65,3 +65,5 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak)
 endforeach()
 
 set(CMAKE_REQUIRED_FLAGS)
+unset(_c_res CACHE)
+unset(_cxx_res CACHE)
