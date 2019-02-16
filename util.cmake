@@ -38,3 +38,19 @@ function(clone_executable old_target new_target)
     set_target_properties(${new_target} PROPERTIES "${property}" "${property_value}")
   ENDFOREACH()
 endfunction()
+
+function (get_all_sources_and_headers)
+  set(get_all_sources_and_headers [=[
+#!/bin/sh
+for source_file in $(grep '"file":' $1 | sed -e 's/"file"://' | sed -e 's/[^"]*"\([^"]*\)"/\1/')
+do
+  source_dir=$(dirname ${source_file})
+  for head in $(sed -n -e 's/#include[^"]*"\([^"]*\)"/\1/p' ${source_file} )
+  do
+    realpath "${source_dir}/${head}"
+  done
+  realpath "${source_file}"
+done
+  ]=])
+  file(WRITE ${CMAKE_BINARY_DIR}/get_all_sources_and_headers.sh ${get_all_sources_and_headers})
+endfunction()
