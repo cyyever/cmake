@@ -7,7 +7,7 @@
 include_guard()
 include(FindPackageHandleStandardArgs)
 
-find_program(clang-format_BINARY NAMES clang-format-8 clang-format-7 clang-format)
+find_program(clang-format_BINARY NAMES clang-format-8 clang-format-7 clang-format clang-format-devel)
 find_package_handle_standard_args(ClangFormat DEFAULT_MSG clang-format_BINARY)
 if(ClangFormat_FOUND AND NOT TARGET ClangFormat::clang-format)
   add_executable(ClangFormat::clang-format IMPORTED)
