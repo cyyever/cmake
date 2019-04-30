@@ -19,6 +19,14 @@ endforeach()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+add_custom_target(
+  copy_compile_commands_json
+  ALL
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/compile_commands.json ${CMAKE_SOURCE_DIR}
+  DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  )
+
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/module)
 
 find_package(ClangTools QUIET)
@@ -66,10 +74,10 @@ if(WITH_PVSSTUDIO)
         )
     else()
       find_package(powershell QUIET)
-      if(powershell_FOUND) 
+      if(powershell_FOUND)
         add_custom_target(do_pvs_studio_analysis
           COMMAND PVS-Studio::Cmd --incremental ScanAndAnalyze --target ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.sln --progress -o ./pvs-studio.log
-          COMMAND PVS-Studio::plog-converter -t FullHtml,Tasks -o . -n pvs-studio-report ./pvs-studio.log 
+          COMMAND PVS-Studio::plog-converter -t FullHtml,Tasks -o . -n pvs-studio-report ./pvs-studio.log
           COMMAND powershell::powershell rm ./pvs-studio.log
           DEPENDS ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.sln
           WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
