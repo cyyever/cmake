@@ -19,16 +19,19 @@ endforeach()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_custom_target(
-  copy_compile_commands_json
-  ALL
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/compile_commands.json ${CMAKE_SOURCE_DIR}
-  DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-  )
+if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  add_custom_target(
+    copy_compile_commands_json
+    ALL
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/compile_commands.json ${CMAKE_SOURCE_DIR}
+    DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
+endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/module)
 
+if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 find_package(ClangTools QUIET)
 if(clang-tidy_FOUND AND run-clang-tidy_FOUND AND NOT TARGET do_run_clang_tidy)
   set(EXTRA-ARGS -extra-arg='-std=c++2a' -extra-arg='-Qunused-arguments')
@@ -40,8 +43,10 @@ if(clang-tidy_FOUND AND run-clang-tidy_FOUND AND NOT TARGET do_run_clang_tidy)
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       )
 endif()
+endif()
 
 find_package(cppcheck QUIET)
+if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 if(cppcheck_FOUND AND NOT TARGET do_cppcheck)
   add_custom_target(do_cppcheck
     COMMAND cppcheck::cppcheck --project=${CMAKE_BINARY_DIR}/compile_commands.json --std=c++14 --enable=all --inconclusive 2> ./do_cppcheck.txt
@@ -49,14 +54,17 @@ if(cppcheck_FOUND AND NOT TARGET do_cppcheck)
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
 endif()
+endif()
 
 find_package(iwyu QUIET)
+if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 if(iwyu_tool_FOUND AND NOT TARGET do_include_what_you_use)
   add_custom_target(do_include_what_you_use
     COMMAND iwyu::iwyu_tool -p ${CMAKE_BINARY_DIR} -- --transitive_includes_only > ./do_include_what_you_use.txt
     DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
+endif()
 endif()
 
 option(WITH_PVSSTUDIO "use PVS-Studio for static analysis" OFF)
