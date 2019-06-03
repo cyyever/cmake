@@ -1,6 +1,26 @@
-include_guard()
-include(${CMAKE_CURRENT_LIST_DIR}/util.cmake)
+include_guard(GLOBAL)
 
+get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+if(NOT C IN_LIST languages AND NOT CXX IN_LIST languages)
+  return()
+endif()
+
+include(${CMAKE_CURRENT_LIST_DIR}/util.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/build_type.cmake)
+
+add_custom_build_type_like(PROFILING DEBUG)
+
+if(CXX IN_LIST languages)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    add_link_options($<$<CONFIG:PROFILING>:/PROFILE>)
+  endif()
+endif()
+
+if(C IN_LIST languages)
+  if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+    add_link_options($<$<CONFIG:PROFILING>:/PROFILE>)
+  endif()
+endif()
 
 function(add_profiling)
   set(cpu_profiling_tools GPROF LTRACE STRACE)
