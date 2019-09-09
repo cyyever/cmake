@@ -38,11 +38,11 @@ find_package(ClangTools QUIET)
       set(CHECKES "-checks='*,-fuchsia-default-arguments,-clang-analyzer-cplusplus.NewDeleteLeaks,-clang-diagnostic-ignored-optimization-argument,-readability-implicit-bool-conversion,-llvm-namespace-comment,-google-readability-namespace-comments,-cppcoreguidelines-owning-memory,-cert-err58-cpp,-fuchsia-statically-constructed-objects,-clang-diagnostic-gnu-zero-variadic-macro-arguments,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-avoid-magic-numbers,-hicpp-vararg,-readability-magic-numbers,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-hicpp-no-array-decay'")
       if(C IN_LIST languages AND NOT CXX IN_LIST languages)
         set(EXTRA-ARGS )
-        set(CHECKES "-checks='*,-modernize*,-*readability*,-hicpp-braces*,-cppcoreguidelines*,-misc-non-private-member-variables-in-classes,-hicpp-no-malloc,-*uppercase-literal-suffix*,-llvm-include-order,-bugprone-narrowing-conversions,-performance-type-promotion-in-math-fn'")
+        set(CHECKES "-checks='*,-modernize*,-*readability*,-hicpp-braces*,-cppcoreguidelines*,-misc-non-private-member-variables-in-classes,-hicpp-no-malloc,-*uppercase-literal-suffix*,-llvm-include-order,-bugprone-narrowing-conversions,-performance-type-promotion-in-math-fn,-hicpp-signed-bitwise'")
       endif()
     add_custom_target(
       do_run_clang_tidy
-      COMMAND ClangTools::run-clang-tidy -clang-tidy-binary "$<TARGET_FILE:ClangTools::clang-tidy>" -p ${CMAKE_BINARY_DIR} "-quiet" ${EXTRA-ARGS} ${CHECKES} > ./run-clang-tidy.txt
+      COMMAND ClangTools::run-clang-tidy -clang-tidy-binary "$<TARGET_FILE:ClangTools::clang-tidy>" -p ${CMAKE_BINARY_DIR} "-quiet" ${EXTRA-ARGS} ${CHECKES} | grep -v 'clang.*tidy.*checks' > ./run-clang-tidy.txt
       DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       )
