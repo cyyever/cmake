@@ -1,5 +1,5 @@
 include_guard(GLOBAL)
-cmake_policy(VERSION 3.11)
+
 get_property(isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if(NOT isMultiConfig)
   if(NOT CMAKE_BUILD_TYPE)

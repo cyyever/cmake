@@ -4,7 +4,6 @@ if(NOT WITH_IPO)
   return()
 endif()
 
-cmake_policy(VERSION 3.13.0)
 include(CheckIPOSupported)
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 set(c_or_cxx)
