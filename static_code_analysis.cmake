@@ -64,7 +64,7 @@ find_package(iwyu QUIET)
 if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   if(iwyu_tool_FOUND AND NOT TARGET do_include_what_you_use)
     add_custom_target(do_include_what_you_use
-      COMMAND iwyu::iwyu_tool -p ${CMAKE_BINARY_DIR} -- --transitive_includes_only > ./do_include_what_you_use.txt
+      COMMAND iwyu::iwyu_tool -p ${CMAKE_BINARY_DIR} -- -Xiwyu --transitive_includes_only > ./do_include_what_you_use.txt
       DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       )
