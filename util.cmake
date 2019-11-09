@@ -45,7 +45,7 @@ function (get_all_sources_and_headers)
 for source_file in $(grep '"file":' $1 | sed -e 's/"file"://' | sed -e 's/[^"]*"\([^"]*\)"/\1/')
 do
   source_dir=$(dirname ${source_file})
-  for head in $(sed -n -e 's/#include[^"]*"\([^"]*\)"/\1/p' ${source_file} )
+  for head in $(sed -n -e 's/^\s*#include[^"]*"\([^"]*\)"/\1/p' ${source_file})
   do
     realpath "${source_dir}/${head}"
   done
