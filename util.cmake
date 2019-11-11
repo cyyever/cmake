@@ -1,5 +1,5 @@
 include_guard(GLOBAL)
-function(clone_executable old_target new_target) 
+function(clone_executable old_target new_target)
   if(NOT TARGET ${old_target})
     message(FATAL_ERROR "${old_target} is not a target")
     return()
@@ -13,13 +13,13 @@ function(clone_executable old_target new_target)
 
   get_target_property(source_files ${old_target} SOURCES)
   add_executable(${new_target} ${source_files})
-  
+
   # get all properties
   execute_process(COMMAND ${CMAKE_COMMAND} --help-property-list OUTPUT_VARIABLE CMAKE_PROPERTY_LIST)
   # Convert command output into a CMake list
   string(REGEX REPLACE "[\n\r]" ";" CMAKE_PROPERTY_LIST "${CMAKE_PROPERTY_LIST}")
 
-  foreach(property IN LISTS CMAKE_PROPERTY_LIST) 
+  foreach(property IN LISTS CMAKE_PROPERTY_LIST)
     if(
 	property STREQUAL ""
 	OR property STREQUAL "TYPE"
@@ -47,9 +47,15 @@ do
   source_dir=$(dirname ${source_file})
   for head in $(sed -n -e 's/^\s*#include[^"]*"\([^"]*\)"/\1/p' ${source_file})
   do
-    realpath "${source_dir}/${head}"
+    if test -f "${source_dir}/${head}"
+    then
+      realpath "${source_dir}/${head}"
+    fi
   done
-  realpath "${source_file}"
+  if test -f "${source_file}"
+  then
+    realpath "${source_file}"
+  fi
 done
   ]=])
   file(WRITE ${CMAKE_BINARY_DIR}/get_all_sources_and_headers.sh ${get_all_sources_and_headers})
