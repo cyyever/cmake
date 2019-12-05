@@ -1,5 +1,8 @@
 include_guard(GLOBAL)
 
+if(WIN32)
+  return()
+endif()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/module)

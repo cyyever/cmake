@@ -4,6 +4,15 @@
 #  libFuzzer_FOUND
 #  libFuzzer::libFuzzer
 include_guard()
+if(TARGET libFuzzer::libFuzzer)
+  set(libFuzzer_FOUND TRUE)
+  return()
+endif()
+if(WIN32)
+  set(libFuzzer_FOUND FALSE)
+  return()
+endif()
+
 include(FindPackageHandleStandardArgs)
 
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
