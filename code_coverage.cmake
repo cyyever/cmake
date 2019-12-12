@@ -1,5 +1,9 @@
 include_guard(GLOBAL)
 
+if(TARGET generate_code_coverage_report)
+  return()
+endif()
+
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 if(NOT C IN_LIST languages AND NOT CXX IN_LIST languages)
   return()
@@ -14,11 +18,19 @@ set(ENABLE_LLVM_CODE_COVERAGE FALSE)
 foreach(lang IN ITEMS C CXX)
   if(lang IN_LIST languages)
     if(CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
+      find_package(LLVM QUIET)
+      if(NOT LLVM_FOUND)
+        return()
+      endif()
       set(CMAKE_${lang}_FLAGS_CODE_COVERAGE
           "${CMAKE_${lang}_FLAGS_CODE_COVERAGE} -fprofile-instr-generate -fcoverage-mapping"
           CACHE STRING "" FORCE)
       set(ENABLE_LLVM_CODE_COVERAGE TRUE)
     elseif(CMAKE_${lang}_COMPILER_ID STREQUAL "GNU")
+      find_package(lcov QUIET)
+      if(NOT lcov_FOUND)
+        return()
+      endif()
       set(CMAKE_${lang}_FLAGS_CODE_COVERAGE
           "${CMAKE_${lang}_FLAGS_CODE_COVERAGE} --coverage"
           CACHE STRING "" FORCE)
@@ -30,46 +42,62 @@ foreach(lang IN ITEMS C CXX)
   endif()
 endforeach()
 
-if(NOT TARGET generate_code_coverage_report)
-  if(ENABLE_GNU_CODE_COVERAGE)
-    find_package(lcov QUIET)
-    if(lcov_FOUND)
-      add_custom_target(
-        generate_code_coverage_report
-        COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=code_coverage
-                ${CMAKE_SOURCE_DIR}
-        COMMAND ${CMAKE_COMMAND} --build .
-        COMMAND ${CMAKE_CTEST_COMMAND}
-        COMMAND mkdir -p code_coverage_report
-        COMMAND lcov::lcov --capture --directory . --output-file coverage.info
-        COMMAND lcov::genhtml coverage.info --output-directory
-                ./code_coverage_report
-        COMMAND rm ./coverage.info
-        WORKING_DIRECTORY
-          ${CMAKE_BINARY_DIR}
-          BYPRODUCTS
-          code_coverage_report)
-    endif()
-  elseif(ENABLE_LLVM_CODE_COVERAGE)
-    find_package(LLVM QUIET)
-    if(LLVM_FOUND)
-      add_custom_target(
-        generate_code_coverage_report
-        COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=code_coverage
-                ${CMAKE_SOURCE_DIR}
-        COMMAND ${CMAKE_COMMAND} --build .
-        COMMAND ${CMAKE_CTEST_COMMAND}
-        COMMAND
-          llvm-profdata merge -sparse `find -name '*.profraw'` -o
-          default.profdata
-        COMMAND
-          llvm-cov show -instr-profile=default.profdata -format=html
-          -output-dir=./code_coverage_report -object `find ./test -executable
-          -type f`
-        WORKING_DIRECTORY
-          ${CMAKE_BINARY_DIR}
-          BYPRODUCTS
-          code_coverage_report)
-    endif()
-  endif()
+if(NOT ENABLE_GNU_CODE_COVERAGE AND NOT ENABLE_LLVM_CODE_COVERAGE)
+  return()
 endif()
+
+add_custom_command(
+  OUTPUT ${CMAKE_BINARY_DIR}/code_coverage
+  COMMAND mkdir -p code_coverage
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+
+add_custom_target(
+  do_test_for_code_coverage
+  COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=code_coverage
+          -DDISABLE_RUNTIME_ANALYSIS=ON ${CMAKE_SOURCE_DIR}
+  COMMAND ${CMAKE_COMMAND} --build .
+  COMMAND ${CMAKE_CTEST_COMMAND}
+  DEPENDS ${CMAKE_BINARY_DIR}/code_coverage
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/code_coverage)
+
+if(ENABLE_GNU_CODE_COVERAGE)
+  add_custom_target(
+    generate_code_coverage_report
+    # COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=code_coverage
+    # -DDISABLE_RUNTIME_ANALYSIS=ON ${CMAKE_SOURCE_DIR} COMMAND ${CMAKE_COMMAND}
+    # --build . COMMAND ${CMAKE_CTEST_COMMAND}
+    COMMAND mkdir -p code_coverage_report
+    COMMAND
+      lcov::lcov --capture --include '${CMAKE_SOURCE_DIR}/*' --directory .
+      --output-file coverage.info
+
+
+      # COMMAND lcov::lcov --remove coverage.info '/usr/include/x86_64-linux-
+      # gnu/c++/*' '/usr/include/c++/*' -o coverage.info
+    COMMAND lcov::genhtml coverage.info --output-directory
+            ./code_coverage_report
+    COMMAND rm ./coverage.info
+    WORKING_DIRECTORY
+      ${CMAKE_BINARY_DIR}/code_coverage
+      BYPRODUCTS
+      code_coverage_report)
+elseif(ENABLE_LLVM_CODE_COVERAGE)
+  add_custom_target(
+    generate_code_coverage_report
+    # COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=code_coverage
+    # -DDISABLE_RUNTIME_ANALYSIS=ON ${CMAKE_SOURCE_DIR} COMMAND ${CMAKE_COMMAND}
+    # --build . COMMAND ${CMAKE_CTEST_COMMAND}
+    COMMAND mkdir -p code_coverage_report
+    COMMAND
+      llvm-profdata merge -sparse `find -name '*.profraw'` -o default.profdata
+    COMMAND
+      llvm-cov show -instr-profile=default.profdata -format=html
+      -output-dir=./code_coverage_report -object `find ./test -executable -type
+      f`
+    DEPENDS ${CMAKE_BINARY_DIR}/code_coverage
+    WORKING_DIRECTORY
+      ${CMAKE_BINARY_DIR}/code_coverage
+      BYPRODUCTS
+      code_coverage_report)
+endif()
+add_dependencies(generate_code_coverage_report do_test_for_code_coverage)
