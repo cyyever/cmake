@@ -2,12 +2,7 @@ include_guard()
 
 enable_testing()
 include(${CMAKE_CURRENT_LIST_DIR}/util.cmake)
-
-find_package(libFuzzer)
-find_package(GoogleSanitizer)
-
-file(GLOB lsan_suppression_file ${CMAKE_CURRENT_LIST_DIR}/sanitizer_supp/lsan.supp)
-file(GLOB tsan_suppression_file ${CMAKE_CURRENT_LIST_DIR}/sanitizer_supp/tsan.supp)
+set(sanitizer_suppression_dir ${CMAKE_CURRENT_LIST_DIR}/sanitizer_supp)
 
 function(add_fuzzing)
   set(cpu_analysis_tools UBSAN ASAN TSAN)
@@ -25,11 +20,8 @@ function(add_fuzzing)
     return()
   endif()
 
-  if(NOT libFuzzer_FOUND)
-    message(WARNING "no libFuzzer found,skip fuzzing")
-    return()
-  endif()
-
+  find_package(libFuzzer REQUIRED)
+  find_package(GoogleSanitizer)
   if("${this_ASAN}" STREQUAL "")
     set(this_ASAN ${address_sanitizer_FOUND})
   elseif(this_ASAN AND NOT address_sanitizer_FOUND)
@@ -52,9 +44,19 @@ function(add_fuzzing)
   endif()
 
   get_target_property(new_env ${this_TARGET} ENVIRONMENT)
-  list(APPEND new_env ASAN_OPTIONS=protect_shadow_gap=0:check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true)
-  list(APPEND new_env "LSAN_OPTIONS=suppressions=${lsan_suppression_file}")
-  list(APPEND new_env "TSAN_OPTIONS=suppressions=${tsan_suppression_file}:force_seq_cst_atomics=1")
+  list(
+    APPEND
+      new_env
+      ASAN_OPTIONS=protect_shadow_gap=0:check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true
+  )
+  list(
+    APPEND new_env
+           "LSAN_OPTIONS=suppressions=${sanitizer_suppression_dir}/lsan.supp")
+  list(
+    APPEND
+      new_env
+      "TSAN_OPTIONS=suppressions=${sanitizer_suppression_dir}/tsan.supp:force_seq_cst_atomics=1"
+  )
 
   target_link_libraries(${this_TARGET} PRIVATE libFuzzer::libFuzzer)
   foreach(tool IN LISTS cpu_analysis_tools)
@@ -73,7 +75,8 @@ function(add_fuzzing)
       target_link_libraries(${new_target} PRIVATE GoogleSanitizer::thread)
     endif()
 
-    set_target_properties(${new_target} PROPERTIES INTERPROCEDURAL_OPTIMIZATION FALSE)
+    set_target_properties(${new_target} PROPERTIES INTERPROCEDURAL_OPTIMIZATION
+                                                   FALSE)
 
     if(NOT DEFINED $ENV{MAX_FUZZING_TIME})
       set(ENV{MAX_FUZZING_TIME} 60)
@@ -83,7 +86,11 @@ function(add_fuzzing)
       set(ENV{FUZZING_JOBS} 1)
     endif()
 
-    add_test(NAME ${new_target} WORKING_DIRECTORY $<TARGET_FILE_DIR:${new_target}> COMMAND $<TARGET_FILE:${new_target}> -jobs=$ENV{FUZZING_JOBS} -max_total_time=$ENV{MAX_FUZZING_TIME})
+    add_test(
+      NAME ${new_target}
+      WORKING_DIRECTORY $<TARGET_FILE_DIR:${new_target}>
+      COMMAND $<TARGET_FILE:${new_target}> -jobs=$ENV{FUZZING_JOBS}
+              -max_total_time=$ENV{MAX_FUZZING_TIME})
     set_tests_properties(${name} PROPERTIES ENVIRONMENT "${new_env}")
   endforeach()
 endfunction()

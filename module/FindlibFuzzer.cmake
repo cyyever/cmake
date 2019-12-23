@@ -19,7 +19,8 @@ get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 
 set(CMAKE_REQUIRED_FLAGS "-fsanitize=fuzzer")
 
-set(_source_code [==[
+set(_source_code
+    [==[
   #include <stdint.h>
   #include <stddef.h>
   extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
@@ -48,16 +49,15 @@ endif()
 find_package_handle_standard_args(libFuzzer DEFAULT_MSG _compile_res)
 if(libFuzzer_FOUND AND NOT TARGET libFuzzer::libFuzzer)
   add_library(libFuzzer::libFuzzer INTERFACE IMPORTED)
-  target_compile_options(libFuzzer::libFuzzer
+  target_compile_options(
+    libFuzzer::libFuzzer
     INTERFACE
+      $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$_cxx_res>>:${CMAKE_REQUIRED_FLAGS}>
+      $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$_c_res>>:${CMAKE_REQUIRED_FLAGS}>)
+  target_link_options(
+    libFuzzer::libFuzzer INTERFACE
     $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$_cxx_res>>:${CMAKE_REQUIRED_FLAGS}>
-    $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$_c_res>>:${CMAKE_REQUIRED_FLAGS}>
-    )
-  target_link_options(libFuzzer::libFuzzer
-    INTERFACE
-    $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$_cxx_res>>:${CMAKE_REQUIRED_FLAGS}>
-    $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$_c_res>>:${CMAKE_REQUIRED_FLAGS}>
-    )
+    $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$_c_res>>:${CMAKE_REQUIRED_FLAGS}>)
 endif()
 
 set(CMAKE_REQUIRED_FLAGS)
