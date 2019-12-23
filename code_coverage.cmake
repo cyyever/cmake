@@ -63,17 +63,10 @@ add_custom_target(
 if(ENABLE_GNU_CODE_COVERAGE)
   add_custom_target(
     generate_code_coverage_report
-    # COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=code_coverage
-    # -DDISABLE_RUNTIME_ANALYSIS=ON ${CMAKE_SOURCE_DIR} COMMAND ${CMAKE_COMMAND}
-    # --build . COMMAND ${CMAKE_CTEST_COMMAND}
     COMMAND mkdir -p code_coverage_report
     COMMAND
       lcov::lcov --capture --include '${CMAKE_SOURCE_DIR}/*' --directory .
       --output-file coverage.info
-
-
-      # COMMAND lcov::lcov --remove coverage.info '/usr/include/x86_64-linux-
-      # gnu/c++/*' '/usr/include/c++/*' -o coverage.info
     COMMAND lcov::genhtml coverage.info --output-directory
             ./code_coverage_report
     COMMAND rm ./coverage.info
@@ -84,9 +77,6 @@ if(ENABLE_GNU_CODE_COVERAGE)
 elseif(ENABLE_LLVM_CODE_COVERAGE)
   add_custom_target(
     generate_code_coverage_report
-    # COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=code_coverage
-    # -DDISABLE_RUNTIME_ANALYSIS=ON ${CMAKE_SOURCE_DIR} COMMAND ${CMAKE_COMMAND}
-    # --build . COMMAND ${CMAKE_CTEST_COMMAND}
     COMMAND mkdir -p code_coverage_report
     COMMAND
       llvm-profdata merge -sparse `find -name '*.profraw'` -o default.profdata
