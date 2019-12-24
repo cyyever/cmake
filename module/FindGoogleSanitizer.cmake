@@ -37,20 +37,18 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak)
   set(_run_res 0)
   if("CXX" IN_LIST languages AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     include(CheckCXXSourceRuns)
-    check_cxx_source_runs("${_source_code}" _cxx_res)
-    if(_cxx_res)
+    check_cxx_source_runs("${_source_code}" __cxx_${sanitizer_name}_res)
+    if(__cxx_${sanitizer_name}_res)
       set(_run_res 1)
     endif()
   endif()
   if("C" IN_LIST languages AND NOT CMAKE_C_COMPILER_ID STREQUAL "MSVC")
     include(CheckCSourceRuns)
-    check_c_source_runs("${_source_code}" _c_res)
-    if(_c_res)
+    check_c_source_runs("${_source_code}" __c_${sanitizer_name}_res)
+    if(__c_${sanitizer_name}_res)
       set(_run_res 1)
     endif()
   endif()
-  unset(_c_res CACHE)
-  unset(_cxx_res CACHE)
 
   find_package_handle_standard_args(${sanitizer_name}_sanitizer DEFAULT_MSG
                                     _run_res)
@@ -59,14 +57,14 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak)
     target_compile_options(
       GoogleSanitizer::${sanitizer_name}
       INTERFACE
-        $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$_cxx_res>>:${CMAKE_REQUIRED_FLAGS}>
-        $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$_c_res>>:${CMAKE_REQUIRED_FLAGS}>
+        $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$__cxx_${sanitizer_name}_res>>:${CMAKE_REQUIRED_FLAGS}>
+        $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$__c_${sanitizer_name}_res>>:${CMAKE_REQUIRED_FLAGS}>
         -fno-omit-frame-pointer)
     target_link_options(
       GoogleSanitizer::${sanitizer_name}
       INTERFACE
-      $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$_cxx_res>>:${CMAKE_REQUIRED_FLAGS}>
-      $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$_c_res>>:${CMAKE_REQUIRED_FLAGS}>
+      $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$ __cxx_${sanitizer_name}_res>>:${CMAKE_REQUIRED_FLAGS}>
+      $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$__c_${sanitizer_name}_res>>:${CMAKE_REQUIRED_FLAGS}>
       -fno-omit-frame-pointer)
   endif()
 endforeach()

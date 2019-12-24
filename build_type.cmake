@@ -3,31 +3,57 @@ include_guard(GLOBAL)
 get_property(isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if(NOT isMultiConfig)
   if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Debug CACHE STRING "" FORCE)
+    set(CMAKE_BUILD_TYPE
+        Debug
+        CACHE STRING "" FORCE)
   endif()
 endif()
 
+get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 function(add_custom_build_type build_type)
   if(isMultiConfig)
-    if(NOT ${build_type} IN_LIST CMAKE_CONFIGURATION_TYPES)
-      list(APPEND CMAKE_CONFIGURATION_TYPES ${build_type})
-      set(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING "" FORCE)
+    if(${build_type} IN_LIST CMAKE_CONFIGURATION_TYPES)
+      return()
     endif()
+    list(APPEND CMAKE_CONFIGURATION_TYPES ${build_type})
+    set(CMAKE_CONFIGURATION_TYPES
+        "${CMAKE_CONFIGURATION_TYPES}"
+        CACHE STRING "" FORCE)
   else()
-    get_property(build_type_strings CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS)
-    if(NOT ${build_type} IN_LIST build_type_strings)
-      list(APPEND build_type_strings ${build_type})
-      set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "${build_type_strings}")
+    get_property(
+      build_type_strings
+      CACHE CMAKE_BUILD_TYPE
+      PROPERTY STRINGS)
+    if(${build_type} IN_LIST build_type_strings)
+      return()
     endif()
+    list(APPEND build_type_strings ${build_type})
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+                                                 "${build_type_strings}")
   endif()
+
+  foreach(lang IN LISTS languages)
+    set(CMAKE_${lang}_FLAGS_${build_type}
+        ""
+        CACHE STRING "")
+  endforeach()
+  foreach(targettype IN ITEMS EXE SHARED STATIC MODULE)
+    set(CMAKE_${targettype}_LINKER_FLAGS_${build_type}
+        ""
+        CACHE STRING "")
+  endforeach()
 endfunction()
 
 function(add_custom_build_type_like build_type existed_build_type)
   add_custom_build_type(${build_type})
-  set(CMAKE_C_FLAGS_${build_type} "${CMAKE_C_FLAGS_${existed_build_type}}" CACHE STRING "")
-  set(CMAKE_CXX_FLAGS_${build_type} "${CMAKE_CXX_FLAGS_${existed_build_type}}" CACHE STRING "")
-  set(CMAKE_EXE_LINKER_FLAGS_${build_type} "${CMAKE_EXE_LINKER_FLAGS_${existed_build_type}}" CACHE STRING "")
-  set(CMAKE_SHARED_LINKER_FLAGS_${build_type} "${CMAKE_SHARED_LINKER_FLAGS_${existed_build_type}}" CACHE STRING "")
-  set(CMAKE_STATIC_LINKER_FLAGS_${build_type} "${CMAKE_STATIC_LINKER_FLAGS_${existed_build_type}}" CACHE STRING "")
-  set(CMAKE_MODULE_LINKER_FLAGS_${build_type} "${CMAKE_MODULE_LINKER_FLAGS_${existed_build_type}}" CACHE STRING "")
+  foreach(lang IN LISTS languages)
+    set(CMAKE_${lang}_FLAGS_${build_type}
+        "${CMAKE_${lang}_FLAGS_${existed_build_type}}"
+        CACHE STRING "")
+  endforeach()
+  foreach(targettype IN ITEMS EXE SHARED STATIC MODULE)
+    set(CMAKE_${targettype}_LINKER_FLAGS_${build_type}
+        "${CMAKE_${targettype}_LINKER_FLAGS_${existed_build_type}}"
+        CACHE STRING "")
+  endforeach()
 endfunction()
