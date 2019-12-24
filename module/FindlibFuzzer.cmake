@@ -47,7 +47,7 @@ if(_c_res OR _cxx_res)
 endif()
 
 find_package_handle_standard_args(libFuzzer DEFAULT_MSG _compile_res)
-if(libFuzzer_FOUND AND NOT TARGET libFuzzer::libFuzzer)
+if(libFuzzer_FOUND)
   add_library(libFuzzer::libFuzzer INTERFACE IMPORTED)
   target_compile_options(
     libFuzzer::libFuzzer

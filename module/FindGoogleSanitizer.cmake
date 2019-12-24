@@ -11,9 +11,11 @@
 #  GoogleSanitizer::leak
 include_guard()
 include(FindPackageHandleStandardArgs)
+
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 
-set(_source_code [==[
+set(_source_code
+    [==[
   #include <stdio.h>
   int main() {
   printf("hello world!");
@@ -21,6 +23,8 @@ set(_source_code [==[
   }
   ]==])
 
+include(CMakePushCheckState)
+cmake_push_check_state(RESET)
 foreach(sanitizer_name IN ITEMS address thread undefined leak)
   if(TARGET GoogleSanitizer::${sanitizer_name})
     set(${sanitizer_name}_sanitizer_FOUND TRUE)
@@ -29,8 +33,6 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak)
 
   set(CMAKE_REQUIRED_FLAGS "-fsanitize=${sanitizer_name}")
 
-  set(_c_res)
-  set(_cxx_res)
   set(CMAKE_REQUIRED_QUIET ON)
   set(_run_res 0)
   if("CXX" IN_LIST languages AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
@@ -47,25 +49,26 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak)
       set(_run_res 1)
     endif()
   endif()
+  unset(_c_res CACHE)
+  unset(_cxx_res CACHE)
 
-  find_package_handle_standard_args(${sanitizer_name}_sanitizer DEFAULT_MSG _run_res)
+  find_package_handle_standard_args(${sanitizer_name}_sanitizer DEFAULT_MSG
+                                    _run_res)
   if(${sanitizer_name}_sanitizer_FOUND)
     add_library(GoogleSanitizer::${sanitizer_name} INTERFACE IMPORTED)
-    target_compile_options(GoogleSanitizer::${sanitizer_name}
+    target_compile_options(
+      GoogleSanitizer::${sanitizer_name}
+      INTERFACE
+        $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$_cxx_res>>:${CMAKE_REQUIRED_FLAGS}>
+        $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$_c_res>>:${CMAKE_REQUIRED_FLAGS}>
+        -fno-omit-frame-pointer)
+    target_link_options(
+      GoogleSanitizer::${sanitizer_name}
       INTERFACE
       $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$_cxx_res>>:${CMAKE_REQUIRED_FLAGS}>
       $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$_c_res>>:${CMAKE_REQUIRED_FLAGS}>
-      -fno-omit-frame-pointer
-      )
-    target_link_options(GoogleSanitizer::${sanitizer_name}
-      INTERFACE
-      $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$_cxx_res>>:${CMAKE_REQUIRED_FLAGS}>
-      $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$_c_res>>:${CMAKE_REQUIRED_FLAGS}>
-      -fno-omit-frame-pointer
-      )
+      -fno-omit-frame-pointer)
   endif()
 endforeach()
 
-set(CMAKE_REQUIRED_FLAGS)
-unset(_c_res CACHE)
-unset(_cxx_res CACHE)
+cmake_pop_check_state()
