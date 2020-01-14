@@ -48,6 +48,7 @@ if(libcxx_FOUND)
   add_library(libcxx::libcxx INTERFACE IMPORTED)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(libcxx::libcxx INTERFACE ${CMAKE_REQUIRED_FLAGS})
+    target_compile_options(libcxx::libcxx INTERFACE -U_GLIBCXX_DEBUG -U_GLIBCXX_SANITIZE_VECTOR)
     target_include_directories(libcxx::libcxx
                                INTERFACE ${CMAKE_REQUIRED_INCLUDES})
     target_link_directories(libcxx::libcxx INTERFACE /usr/lib/llvm-9/lib)
