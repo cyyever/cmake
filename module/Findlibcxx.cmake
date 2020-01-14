@@ -48,12 +48,17 @@ if(libcxx_FOUND)
   add_library(libcxx::libcxx INTERFACE IMPORTED)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(libcxx::libcxx INTERFACE ${CMAKE_REQUIRED_FLAGS})
-    target_compile_options(libcxx::libcxx INTERFACE -U_GLIBCXX_DEBUG -U_GLIBCXX_SANITIZE_VECTOR)
+    target_compile_options(libcxx::libcxx INTERFACE -U_GLIBCXX_DEBUG
+                                                    -U_GLIBCXX_SANITIZE_VECTOR)
     target_include_directories(libcxx::libcxx
                                INTERFACE ${CMAKE_REQUIRED_INCLUDES})
     target_link_directories(libcxx::libcxx INTERFACE /usr/lib/llvm-9/lib)
-    target_link_libraries(libcxx::libcxx INTERFACE c++ c++abi m c gcc_s gcc)
     target_link_options(libcxx::libcxx INTERFACE -nodefaultlibs)
+    target_link_libraries(libcxx::libcxx INTERFACE ${CMAKE_REQUIRED_LIBRARIES})
+    target_compile_definitions(libcxx::libcxx
+                               INTERFACE $<$<CONFIG:Debug>:_LIBCPP_DEBUG=1>)
+    target_compile_definitions(libcxx::libcxx
+                               INTERFACE _LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS)
   endif()
 endif()
 cmake_pop_check_state()
