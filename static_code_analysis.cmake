@@ -93,7 +93,6 @@ if(PVS-Studio_FOUND)
         PVS-Studio::plog-converter -t tasklist -a
         'GA:1,2,3;64:1,2,3;OP:1,2,3;CS:1,2,3' -o ./pvs-studio-report.txt
         ./pvs-studio.log
-      COMMAND rm ./pvs-studio.log
       DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
   else()
