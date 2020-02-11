@@ -63,9 +63,26 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak)
     target_link_options(
       GoogleSanitizer::${sanitizer_name}
       INTERFACE
-      $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$ __cxx_${sanitizer_name}_res>>:${CMAKE_REQUIRED_FLAGS}>
+      $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$__cxx_${sanitizer_name}_res>>:${CMAKE_REQUIRED_FLAGS}>
       $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$__c_${sanitizer_name}_res>>:${CMAKE_REQUIRED_FLAGS}>
       -fno-omit-frame-pointer)
+
+    if(sanitizer_name STREQUAL "address")
+      target_link_options(
+        GoogleSanitizer::${sanitizer_name}
+        INTERFACE
+        $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$__cxx_${sanitizer_name}_res>,$<CXX_COMPILER_ID:GNU>>:-lasan>
+        $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$__c_${sanitizer_name}_res>,$<C_COMPILER_ID:GNU>>:-lasan>
+      )
+    endif()
+    if(sanitizer_name STREQUAL "undefined")
+      target_link_options(
+        GoogleSanitizer::${sanitizer_name}
+        INTERFACE
+        $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$__cxx_${sanitizer_name}_res>,$<CXX_COMPILER_ID:GNU>>:-lubsan>
+        $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$__c_${sanitizer_name}_res>,$<C_COMPILER_ID:GNU>>:-lubsan>
+      )
+    endif()
   endif()
 endforeach()
 
