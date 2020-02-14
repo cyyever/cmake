@@ -46,16 +46,15 @@ function(add_fuzzing)
   get_target_property(new_env ${this_TARGET} ENVIRONMENT)
   list(
     APPEND
-      new_env
-      ASAN_OPTIONS=protect_shadow_gap=0:check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true
+    new_env
+    ASAN_OPTIONS=protect_shadow_gap=0:check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true
   )
-  list(
-    APPEND new_env
-           "LSAN_OPTIONS=suppressions=${sanitizer_suppression_dir}/lsan.supp")
+  list(APPEND new_env
+       "LSAN_OPTIONS=suppressions=${sanitizer_suppression_dir}/lsan.supp")
   list(
     APPEND
-      new_env
-      "TSAN_OPTIONS=suppressions=${sanitizer_suppression_dir}/tsan.supp:force_seq_cst_atomics=1"
+    new_env
+    "TSAN_OPTIONS=suppressions=${sanitizer_suppression_dir}/tsan.supp:force_seq_cst_atomics=1"
   )
 
   target_link_libraries(${this_TARGET} PRIVATE libFuzzer::libFuzzer)
@@ -78,23 +77,24 @@ function(add_fuzzing)
     set_target_properties(${new_target} PROPERTIES INTERPROCEDURAL_OPTIMIZATION
                                                    FALSE)
 
-    if(NOT DEFINED $ENV{MAX_FUZZING_TIME})
+    if(NOT DEFINED ENV{MAX_FUZZING_TIME})
       set(ENV{MAX_FUZZING_TIME} 60)
     endif()
 
-    if(NOT DEFINED $ENV{FUZZING_TIMEOUT})
+    if(NOT DEFINED ENV{FUZZING_TIMEOUT})
       set(ENV{FUZZING_TIMEOUT} 60)
     endif()
 
-    if(NOT DEFINED $ENV{FUZZING_JOBS})
+    if(NOT DEFINED ENV{FUZZING_JOBS})
       set(ENV{FUZZING_JOBS} 1)
     endif()
 
     add_test(
       NAME ${new_target}
       WORKING_DIRECTORY $<TARGET_FILE_DIR:${new_target}>
-      COMMAND $<TARGET_FILE:${new_target}> -jobs=$ENV{FUZZING_JOBS}
-              -max_total_time=$ENV{MAX_FUZZING_TIME} -timeout=$ENV{MAX_FUZZING_TIME})
+      COMMAND
+        $<TARGET_FILE:${new_target}> -jobs=$ENV{FUZZING_JOBS}
+        -max_total_time=$ENV{MAX_FUZZING_TIME} -timeout=$ENV{FUZZING_TIMEOUT})
     set_tests_properties(${name} PROPERTIES ENVIRONMENT "${new_env}")
   endforeach()
 endfunction()
