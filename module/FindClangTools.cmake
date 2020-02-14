@@ -11,6 +11,7 @@
 include_guard()
 include(FindPackageHandleStandardArgs)
 
+set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS ON)
 foreach(program_name IN ITEMS clang-tidy clang-apply-replacements)
   find_program(${program_name}_BINARY NAMES ${program_name}-devel ${program_name}-9 ${program_name}-8 ${program_name} PATH_SUFFIXES "LLVM/bin")
   find_package_handle_standard_args(${program_name} DEFAULT_MSG ${program_name}_BINARY)

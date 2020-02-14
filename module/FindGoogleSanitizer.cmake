@@ -50,6 +50,7 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak)
     endif()
   endif()
 
+  set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS ON)
   find_package_handle_standard_args(${sanitizer_name}_sanitizer DEFAULT_MSG
                                     _run_res)
   if(${sanitizer_name}_sanitizer_FOUND)
