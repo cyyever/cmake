@@ -5,12 +5,13 @@
 #  CUDA-MEMCHECK::cuda-memcheck
 
 include_guard()
-include(FindPackageHandleStandardArgs)
-if(NOT DEFINED CUDA_TOOLKIT_ROOT_DIR)
+find_package(CUDAToolkit)
+if(NOT DEFINED CUDAToolkit_BIN_DIR)
   return()
 endif()
 
-find_program(CUDA-MEMCHECK_BINARY cuda-memcheck PATHS ${CUDA_TOOLKIT_ROOT_DIR}/bin)
+include(FindPackageHandleStandardArgs)
+find_program(CUDA-MEMCHECK_BINARY cuda-memcheck PATHS ${CUDAToolkit_BIN_DIR})
 find_package_handle_standard_args(CUDA-MEMCHECK DEFAULT_MSG CUDA-MEMCHECK_BINARY)
 if(CUDA-MEMCHECK_FOUND AND NOT TARGET CUDA-MEMCHECK::cuda-memcheck)
   add_executable(CUDA-MEMCHECK::cuda-memcheck IMPORTED)
