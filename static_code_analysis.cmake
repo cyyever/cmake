@@ -21,7 +21,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   add_custom_target(
-    copy_compile_commands_json ALL
+    copy_compile_commands_json
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/compile_commands.json
             ${CMAKE_SOURCE_DIR}
     DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
