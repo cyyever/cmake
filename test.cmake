@@ -139,7 +139,7 @@ function(add_test_with_runtime_analysis)
   list(
     APPEND
       new_env
-      "TSAN_OPTIONS=suppressions=${sanitizer_suppression_dir}/tsan.supp:force_seq_cst_atomics=1"
+      "TSAN_OPTIONS=suppressions=${sanitizer_suppression_dir}/tsan.supp:force_seq_cst_atomics=1:history_size=7"
   )
 
   set(has_test FALSE)
