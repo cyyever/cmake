@@ -5,10 +5,12 @@
 #  thread_sanitizer_FOUND
 #  undefined_sanitizer_FOUND
 #  leak_sanitizer_FOUND
+#  memory_sanitizer_FOUND
 #  GoogleSanitizer::address
 #  GoogleSanitizer::thread
 #  GoogleSanitizer::undefined
 #  GoogleSanitizer::leak
+#  GoogleSanitizer::memory
 include_guard()
 include(FindPackageHandleStandardArgs)
 
@@ -25,7 +27,7 @@ set(_source_code
 
 include(CMakePushCheckState)
 cmake_push_check_state(RESET)
-foreach(sanitizer_name IN ITEMS address thread undefined leak)
+foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
   if(TARGET GoogleSanitizer::${sanitizer_name})
     set(${sanitizer_name}_sanitizer_FOUND TRUE)
     continue()
