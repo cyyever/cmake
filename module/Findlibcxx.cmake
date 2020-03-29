@@ -59,7 +59,10 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   set(CMAKE_REQUIRED_FLAGS "-nostdinc++")
   set(CMAKE_REQUIRED_INCLUDES ${libcxx_include_dir})
   set(CMAKE_REQUIRED_LINK_OPTIONS -nodefaultlibs -L${libcxx_lib_dir})
-  set(CMAKE_REQUIRED_LIBRARIES c++ c++abi m c gcc gcc_s)
+  set(CMAKE_REQUIRED_LIBRARIES c++ m c gcc gcc_s)
+  if(NOT CMAKE_SYSTEM_NAME MATCHES FreeBSD)
+    list(APPEND CMAKE_REQUIRED_LIBRARIES c++abi)
+  endif()
 endif()
 
 set(_source_code
