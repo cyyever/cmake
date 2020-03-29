@@ -10,7 +10,7 @@ set(sanitizer_suppression_dir ${CMAKE_CURRENT_LIST_DIR}/sanitizer_supp)
 option(DISABLE_RUNTIME_ANALYSIS "Disable all runtime analysis" OFF)
 
 function(add_test_with_runtime_analysis)
-  set(cpu_analysis_tools MEMCHECK UBSAN HELGRIND ASAN TSAN)
+  set(cpu_analysis_tools MEMCHECK UBSAN HELGRIND ASAN TSAN MSAN)
   set(gpu_analysis_tools CUDA-MEMCHECK CUDA-SYNCCHECK CUDA-INITCHECK
                          CUDA-RACECHECK)
   set(oneValueArgs TARGET WITH_CPU_ANALYSIS WITH_GPU_ANALYSIS
@@ -87,6 +87,13 @@ function(add_test_with_runtime_analysis)
     set(this_TSAN FALSE)
   endif()
 
+  if("${this_MSAN}" STREQUAL "")
+    set(this_MSAN ${memory_sanitizer_FOUND})
+  elseif(this_MSAN AND NOT memory_sanitizer_FOUND)
+    message(WARNING "no msan")
+    set(this_MSAN FALSE)
+  endif()
+
   if("${this_UBSAN}" STREQUAL "")
     set(this_UBSAN ${undefined_sanitizer_FOUND})
   elseif(this_UBSAN AND NOT undefined_sanitizer_FOUND)
@@ -126,20 +133,19 @@ function(add_test_with_runtime_analysis)
   get_target_property(new_env ${this_TARGET} ENVIRONMENT)
   if(ENABLE_LLVM_CODE_COVERAGE)
     list(APPEND new_env
-                "LLVM_PROFILE_FILE=${CMAKE_BINARY_DIR}/profraw_dir/%p.profraw")
+         "LLVM_PROFILE_FILE=${CMAKE_BINARY_DIR}/profraw_dir/%p.profraw")
   endif()
   list(
     APPEND
-      new_env
-      ASAN_OPTIONS=protect_shadow_gap=0:check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true
+    new_env
+    ASAN_OPTIONS=protect_shadow_gap=0:check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true
   )
-  list(
-    APPEND new_env
-           "LSAN_OPTIONS=suppressions=${sanitizer_suppression_dir}/lsan.supp")
+  list(APPEND new_env
+       "LSAN_OPTIONS=suppressions=${sanitizer_suppression_dir}/lsan.supp")
   list(
     APPEND
-      new_env
-      "TSAN_OPTIONS=suppressions=${sanitizer_suppression_dir}/tsan.supp:force_seq_cst_atomics=1:history_size=7"
+    new_env
+    "TSAN_OPTIONS=suppressions=${sanitizer_suppression_dir}/tsan.supp:force_seq_cst_atomics=1:history_size=7"
   )
 
   set(has_test FALSE)
@@ -159,10 +165,13 @@ function(add_test_with_runtime_analysis)
       target_link_libraries(${new_target} PRIVATE GoogleSanitizer::undefined)
     elseif(tool STREQUAL TSAN)
       target_link_libraries(${new_target} PRIVATE GoogleSanitizer::thread)
+    elseif(tool STREQUAL MSAN)
+      target_link_libraries(${new_target} PRIVATE GoogleSanitizer::memory)
     elseif(tool STREQUAL MEMCHECK)
       set(memcheck_command
-          "$<TARGET_FILE:valgrind::valgrind> --tool=memcheck --error-exitcode=1 --trace-children=yes --gen-suppressions=all --track-fds=yes --leak-check=full"
-      )
+          $<TARGET_FILE:valgrind::valgrind> --tool=memcheck --error-exitcode=1
+          --trace-children=yes --gen-suppressions=all --track-fds=yes
+          --leak-check=full)
       foreach(suppression_file ${valgrind_suppression_files})
         set(memcheck_command
             "${memcheck_command} --suppressions=${suppression_file}")
@@ -171,8 +180,8 @@ function(add_test_with_runtime_analysis)
       set(new_target_command "${memcheck_command};$<TARGET_FILE:${new_target}>")
     elseif(tool STREQUAL HELGRIND)
       set(helgrind_command
-          "$<TARGET_FILE:valgrind::valgrind> --tool=helgrind --error-exitcode=1 --trace-children=yes --gen-suppressions=all"
-      )
+          $<TARGET_FILE:valgrind::valgrind> --tool=helgrind --error-exitcode=1
+          --trace-children=yes --gen-suppressions=all)
       foreach(suppression_file ${valgrind_suppression_files})
         set(helgrind_command
             "${helgrind_command} --suppressions=${suppression_file}")
@@ -181,53 +190,25 @@ function(add_test_with_runtime_analysis)
       set(new_target_command "${helgrind_command};$<TARGET_FILE:${new_target}>")
     elseif(tool STREQUAL CUDA-MEMCHECK)
       set(memcheck_command
-          $<TARGET_FILE:CUDA-MEMCHECK::cuda-memcheck>
-          --tool
-          memcheck
-          --leak-check
-          full
-          --error-exitcode
-          1
-          --flush-to-disk
-          yes)
+          $<TARGET_FILE:CUDA-MEMCHECK::cuda-memcheck> --tool memcheck
+          --leak-check full --error-exitcode 1 --flush-to-disk yes)
       set(new_target_command "${memcheck_command};$<TARGET_FILE:${new_target}>")
     elseif(tool STREQUAL CUDA-SYNCCHECK)
       set(synccheck_command
-          $<TARGET_FILE:CUDA-MEMCHECK::cuda-memcheck>
-          --tool
-          synccheck
-          --leak-check
-          full
-          --error-exitcode
-          1
-          --flush-to-disk
-          yes)
+          $<TARGET_FILE:CUDA-MEMCHECK::cuda-memcheck> --tool synccheck
+          --leak-check full --error-exitcode 1 --flush-to-disk yes)
       set(new_target_command
           "${synccheck_command};$<TARGET_FILE:${new_target}>")
     elseif(tool STREQUAL CUDA-INITCHECK)
       set(initcheck_command
-          $<TARGET_FILE:CUDA-MEMCHECK::cuda-memcheck>
-          --tool
-          initcheck
-          --leak-check
-          full
-          --error-exitcode
-          1
-          --flush-to-disk
-          yes)
+          $<TARGET_FILE:CUDA-MEMCHECK::cuda-memcheck> --tool initcheck
+          --leak-check full --error-exitcode 1 --flush-to-disk yes)
       set(new_target_command
           "${initcheck_command};$<TARGET_FILE:${new_target}>")
     elseif(tool STREQUAL CUDA-RACECHECK)
       set(racecheck_command
-          $<TARGET_FILE:CUDA-MEMCHECK::cuda-memcheck>
-          --tool
-          racecheck
-          --leak-check
-          full
-          --error-exitcode
-          1
-          --flush-to-disk
-          yes)
+          $<TARGET_FILE:CUDA-MEMCHECK::cuda-memcheck> --tool racecheck
+          --leak-check full --error-exitcode 1 --flush-to-disk yes)
       set(new_target_command
           "${racecheck_command};$<TARGET_FILE:${new_target}>")
     endif()
