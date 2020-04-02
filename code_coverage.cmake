@@ -57,19 +57,20 @@ add_custom_target(
           -DDISABLE_RUNTIME_ANALYSIS=ON ${CMAKE_SOURCE_DIR}
   COMMAND ${CMAKE_COMMAND} --build .
   COMMAND ${CMAKE_CTEST_COMMAND}
-  DEPENDS ${CMAKE_BINARY_DIR}/code_coverage
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/code_coverage)
+  DEPENDS ${CMAKE_BINARY_DIR}
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
 if(ENABLE_GNU_CODE_COVERAGE)
   add_custom_target(
     generate_code_coverage_report
     COMMAND mkdir -p code_coverage_report
     COMMAND
-      lcov::lcov --capture --include '${CMAKE_SOURCE_DIR}/*' --directory .
+      lcov::lcov --capture --include '${CMAKE_SOURCE_DIR}/*' --directory ..
       --output-file coverage.info
     COMMAND lcov::genhtml coverage.info --output-directory
             ./code_coverage_report
     COMMAND rm ./coverage.info
+    DEPENDS ${CMAKE_BINARY_DIR}/code_coverage
     WORKING_DIRECTORY
       ${CMAKE_BINARY_DIR}/code_coverage
       BYPRODUCTS
