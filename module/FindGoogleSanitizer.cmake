@@ -36,11 +36,14 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_C_COMPILER_ID STREQUAL "MSVC")
     if(sanitizer_name STREQUAL "address")
       set(CMAKE_REQUIRED_FLAGS "/fsanitize=address")
-      # set(CMAKE_REQUIRED_LIBRARIES "C:/Program Files/LLVM/lib/clang/10.0.0/lib/windows/clang_rt.asan_dynamic-x86_64.lib")
-      set(CMAKE_REQUIRED_LIBRARIES 
-        "C:/Program Files/LLVM/lib/clang/10.0.0/lib/windows/clang_rt.asan_cxx-x86_64.lib"
+      set(CMAKE_REQUIRED_LIBRARIES "C:/Program Files/LLVM/lib/clang/10.0.0/lib/windows/clang_rt.asan_dynamic-x86_64.lib" "C:/Program Files/LLVM/lib/clang/10.0.0/lib/windows/clang_rt.asan_dynamic_runtime_thunk-x86_64.lib")
+      # set(CMAKE_REQUIRED_LIBRARIES 
         # "C:/Program Files/LLVM/lib/clang/10.0.0/lib/windows/clang_rt.asan-x86_64.lib"
-        )
+        # "C:/Program Files/LLVM/lib/clang/10.0.0/lib/windows/clang_rt.asan-x86_64.lib"
+        # "C:/Program Files/LLVM/lib/clang/10.0.0/lib/windows/clang_rt.asan_cxx-x86_64.lib"
+        # "C:/Program Files/LLVM/lib/clang/10.0.0/lib/windows/clang_rt.asan_dll_thunk-x86_64.lib"
+        # # "C:/Program Files/LLVM/lib/clang/10.0.0/lib/windows/clang_rt.asan-x86_64.lib"
+        # )
     else()
       set(${sanitizer_name}_sanitizer_FOUND FALSE)
       continue()
