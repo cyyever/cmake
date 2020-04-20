@@ -11,7 +11,6 @@ if(MicrosoftGSL_FOUND AND NOT TARGET Microsoft::GSL)
   add_library(Microsoft::GSL INTERFACE IMPORTED)
   set_property(TARGET Microsoft::GSL
       PROPERTY INTERFACE_INCLUDE_DIRECTORIES
-      "${MicrosoftGSL_dir}"
       "${MicrosoftGSL_dir}/.."
       )
 endif()
