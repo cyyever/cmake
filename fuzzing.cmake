@@ -1,10 +1,12 @@
 include_guard()
 
-enable_testing()
 include(${CMAKE_CURRENT_LIST_DIR}/util.cmake)
 set(sanitizer_suppression_dir ${CMAKE_CURRENT_LIST_DIR}/sanitizer_supp)
 
 function(add_fuzzing)
+  if(NOT BUILD_TESTING) 
+    return()
+  endif()
   set(cpu_analysis_tools UBSAN ASAN TSAN)
   set(oneValueArgs TARGET ${cpu_analysis_tools})
   cmake_parse_arguments(this "" "${oneValueArgs}" "ARGS" ${ARGN})

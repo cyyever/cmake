@@ -1,5 +1,4 @@
 include_guard()
-enable_testing()
 
 include(${CMAKE_CURRENT_LIST_DIR}/code_coverage.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/util.cmake)
@@ -10,6 +9,9 @@ set(sanitizer_suppression_dir ${CMAKE_CURRENT_LIST_DIR}/sanitizer_supp)
 option(DISABLE_RUNTIME_ANALYSIS "Disable all runtime analysis" OFF)
 
 function(add_test_with_runtime_analysis)
+  if(NOT BUILD_TESTING) 
+    return()
+  endif()
   set(cpu_analysis_tools MEMCHECK UBSAN HELGRIND ASAN TSAN MSAN)
   set(gpu_analysis_tools CUDA-MEMCHECK CUDA-SYNCCHECK CUDA-INITCHECK
                          CUDA-RACECHECK)
