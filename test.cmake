@@ -1,4 +1,5 @@
 include_guard()
+include(CTest)
 
 include(${CMAKE_CURRENT_LIST_DIR}/code_coverage.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/util.cmake)

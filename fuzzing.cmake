@@ -1,4 +1,5 @@
 include_guard()
+include(CTest)
 
 include(${CMAKE_CURRENT_LIST_DIR}/util.cmake)
 set(sanitizer_suppression_dir ${CMAKE_CURRENT_LIST_DIR}/sanitizer_supp)
