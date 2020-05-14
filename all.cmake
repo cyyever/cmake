@@ -1,4 +1,4 @@
-cmake_policy(VERSION 3.17.0)
+cmake_policy(VERSION 3.16.0)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/module)
 include(${CMAKE_CURRENT_LIST_DIR}/build_type.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/basic_compiling_option.cmake)
