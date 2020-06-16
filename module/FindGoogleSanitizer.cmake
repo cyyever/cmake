@@ -74,7 +74,8 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
       target_compile_definitions(
         GoogleSanitizer::${sanitizer_name}
         INTERFACE
-        $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$__cxx_${sanitizer_name}_res>,$<CXX_COMPILER_ID:GNU>>:_GLIBCXX_SANITIZE_VECTOR>
+        $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$__cxx_${sanitizer_name}_res>>:_GLIBCXX_SANITIZE_VECTOR>
+        $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$__cxx_${sanitizer_name}_res>>:_GLIBCXX_SANITIZE_STD_ALLOCATOR>
       )
       target_link_options(
         GoogleSanitizer::${sanitizer_name}

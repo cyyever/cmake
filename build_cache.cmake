@@ -3,6 +3,7 @@ include_guard(GLOBAL)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/module)
 find_package(ccache QUIET)
 if(NOT ccache_FOUND)
+  message(WARNING "no ccache found")
   return()
 endif()
 

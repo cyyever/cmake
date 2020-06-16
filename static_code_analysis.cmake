@@ -70,9 +70,10 @@ if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   endif()
 endif()
 
-find_package(iwyu QUIET)
-if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  if(iwyu_tool_FOUND AND NOT TARGET do_include_what_you_use)
+if(NOT TARGET do_include_what_you_use AND NOT CMAKE_CXX_COMPILER_ID STREQUAL
+                                          "MSVC")
+  find_package(iwyu QUIET)
+  if(iwyu_tool_FOUND)
     add_custom_target(
       do_include_what_you_use
       COMMAND iwyu::iwyu_tool -p ${CMAKE_BINARY_DIR} -- -Xiwyu
@@ -87,8 +88,7 @@ if(PVS-Studio_FOUND)
   if(NOT WIN32)
     add_custom_target(
       do_pvs_studio_analysis
-      COMMAND PVS-Studio::analyzer analyze -a 31 -o
-              ./pvs-studio.log -j8 || true
+      COMMAND PVS-Studio::analyzer analyze -a 31 -o ./pvs-studio.log -j8 || true
       COMMAND
         PVS-Studio::plog-converter -t tasklist -a
         'GA:1,2,3;64:1,2,3;OP:1,2,3;CS:1,2,3' -o ./pvs-studio-report.txt
