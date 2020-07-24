@@ -25,7 +25,8 @@ endif()
 function(add_profiling)
   set(cpu_profiling_tools GPROF LTRACE STRACE)
   set(gpu_profiling_tools NVPROF)
-  set(oneValueArgs TARGET WITH_CPU_profiling WITH_GPU_profiling ${cpu_profiling_tools} ${gpu_profiling_tools})
+  set(oneValueArgs TARGET WITH_CPU_profiling WITH_GPU_profiling
+                   ${cpu_profiling_tools} ${gpu_profiling_tools})
   cmake_parse_arguments(this "" "${oneValueArgs}" "ARGS" ${ARGN})
   separate_arguments(this_ARGS)
 
@@ -47,7 +48,7 @@ function(add_profiling)
     set(this_WITH_GPU_profiling TRUE)
   endif()
 
-  #set default values for runtime profiling
+  # set default values for runtime profiling
   if(NOT this_WITH_CPU_profiling)
     foreach(tool IN LISTS cpu_profiling_tools)
       set(this_${tool} FALSE)
@@ -59,7 +60,6 @@ function(add_profiling)
       set(this_${tool} FALSE)
     endforeach()
   endif()
-
 
   find_package(gprof)
   if("${this_GPROF}" STREQUAL "" AND gprof_FOUND)
@@ -85,12 +85,9 @@ function(add_profiling)
     set(this_STRACE FALSE)
   endif()
 
-  # if("${this_NVPROF}" STREQUAL "")
-  #   set(this_NVPROF FALSE)
-  # elseif(${this_NVPROF} AND NOT CUDA_FOUND)
-  #   message(WARNING "no CUDA")
-  #   set(this_NVPROF FALSE)
-  # endif()
+  # if("${this_NVPROF}" STREQUAL "") set(this_NVPROF FALSE)
+  # elseif(${this_NVPROF} AND NOT CUDA_FOUND) message(WARNING "no CUDA")
+  # set(this_NVPROF FALSE) endif()
 
   set(has_profiling FALSE)
   foreach(tool IN LISTS cpu_profiling_tools gpu_profiling_tools)
@@ -101,36 +98,46 @@ function(add_profiling)
     set(new_target "${tool}_${this_TARGET}")
     clone_executable(${this_TARGET} ${new_target})
     set(new_target_command $<TARGET_FILE:${new_target}>)
-    set(profiling_output_file ${CMAKE_BINARY_DIR}/profiling_output/${new_target}.txt)
+    set(profiling_output_file
+        ${CMAKE_BINARY_DIR}/profiling_output/${new_target}.txt)
 
     if(tool STREQUAL GPROF)
       target_compile_options(${new_target} PRIVATE "-pg")
       set_target_properties(${new_target} PROPERTIES LINK_FLAGS "-pg")
 
-      add_custom_target("${tool}_${this_TARGET}_output"
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/profiling_output
+      add_custom_target(
+        "${tool}_${this_TARGET}_output"
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+                ${CMAKE_BINARY_DIR}/profiling_output
         COMMAND ${new_target_command} ${this_ARGS}
-        COMMAND	gprof::gprof -p --brief $<TARGET_FILE:${new_target}> `find ${CMAKE_BINARY_DIR} -name gmon.out` > ${profiling_output_file}
+        COMMAND gprof::gprof -p --brief $<TARGET_FILE:${new_target}> `find
+                ${CMAKE_BINARY_DIR} -name gmon.out` > ${profiling_output_file}
         DEPENDS ${new_target})
       set(has_profiling TRUE)
     elseif(tool STREQUAL LTRACE)
-      add_custom_target("${tool}_${this_TARGET}_output"
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/profiling_output
-        COMMAND ltrace::ltrace -c --demangle -o ${profiling_output_file} ${new_target_command} ${this_ARGS}
+      add_custom_target(
+        "${tool}_${this_TARGET}_output"
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+                ${CMAKE_BINARY_DIR}/profiling_output
+        COMMAND ltrace::ltrace -c --demangle -o ${profiling_output_file}
+                ${new_target_command} ${this_ARGS}
         DEPENDS ${new_target})
       set(has_profiling TRUE)
     elseif(tool STREQUAL STRACE)
-      add_custom_target("${tool}_${this_TARGET}_output"
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/profiling_output
-        COMMAND strace::strace -c -o ${profiling_output_file} ${new_target_command} ${this_ARGS}
+      add_custom_target(
+        "${tool}_${this_TARGET}_output"
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+                ${CMAKE_BINARY_DIR}/profiling_output
+        COMMAND strace::strace -c -o ${profiling_output_file}
+                ${new_target_command} ${this_ARGS}
         DEPENDS ${new_target})
       set(has_profiling TRUE)
-#    elseif(tool STREQUAL NVPROF)
-#      add_custom_target("${tool}_${this_TARGET}_output"
-#        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/profiling_output
-#        COMMAND ${CUDA_TOOLKIT_ROOT_DIR}/bin/nvprof --profile-from-start off --log-file ${profiling_output_file} ${new_target_command} ${this_ARGS}
-#        DEPENDS ${new_target})
-#      set(has_profiling TRUE)
+      # elseif(tool STREQUAL NVPROF)
+      # add_custom_target("${tool}_${this_TARGET}_output" COMMAND
+      # ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/profiling_output
+      # COMMAND ${CUDA_TOOLKIT_ROOT_DIR}/bin/nvprof --profile-from-start off
+      # --log-file ${profiling_output_file} ${new_target_command} ${this_ARGS}
+      # DEPENDS ${new_target}) set(has_profiling TRUE)
     endif()
   endforeach()
 
@@ -138,3 +145,14 @@ function(add_profiling)
     message(FATAL_ERROR "no available profiling tool")
   endif()
 endfunction()
+
+add_custom_target(
+  do_profiling
+  COMMAND
+    ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=profiling
+    -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+    -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER} -DDISABLE_RUNTIME_ANALYSIS=ON
+    -DBUILD_TESTING=OFF ${CMAKE_SOURCE_DIR}
+  COMMAND ${CMAKE_COMMAND} --build .
+  DEPENDS ${CMAKE_BINARY_DIR}
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
