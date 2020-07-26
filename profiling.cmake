@@ -8,7 +8,7 @@ endif()
 include(${CMAKE_CURRENT_LIST_DIR}/util.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/build_type.cmake)
 
-add_custom_build_type_like(PROFILING DEBUG)
+add_custom_build_type_like(PROFILING RELEASE)
 
 if(CXX IN_LIST languages)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")

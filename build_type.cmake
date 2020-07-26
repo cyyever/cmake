@@ -49,11 +49,11 @@ function(add_custom_build_type_like build_type existed_build_type)
   foreach(lang IN LISTS languages)
     set(CMAKE_${lang}_FLAGS_${build_type}
         "${CMAKE_${lang}_FLAGS_${existed_build_type}}"
-        CACHE STRING "")
+        CACHE STRING "" FORCE)
   endforeach()
   foreach(targettype IN ITEMS EXE SHARED STATIC MODULE)
     set(CMAKE_${targettype}_LINKER_FLAGS_${build_type}
         "${CMAKE_${targettype}_LINKER_FLAGS_${existed_build_type}}"
-        CACHE STRING "")
+        CACHE STRING "" FORCE)
   endforeach()
 endfunction()
