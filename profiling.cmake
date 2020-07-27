@@ -85,9 +85,13 @@ function(add_profiling)
     set(this_STRACE FALSE)
   endif()
 
-  # if("${this_NVPROF}" STREQUAL "") set(this_NVPROF FALSE)
-  # elseif(${this_NVPROF} AND NOT CUDA_FOUND) message(WARNING "no CUDA")
-  # set(this_NVPROF FALSE) endif()
+  find_package(nvprof)
+  if("${this_NVPROF}" STREQUAL "")
+    set(this_NVPROF FALSE)
+  elseif(${this_NVPROF} AND NOT CUDA_nvprof_FOUND)
+    message(WARNING "no CUDA")
+    set(this_NVPROF FALSE)
+  endif()
 
   set(has_profiling FALSE)
   foreach(tool IN LISTS cpu_profiling_tools gpu_profiling_tools)
@@ -95,6 +99,7 @@ function(add_profiling)
       continue()
     endif()
 
+    set(has_profiling TRUE)
     set(new_target "${tool}_${this_TARGET}")
     clone_executable(${this_TARGET} ${new_target})
     set(new_target_command $<TARGET_FILE:${new_target}>)
@@ -103,42 +108,29 @@ function(add_profiling)
 
     if(tool STREQUAL GPROF)
       target_compile_options(${new_target} PRIVATE "-pg")
-      set_target_properties(${new_target} PROPERTIES LINK_FLAGS "-pg")
-
-      add_custom_target(
-        "${tool}_${this_TARGET}_output"
-        COMMAND ${CMAKE_COMMAND} -E make_directory
-                ${CMAKE_BINARY_DIR}/profiling_output
-        COMMAND ${new_target_command} ${this_ARGS}
-        COMMAND gprof::gprof -p --brief $<TARGET_FILE:${new_target}> `find
-                ${CMAKE_BINARY_DIR} -name gmon.out` > ${profiling_output_file}
-        DEPENDS ${new_target})
-      set(has_profiling TRUE)
+      target_link_options(${new_target} PRIVATE "-pg")
+      set(gprof_command
+          bash -c
+          "$<TARGET_FILE:${new_target}> ${this_ARGS} && $<TARGET_FILE:gprof::gprof> -p --brief $<TARGET_FILE:${new_target}> `find ${CMAKE_BINARY_DIR} -name gmon.out` > ${profiling_output_file}"
+      )
+      set(new_target_command "${gprof_command}")
     elseif(tool STREQUAL LTRACE)
-      add_custom_target(
-        "${tool}_${this_TARGET}_output"
-        COMMAND ${CMAKE_COMMAND} -E make_directory
-                ${CMAKE_BINARY_DIR}/profiling_output
-        COMMAND ltrace::ltrace -c --demangle -o ${profiling_output_file}
-                ${new_target_command} ${this_ARGS}
-        DEPENDS ${new_target})
-      set(has_profiling TRUE)
+      set(ltrace_command ltrace::ltrace -c --demangle -o
+                         ${profiling_output_file})
+      set(new_target_command "${ltrace_command};$<TARGET_FILE:${new_target}>")
     elseif(tool STREQUAL STRACE)
-      add_custom_target(
-        "${tool}_${this_TARGET}_output"
-        COMMAND ${CMAKE_COMMAND} -E make_directory
-                ${CMAKE_BINARY_DIR}/profiling_output
-        COMMAND strace::strace -c -o ${profiling_output_file}
-                ${new_target_command} ${this_ARGS}
-        DEPENDS ${new_target})
-      set(has_profiling TRUE)
-      # elseif(tool STREQUAL NVPROF)
-      # add_custom_target("${tool}_${this_TARGET}_output" COMMAND
-      # ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/profiling_output
-      # COMMAND ${CUDA_TOOLKIT_ROOT_DIR}/bin/nvprof --profile-from-start off
-      # --log-file ${profiling_output_file} ${new_target_command} ${this_ARGS}
-      # DEPENDS ${new_target}) set(has_profiling TRUE)
+      set(strace_command strace::strace -c -o ${profiling_output_file})
+      set(new_target_command "${strace_command};$<TARGET_FILE:${new_target}>")
+    elseif(tool STREQUAL NVPROF)
+      set(nvprof_command CUDA::nvprof --profile-from-start off --log-file
+                         ${profiling_output_file})
+      set(new_target_command "${nvprof_command};$<TARGET_FILE:${new_target}>")
     endif()
+    set(has_profiling TRUE)
+    add_test(
+      NAME ${new_target}
+      COMMAND ${new_target_command} ${this_ARGS}
+      CONFIGURATIONS PROFILING)
   endforeach()
 
   if(NOT has_profiling)
@@ -148,11 +140,13 @@ endfunction()
 
 add_custom_target(
   do_profiling
+  COMMAND ${CMAKE_COMMAND} -E make_directory
+          ${CMAKE_BINARY_DIR}/profiling_output
   COMMAND
     ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=profiling
     -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
     -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER} -DDISABLE_RUNTIME_ANALYSIS=ON
-    -DBUILD_TESTING=OFF ${CMAKE_SOURCE_DIR}
+    -DBUILD_TESTING=ON ${CMAKE_SOURCE_DIR}
   COMMAND ${CMAKE_COMMAND} --build .
   DEPENDS ${CMAKE_BINARY_DIR}
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
