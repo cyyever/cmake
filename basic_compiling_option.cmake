@@ -1,4 +1,5 @@
 include_guard(GLOBAL)
+cmake_policy(SET CMP0092 NEW)
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 
 if(C IN_LIST languages AND NOT DEFINED CMAKE_C_STANDARD)
