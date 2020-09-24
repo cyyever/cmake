@@ -83,7 +83,7 @@ elseif(ENABLE_LLVM_CODE_COVERAGE)
             '*.profraw'` -o default.profdata
     COMMAND
       llvm-cov show -instr-profile=default.profdata -format=html
-      -output-dir=./code_coverage_report -object `find ${CMAKE_BINARY_DIR}/test
+      -output-dir=./code_coverage_report -object `find ${CMAKE_BINARY_DIR} -wholename '*/test/*'
       -executable -type f`
     DEPENDS ${CMAKE_BINARY_DIR}/code_coverage
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/code_coverage
