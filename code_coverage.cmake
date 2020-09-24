@@ -53,8 +53,11 @@ add_custom_command(
 
 add_custom_target(
   do_test_for_code_coverage
-  COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=code_coverage -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-          -DDISABLE_RUNTIME_ANALYSIS=ON ${CMAKE_SOURCE_DIR}
+  COMMAND
+    ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=code_coverage
+    -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+    -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER} -DDISABLE_RUNTIME_ANALYSIS=ON
+    ${CMAKE_SOURCE_DIR}
   COMMAND ${CMAKE_COMMAND} --build .
   COMMAND ${CMAKE_CTEST_COMMAND}
   DEPENDS ${CMAKE_BINARY_DIR}
@@ -64,31 +67,26 @@ if(ENABLE_GNU_CODE_COVERAGE)
   add_custom_target(
     generate_code_coverage_report
     COMMAND mkdir -p code_coverage_report
-    COMMAND
-      lcov::lcov --capture --include '${CMAKE_SOURCE_DIR}/*' --directory ..
-      --output-file coverage.info
+    COMMAND lcov::lcov --capture --include '${CMAKE_SOURCE_DIR}/*' --directory
+            .. --output-file coverage.info
     COMMAND lcov::genhtml coverage.info --output-directory
             ./code_coverage_report
     COMMAND rm ./coverage.info
     DEPENDS ${CMAKE_BINARY_DIR}/code_coverage
-    WORKING_DIRECTORY
-      ${CMAKE_BINARY_DIR}/code_coverage
-      BYPRODUCTS
-      code_coverage_report)
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/code_coverage
+    BYPRODUCTS code_coverage_report)
 elseif(ENABLE_LLVM_CODE_COVERAGE)
   add_custom_target(
     generate_code_coverage_report
     COMMAND mkdir -p code_coverage_report
-    COMMAND
-      llvm-profdata merge -sparse `find -name '*.profraw'` -o default.profdata
+    COMMAND llvm-profdata merge -sparse `find ${CMAKE_BINARY_DIR} -name
+            '*.profraw'` -o default.profdata
     COMMAND
       llvm-cov show -instr-profile=default.profdata -format=html
-      -output-dir=./code_coverage_report -object `find ./test -executable -type
-      f`
+      -output-dir=./code_coverage_report -object `find ${CMAKE_BINARY_DIR}/test
+      -executable -type f`
     DEPENDS ${CMAKE_BINARY_DIR}/code_coverage
-    WORKING_DIRECTORY
-      ${CMAKE_BINARY_DIR}/code_coverage
-      BYPRODUCTS
-      code_coverage_report)
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/code_coverage
+    BYPRODUCTS code_coverage_report)
 endif()
 add_dependencies(generate_code_coverage_report do_test_for_code_coverage)
