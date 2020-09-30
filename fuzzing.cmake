@@ -51,10 +51,10 @@ function(add_fuzzing)
   list(
     APPEND
     new_env
-    ASAN_OPTIONS=protect_shadow_gap=0:check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true
+    ASAN_OPTIONS=protect_shadow_gap=0:check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true:replace_intrin=0:fast_unwind_on_malloc=0
   )
   list(APPEND new_env
-       "LSAN_OPTIONS=suppressions=${sanitizer_suppression_dir}/lsan.supp")
+       "LSAN_OPTIONS=suppressions=${sanitizer_suppression_dir}/lsan.supp:fast_unwind_on_malloc=0")
   list(
     APPEND
     new_env
