@@ -39,7 +39,7 @@ foreach(lang IN LISTS languages)
     set(CMAKE_${lang}_FLAGS
         "${CMAKE_${lang}_FLAGS} -Wall -Wextra -fmax-errors=1")
     if(CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 10)
-      option(ANALYSIS_ON_COMPILATION "analysis on compilation" ON)
+      option(ANALYSIS_ON_COMPILATION "analysis on compilation" OFF)
       if(ANALYSIS_ON_COMPILATION)
         set(CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} -fanalyzer")
       endif()
