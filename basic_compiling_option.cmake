@@ -58,7 +58,7 @@ if(CXX IN_LIST languages)
   elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS
         "${CMAKE_CXX_FLAGS} -Wshadow -Wnon-virtual-dtor -Wpedantic")
-    option(USE_GLIBCXX_DEBUG "use glibcxx debug" ON)
+    option(USE_GLIBCXX_DEBUG "use glibcxx debug" OFF)
     if(USE_GLIBCXX_DEBUG)
       add_compile_definitions($<$<CONFIG:Debug>:_GLIBCXX_DEBUG>)
     endif()
