@@ -56,7 +56,7 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
   find_package_handle_standard_args(${sanitizer_name}_sanitizer DEFAULT_MSG
                                     _run_res)
   if(${sanitizer_name}_sanitizer_FOUND)
-    add_library(GoogleSanitizer::${sanitizer_name} INTERFACE IMPORTED)
+    add_library(GoogleSanitizer::${sanitizer_name} INTERFACE IMPORTED GLOBAL)
     target_compile_options(
       GoogleSanitizer::${sanitizer_name}
       INTERFACE

@@ -25,7 +25,7 @@ function(add_fuzzing)
   endif()
 
   find_package(libFuzzer REQUIRED)
-  find_package(GoogleSanitizer)
+  find_package(GoogleSanitizer REQUIRED)
   if("${this_ASAN}" STREQUAL "")
     set(this_ASAN ${address_sanitizer_FOUND})
   elseif(this_ASAN AND NOT address_sanitizer_FOUND)
@@ -51,7 +51,7 @@ function(add_fuzzing)
   list(
     APPEND
     new_env
-    ASAN_OPTIONS=protect_shadow_gap=0:check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true:replace_intrin=0:fast_unwind_on_malloc=0
+    ASAN_OPTIONS=protect_shadow_gap=0:check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true:replace_intrin=0:fast_unwind_on_malloc=0:detect_container_overflow=0
   )
   list(APPEND new_env
        "LSAN_OPTIONS=suppressions=${sanitizer_suppression_dir}/lsan.supp:fast_unwind_on_malloc=0")
