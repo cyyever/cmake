@@ -4,7 +4,7 @@
 #  CUDA-MEMCHECK_FOUND
 #  CUDA-MEMCHECK::cuda-memcheck
 
-include_guard()
+include_guard(GLOBAL)
 if(CMAKE_SYSTEM_NAME MATCHES FreeBSD)
   set(CUDA-MEMCHECK_FOUND OFF)
   return()

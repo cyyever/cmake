@@ -11,7 +11,7 @@
 #  GoogleSanitizer::undefined
 #  GoogleSanitizer::leak
 #  GoogleSanitizer::memory
-include_guard()
+include_guard(GLOBAL)
 include(FindPackageHandleStandardArgs)
 
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
