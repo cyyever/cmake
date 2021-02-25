@@ -22,7 +22,7 @@ if(NOT DEFINED CMAKE_CXX_EXTENSIONS)
 endif()
 
 if(CUDA IN_LIST languages AND NOT DEFINED CMAKE_CUDA_STANDARD)
-  set(CMAKE_CUDA_STANDARD 20)
+  set(CMAKE_CUDA_STANDARD 17)
   set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 endif()
 
@@ -32,6 +32,9 @@ endif()
 
 # add common options
 foreach(lang IN LISTS languages)
+  if(NOT lang IN_LIST "CXX;C")
+    continue()
+  endif()
   if(CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
     set(CMAKE_${lang}_FLAGS
         "${CMAKE_${lang}_FLAGS} -Weverything -ferror-limit=1")
@@ -80,4 +83,8 @@ if(CXX IN_LIST languages)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:preprocessor")
     endif()
   endif()
+endif()
+
+if(CUDA IN_LIST languages)
+  set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --expt-relaxed-constexpr --extended-lambda")
 endif()
