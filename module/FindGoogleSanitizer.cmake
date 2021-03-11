@@ -1,11 +1,6 @@
 # Find google sanitizers
 #
 # This module sets the following variables:
-#  address_sanitizer_FOUND
-#  thread_sanitizer_FOUND
-#  undefined_sanitizer_FOUND
-#  leak_sanitizer_FOUND
-#  memory_sanitizer_FOUND
 #  GoogleSanitizer::address
 #  GoogleSanitizer::thread
 #  GoogleSanitizer::undefined
@@ -29,7 +24,6 @@ include(CMakePushCheckState)
 cmake_push_check_state(RESET)
 foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
   if(TARGET GoogleSanitizer::${sanitizer_name})
-    set(${sanitizer_name}_sanitizer_FOUND TRUE)
     continue()
   endif()
 
@@ -74,8 +68,8 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
       target_compile_definitions(
         GoogleSanitizer::${sanitizer_name}
         INTERFACE
-        $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$__cxx_${sanitizer_name}_res>>:_GLIBCXX_SANITIZE_VECTOR>
-        $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$__cxx_${sanitizer_name}_res>>:_GLIBCXX_SANITIZE_STD_ALLOCATOR>
+          $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$__cxx_${sanitizer_name}_res>>:_GLIBCXX_SANITIZE_VECTOR>
+          $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$__cxx_${sanitizer_name}_res>>:_GLIBCXX_SANITIZE_STD_ALLOCATOR>
       )
       target_link_options(
         GoogleSanitizer::${sanitizer_name}
