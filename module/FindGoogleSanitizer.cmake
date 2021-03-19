@@ -28,7 +28,7 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
   endif()
 
   set(CMAKE_REQUIRED_FLAGS
-      "-fsanitize=${sanitizer_name} -fno-omit-frame-pointer")
+      "-fsanitize=${sanitizer_name};-fno-omit-frame-pointer")
   if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_C_COMPILER_ID STREQUAL
                                               "MSVC")
     if(sanitizer_name STREQUAL "address")
