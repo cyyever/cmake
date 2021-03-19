@@ -27,7 +27,8 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
     continue()
   endif()
 
-  set(CMAKE_REQUIRED_FLAGS "-fsanitize=${sanitizer_name}")
+  set(CMAKE_REQUIRED_FLAGS
+      "-fsanitize=${sanitizer_name} -fno-omit-frame-pointer")
   if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_C_COMPILER_ID STREQUAL
                                               "MSVC")
     if(sanitizer_name STREQUAL "address")
@@ -64,13 +65,13 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
       INTERFACE
         $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$__cxx_${sanitizer_name}_res>>:${CMAKE_REQUIRED_FLAGS}>
         $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$__c_${sanitizer_name}_res>>:${CMAKE_REQUIRED_FLAGS}>
-        -fno-omit-frame-pointer)
+    )
     target_link_options(
       GoogleSanitizer::${sanitizer_name}
       INTERFACE
       $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$__cxx_${sanitizer_name}_res>>:${CMAKE_REQUIRED_FLAGS}>
       $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$__c_${sanitizer_name}_res>>:${CMAKE_REQUIRED_FLAGS}>
-      -fno-omit-frame-pointer)
+    )
 
     if(sanitizer_name STREQUAL "address")
       target_compile_definitions(
