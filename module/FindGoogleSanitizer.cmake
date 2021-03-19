@@ -1,6 +1,6 @@
 # Find google sanitizers
 #
-# This module sets the following variables:
+# This module sets the following targets:
 #  GoogleSanitizer::address
 #  GoogleSanitizer::thread
 #  GoogleSanitizer::undefined
