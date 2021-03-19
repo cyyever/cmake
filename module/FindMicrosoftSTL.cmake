@@ -1,23 +1,19 @@
 # Find MicrosoftSTL
 #
-# This module sets the following variables:
-#  MicrosoftSTL_FOUND
+# This module sets the following target:
 #  Microsoft::STL
-include_guard()
+include_guard(GLOBAL)
 
 if(TARGET Microsoft::STL)
-  set(MicrosoftSTL_FOUND TRUE)
   return()
 endif()
 
-if(NOT WIN32)
-  set(MicrosoftSTL_FOUND FALSE)
+if(NOT MSVC)
   return()
 endif()
 
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 if(NOT "CXX" IN_LIST languages)
-  set(MicrosoftSTL_FOUND FALSE)
   return()
 endif()
 
@@ -54,7 +50,7 @@ if(NOT MicrosoftSTL_FOUND)
 endif()
 get_filename_component(MicrosoftSTL_lib_dir ${MicrosoftSTL_release_lib_path} DIRECTORY)
 
-add_library(Microsoft::STL INTERFACE IMPORTED)
+add_library(Microsoft::STL INTERFACE IMPORTED GLOBAL)
 target_include_directories(Microsoft::STL
   SYSTEM BEFORE INTERFACE ${MicrosoftSTL_include_dir})
 target_link_directories(Microsoft::STL INTERFACE ${MicrosoftSTL_lib_dir})
