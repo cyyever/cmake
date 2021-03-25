@@ -11,7 +11,7 @@ if(NOT DEFINED CMAKE_C_EXTENSIONS)
 endif()
 
 if(CXX IN_LIST languages AND NOT DEFINED CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 20)
+  set(CMAKE_CXX_STANDARD 23)
   if(CMAKE_CXX_STANDARD LESS 17)
     message(FATAL_ERROR "only C++17 or above is supported")
   endif()
@@ -86,5 +86,6 @@ if(CXX IN_LIST languages)
 endif()
 
 if(CUDA IN_LIST languages)
-  set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --expt-relaxed-constexpr --extended-lambda")
+  set(CMAKE_CUDA_FLAGS
+      "${CMAKE_CUDA_FLAGS} --expt-relaxed-constexpr --extended-lambda")
 endif()
