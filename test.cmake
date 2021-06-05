@@ -125,7 +125,7 @@ function(add_test_with_runtime_analysis)
   list(
     APPEND
     new_env
-    ASAN_OPTIONS=protect_shadow_gap=0:check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true
+    ASAN_OPTIONS=protect_shadow_gap=0:check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true:detect_container_overflow=0
   )
   list(APPEND new_env
        "LSAN_OPTIONS=suppressions=${sanitizer_suppression_dir}/lsan.supp")
