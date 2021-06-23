@@ -19,7 +19,7 @@ function(add_fuzzing)
     message(FATAL_ERROR "${this_TARGET} is not a target")
     return()
   endif()
-  if(NOT BUILD_TESTING) 
+  if(NOT BUILD_TESTING)
     set_target_properties("${this_TARGET}" PROPERTIES EXCLUDE_FROM_ALL ON)
     return()
   endif()
@@ -53,8 +53,11 @@ function(add_fuzzing)
     new_env
     ASAN_OPTIONS=protect_shadow_gap=0:check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true:replace_intrin=0:fast_unwind_on_malloc=0:detect_container_overflow=0
   )
-  list(APPEND new_env
-       "LSAN_OPTIONS=suppressions=${sanitizer_suppression_dir}/lsan.supp:fast_unwind_on_malloc=0")
+  list(
+    APPEND
+    new_env
+    "LSAN_OPTIONS=suppressions=${sanitizer_suppression_dir}/lsan.supp:fast_unwind_on_malloc=0"
+  )
   list(
     APPEND
     new_env
@@ -93,12 +96,17 @@ function(add_fuzzing)
       set(ENV{FUZZING_JOBS} 1)
     endif()
 
+    if(NOT DEFINED ENV{FUZZING_RSS_LIMIT})
+      set(ENV{FUZZING_RSS_LIMIT} 4096)
+    endif()
+
     add_test(
       NAME ${new_target}
       WORKING_DIRECTORY $<TARGET_FILE_DIR:${new_target}>
       COMMAND
         $<TARGET_FILE:${new_target}> -jobs=$ENV{FUZZING_JOBS}
-        -max_total_time=$ENV{MAX_FUZZING_TIME} -timeout=$ENV{FUZZING_TIMEOUT})
+        -max_total_time=$ENV{MAX_FUZZING_TIME} -timeout=$ENV{FUZZING_TIMEOUT}
+        -rss_limit_mb=$ENV{FUZZING_RSS_LIMIT})
     set_tests_properties(${name} PROPERTIES ENVIRONMENT "${new_env}")
   endforeach()
 endfunction()
