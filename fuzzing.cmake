@@ -5,7 +5,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/util.cmake)
 set(sanitizer_suppression_dir ${CMAKE_CURRENT_LIST_DIR}/sanitizer_supp)
 
 function(add_fuzzing)
-  set(cpu_analysis_tools UBSAN ASAN TSAN)
+  set(cpu_analysis_tools UBSAN ASAN TSAN LSAN)
   set(oneValueArgs TARGET ${cpu_analysis_tools})
   cmake_parse_arguments(this "" "${oneValueArgs}" "ARGS" ${ARGN})
   separate_arguments(this_ARGS)
@@ -97,13 +97,17 @@ function(add_fuzzing)
       set(ENV{FUZZING_RSS_LIMIT} 4096)
     endif()
 
+    if(NOT DEFINED ENV{FUZZING_MAX_LEN})
+      set(ENV{FUZZING_MAX_LEN} 4096)
+    endif()
+
     add_test(
       NAME ${new_target}
       WORKING_DIRECTORY $<TARGET_FILE_DIR:${new_target}>
       COMMAND
         $<TARGET_FILE:${new_target}> -jobs=$ENV{FUZZING_JOBS}
         -max_total_time=$ENV{MAX_FUZZING_TIME} -timeout=$ENV{FUZZING_TIMEOUT}
-        -rss_limit_mb=$ENV{FUZZING_RSS_LIMIT})
+        -rss_limit_mb=$ENV{FUZZING_RSS_LIMIT} -max_len=$ENV{FUZZING_MAX_LEN})
     set_tests_properties(${name} PROPERTIES ENVIRONMENT "${new_env}")
   endforeach()
 endfunction()
