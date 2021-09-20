@@ -3,13 +3,9 @@
 # This module sets the following variables:
 #  libFuzzer_FOUND
 #  libFuzzer::libFuzzer
-include_guard()
+include_guard(GLOBAL)
 if(TARGET libFuzzer::libFuzzer)
   set(libFuzzer_FOUND TRUE)
-  return()
-endif()
-if(WIN32)
-  set(libFuzzer_FOUND FALSE)
   return()
 endif()
 
@@ -18,6 +14,9 @@ include(FindPackageHandleStandardArgs)
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 
 set(CMAKE_REQUIRED_FLAGS "-fsanitize=fuzzer")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+  set(CMAKE_REQUIRED_FLAGS "/fsanitize=fuzzer")
+endif()
 
 set(_source_code
     [==[
