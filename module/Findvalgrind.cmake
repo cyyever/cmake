@@ -1,23 +1,19 @@
 # - Try to find valgrind
 #
 # The following are set after configuration is done:
-#  valgrind_FOUND
 #  valgrind::valgrind
 
-include_guard()
+include_guard(GLOBAL)
 
 if(TARGET valgrind::valgrind)
-  set(valgrind_FOUND TRUE)
   return()
 endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES FreeBSD)
-  set(valgrind_FOUND FALSE)
   return()
 endif()
 
 if(WIN32)
-  set(valgrind_FOUND FALSE)
   return()
 endif()
 
