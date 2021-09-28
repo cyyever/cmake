@@ -2,7 +2,7 @@ include_guard()
 include(CTest)
 
 include(${CMAKE_CURRENT_LIST_DIR}/util.cmake)
-set(sanitizer_suppression_dir ${CMAKE_CURRENT_LIST_DIR}/sanitizer_supp)
+set(sanitizer_suppression_dir $ENV{HOME}/opt/cli_tool_configs/sanitizer_supp)
 
 function(add_fuzzing)
   set(cpu_analysis_tools UBSAN ASAN TSAN LSAN)

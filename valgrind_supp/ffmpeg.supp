@@ -1,7 +1,0 @@
-{
-   invalid read 16
-   Memcheck:Addr16
-   ...
-   fun:sws_scale
-   ...
-}

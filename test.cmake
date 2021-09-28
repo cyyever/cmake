@@ -5,8 +5,8 @@ get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 include(${CMAKE_CURRENT_LIST_DIR}/code_coverage.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/util.cmake)
 
-set(valgrind_suppression_dir ${CMAKE_CURRENT_LIST_DIR}/valgrind_supp)
-set(sanitizer_suppression_dir ${CMAKE_CURRENT_LIST_DIR}/sanitizer_supp)
+set(valgrind_suppression_dir $ENV{HOME}/opt/cli_tool_configs/valgrind_supp)
+set(sanitizer_suppression_dir $ENV{HOME}/opt/cli_tool_configs/sanitizer_supp)
 
 option(DISABLE_RUNTIME_ANALYSIS "Disable all runtime analysis" OFF)
 
