@@ -32,7 +32,8 @@ endif()
 
 # add common options
 foreach(lang IN LISTS languages)
-  if(NOT lang IN_LIST "CXX;C")
+  set(c_languages "C;CXX")
+  if(NOT lang IN_LIST c_languages)
     continue()
   endif()
   if(CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
