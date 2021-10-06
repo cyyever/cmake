@@ -1,12 +1,16 @@
 include_guard()
 include(CTest)
+get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 
 include(${CMAKE_CURRENT_LIST_DIR}/util.cmake)
 set(sanitizer_suppression_dir $ENV{HOME}/opt/cli_tool_configs/sanitizer_supp)
 
 function(add_fuzzing)
   set(cpu_analysis_tools UBSAN ASAN TSAN LSAN)
-  set(oneValueArgs TARGET ${cpu_analysis_tools})
+  set(gpu_analysis_tools CUDA-MEMCHECK CUDA-SYNCCHECK CUDA-INITCHECK
+                         CUDA-RACECHECK)
+  set(oneValueArgs TARGET WITH_GPU_ANALYSIS
+                   ${cpu_analysis_tools} ${gpu_analysis_tools})
   cmake_parse_arguments(this "" "${oneValueArgs}" "ARGS" ${ARGN})
   separate_arguments(this_ARGS)
 
@@ -22,6 +26,18 @@ function(add_fuzzing)
   if(NOT BUILD_TESTING)
     set_target_properties("${this_TARGET}" PROPERTIES EXCLUDE_FROM_ALL ON)
     return()
+  endif()
+  if("${this_WITH_GPU_ANALYSIS}" STREQUAL "")
+    if(CUDA IN_LIST languages)
+      set(this_WITH_GPU_ANALYSIS TRUE)
+    else()
+      set(this_WITH_GPU_ANALYSIS FALSE)
+    endif()
+  endif()
+  if(NOT this_WITH_GPU_ANALYSIS)
+    foreach(tool IN LISTS gpu_analysis_tools)
+      set(this_${tool} FALSE)
+    endforeach()
   endif()
 
   find_package(libFuzzer REQUIRED)
@@ -44,6 +60,32 @@ function(add_fuzzing)
     endif()
   endforeach()
 
+  if(this_WITH_GPU_ANALYSIS)
+    find_package(CUDA-MEMCHECK REQUIRED)
+    if(TARGET CUDA-MEMCHECK::cuda-memcheck)
+      if("${this_CUDA-MEMCHECK}" STREQUAL "")
+        set(this_CUDA-MEMCHECK TRUE)
+      endif()
+      if("${this_CUDA-SYNCCHECK}" STREQUAL "")
+        set(this_CUDA-SYNCCHECK TRUE)
+      endif()
+      if("${this_CUDA-INITCHECK}" STREQUAL "")
+        set(this_CUDA-INITCHECK TRUE)
+      endif()
+      if("${this_CUDA-RACECHECK}" STREQUAL "")
+        set(this_CUDA-RACECHECK TRUE)
+      endif()
+    else()
+      message(WARNING "no cuda-memcheck")
+      set(this_CUDA-MEMCHECK FALSE)
+      set(this_CUDA-SYNCCHECK FALSE)
+      set(this_CUDA-INITCHECK FALSE)
+      set(this_CUDA-RACECHECK FALSE)
+    endif()
+  endif()
+
+
+
   get_target_property(new_env ${this_TARGET} ENVIRONMENT)
   list(
     APPEND
@@ -62,13 +104,14 @@ function(add_fuzzing)
   )
 
   target_link_libraries(${this_TARGET} PRIVATE libFuzzer::libFuzzer)
-  foreach(tool IN LISTS cpu_analysis_tools)
+  foreach(tool IN LISTS cpu_analysis_tools gpu_analysis_tools)
     if(NOT ${this_${tool}})
       continue()
     endif()
 
     set(new_target "fuzzing_${tool}_${this_TARGET}")
     clone_executable(${this_TARGET} ${new_target})
+    set(new_target_command $<TARGET_FILE:${new_target}>)
 
     if(tool STREQUAL ASAN)
       target_link_libraries(${new_target} PRIVATE GoogleSanitizer::address)
@@ -76,6 +119,29 @@ function(add_fuzzing)
       target_link_libraries(${new_target} PRIVATE GoogleSanitizer::undefined)
     elseif(tool STREQUAL TSAN)
       target_link_libraries(${new_target} PRIVATE GoogleSanitizer::thread)
+    elseif(tool STREQUAL CUDA-MEMCHECK)
+      set(memcheck_command
+          $<TARGET_FILE:CUDA-MEMCHECK::cuda-memcheck> --tool memcheck
+          --leak-check full --error-exitcode 1 --flush-to-disk yes)
+      set(new_target_command "${memcheck_command};$<TARGET_FILE:${new_target}>")
+    elseif(tool STREQUAL CUDA-SYNCCHECK)
+      set(synccheck_command
+          $<TARGET_FILE:CUDA-MEMCHECK::cuda-memcheck> --tool synccheck
+          --leak-check full --error-exitcode 1 --flush-to-disk yes)
+      set(new_target_command
+          "${synccheck_command};$<TARGET_FILE:${new_target}>")
+    elseif(tool STREQUAL CUDA-INITCHECK)
+      set(initcheck_command
+          $<TARGET_FILE:CUDA-MEMCHECK::cuda-memcheck> --tool initcheck
+          --leak-check full --error-exitcode 1 --flush-to-disk yes)
+      set(new_target_command
+          "${initcheck_command};$<TARGET_FILE:${new_target}>")
+    elseif(tool STREQUAL CUDA-RACECHECK)
+      set(racecheck_command
+          $<TARGET_FILE:CUDA-MEMCHECK::cuda-memcheck> --tool racecheck
+          --leak-check full --error-exitcode 1 --flush-to-disk yes)
+      set(new_target_command
+          "${racecheck_command};$<TARGET_FILE:${new_target}>")
     endif()
 
     set_target_properties(${new_target} PROPERTIES INTERPROCEDURAL_OPTIMIZATION
@@ -105,7 +171,7 @@ function(add_fuzzing)
       NAME ${new_target}
       WORKING_DIRECTORY $<TARGET_FILE_DIR:${new_target}>
       COMMAND
-        $<TARGET_FILE:${new_target}> -jobs=$ENV{FUZZING_JOBS}
+        ${new_target_command} -jobs=$ENV{FUZZING_JOBS}
         -max_total_time=$ENV{MAX_FUZZING_TIME} -timeout=$ENV{FUZZING_TIMEOUT}
         -rss_limit_mb=$ENV{FUZZING_RSS_LIMIT} -max_len=$ENV{FUZZING_MAX_LEN})
     set_tests_properties(${name} PROPERTIES ENVIRONMENT "${new_env}")
