@@ -22,7 +22,7 @@ if(NOT "CXX" IN_LIST languages)
 endif()
 
 set(libcxx_ROOT_DIR
-    ${CMAKE_INSTALL_PREFIX}
+    ${CMAKE_INSTALL_PREFIX}/llvm/main
     CACHE PATH "root directory contains libcxx")
 
 include(FindPackageHandleStandardArgs)
