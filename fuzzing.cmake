@@ -85,7 +85,7 @@ function(add_fuzzing)
   endif()
 
   get_target_property(new_env ${this_TARGET} ENVIRONMENT)
-  if(NOT CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
+  if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     list(
       APPEND
       new_env

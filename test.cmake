@@ -124,7 +124,7 @@ function(add_test_with_runtime_analysis)
     list(APPEND new_env
          "LLVM_PROFILE_FILE=${CMAKE_BINARY_DIR}/profraw_dir/%p.profraw")
   endif()
-  if(NOT CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
+  if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     list(
       APPEND
       new_env
