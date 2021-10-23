@@ -9,8 +9,8 @@ function(add_fuzzing)
   set(cpu_analysis_tools UBSAN ASAN TSAN LSAN)
   set(gpu_analysis_tools CUDA-MEMCHECK CUDA-SYNCCHECK CUDA-INITCHECK
                          CUDA-RACECHECK)
-  set(oneValueArgs TARGET WITH_GPU_ANALYSIS
-                   ${cpu_analysis_tools} ${gpu_analysis_tools})
+  set(oneValueArgs TARGET WITH_GPU_ANALYSIS ${cpu_analysis_tools}
+                   ${gpu_analysis_tools})
   cmake_parse_arguments(this "" "${oneValueArgs}" "ARGS" ${ARGN})
   separate_arguments(this_ARGS)
 
@@ -84,14 +84,14 @@ function(add_fuzzing)
     endif()
   endif()
 
-
-
   get_target_property(new_env ${this_TARGET} ENVIRONMENT)
-  list(
-    APPEND
-    new_env
-    ASAN_OPTIONS=protect_shadow_gap=0:check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true:replace_intrin=0:fast_unwind_on_malloc=0:detect_container_overflow=0
-  )
+  if(NOT CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
+    list(
+      APPEND
+      new_env
+      ASAN_OPTIONS=protect_shadow_gap=0:check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true:replace_intrin=0:fast_unwind_on_malloc=0:detect_container_overflow=0
+    )
+  endif()
   list(
     APPEND
     new_env

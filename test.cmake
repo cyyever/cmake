@@ -124,11 +124,13 @@ function(add_test_with_runtime_analysis)
     list(APPEND new_env
          "LLVM_PROFILE_FILE=${CMAKE_BINARY_DIR}/profraw_dir/%p.profraw")
   endif()
-  list(
-    APPEND
-    new_env
-    ASAN_OPTIONS=protect_shadow_gap=0:check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true:detect_container_overflow=0
-  )
+  if(NOT CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
+    list(
+      APPEND
+      new_env
+      ASAN_OPTIONS=protect_shadow_gap=0:check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true:detect_container_overflow=0
+    )
+  endif()
   list(APPEND new_env
        "LSAN_OPTIONS=suppressions=${sanitizer_suppression_dir}/lsan.supp")
   list(
