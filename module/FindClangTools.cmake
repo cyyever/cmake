@@ -26,11 +26,11 @@ foreach(program_name IN ITEMS clang-tidy clang-apply-replacements)
   endif()
 endforeach()
 
-find_program(
+find_file(
   run-clang-tidy_BINARY
-  NAMES run-clang-tidy run-clang-tidy.py
-  PATH_SUFFIXES "llvm/llvmorg-11.0.1/share/clang" "LLVM/bin" "llvm-devel/share/clang"
-                "share/clang")
+  NAMES run-clang-tidy.py
+  PATH_SUFFIXES "llvm_tool" "llvm/llvmorg-11.0.1/share/clang" "LLVM/bin"
+                "llvm-devel/share/clang" "share/clang")
 find_package_handle_standard_args(run-clang-tidy DEFAULT_MSG
                                   run-clang-tidy_BINARY)
 if(run-clang-tidy_FOUND AND NOT TARGET ClangTools::run-clang-tidy)

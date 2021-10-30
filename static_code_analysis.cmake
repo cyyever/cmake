@@ -32,8 +32,10 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/module)
 
 if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   find_package(ClangTools QUIET)
+  find_package(Python3 QUIET COMPONENTS Interpreter)
   if(clang-tidy_FOUND
      AND run-clang-tidy_FOUND
+     AND Python3_FOUND
      AND NOT TARGET do_run_clang_tidy)
     set(EXTRA-ARGS -extra-arg='-std=c++2a' -extra-arg='-Qunused-arguments')
     set(CHECKES
@@ -48,7 +50,7 @@ if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     add_custom_target(
       do_run_clang_tidy
       COMMAND
-        ClangTools::run-clang-tidy -clang-tidy-binary
+        ${Python3_EXECUTABLE} "$<TARGET_FILE:ClangTools::run-clang-tidy>"  -clang-tidy-binary
         "$<TARGET_FILE:ClangTools::clang-tidy>" -p ${CMAKE_BINARY_DIR} "-quiet"
         ${EXTRA-ARGS} ${CHECKES} | grep -v 'clang.*tidy.*checks' >
         ./run-clang-tidy.txt
