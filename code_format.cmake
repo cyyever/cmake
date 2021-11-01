@@ -13,6 +13,7 @@ if(ClangFormat_FOUND AND NOT TARGET do_clang_format)
   add_custom_target(
     do_clang_format
     COMMAND sh ${CMAKE_BINARY_DIR}/get_all_sources_and_headers.sh ${CMAKE_BINARY_DIR}/compile_commands.json | xargs -I source_file "$<TARGET_FILE:ClangFormat::clang-format>" -style=file -i source_file
+    COMMAND find ${CMAKE_CURRENT_SOURCE_DIR} -name '*.hpp' | xargs -I source_file "$<TARGET_FILE:ClangFormat::clang-format>" -style=file -i source_file
     DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json ${CMAKE_BINARY_DIR}/get_all_sources_and_headers.sh
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
