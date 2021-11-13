@@ -1,22 +1,15 @@
 # Find libFuzzer
 #
 # This module sets the following variables:
-#  libFuzzer_FOUND
 #  libFuzzer::libFuzzer
 include_guard(GLOBAL)
 if(TARGET libFuzzer::libFuzzer)
-  set(libFuzzer_FOUND TRUE)
   return()
 endif()
 
 include(FindPackageHandleStandardArgs)
 
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
-
-set(CMAKE_REQUIRED_FLAGS "-fsanitize=fuzzer")
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_C_COMPILER_ID STREQUAL "MSVC")
-  set(CMAKE_REQUIRED_FLAGS "/fsanitize=fuzzer")
-endif()
 
 set(_source_code
     [==[
@@ -27,21 +20,31 @@ set(_source_code
   }
   ]==])
 
+include(CMakePushCheckState)
+cmake_push_check_state(RESET)
+
+set(CMAKE_REQUIRED_FLAGS "-fsanitize=fuzzer")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+  set(CMAKE_REQUIRED_FLAGS "/fsanitize=fuzzer")
+  set(CMAKE_REQUIRED_LIBRARIES clang_rt.fuzzer_MDd-x86_64)
+endif()
+message(STATUS "aaaaaaaaa ${CMAKE_REQUIRED_LIBRARIES}")
+
 set(_c_res)
 set(_cxx_res)
-set(CMAKE_REQUIRED_QUIET ON)
-if("CXX" IN_LIST languages)
-  include(CheckCXXSourceCompiles)
-  check_cxx_source_compiles("${_source_code}" _cxx_res)
-endif()
-if("C" IN_LIST languages)
-  include(CheckCSourceCompiles)
-  string(REPLACE "extern \"C\"" "" _source_code "${_source_code}")
-  check_c_source_compiles("${_source_code}" _c_res)
-endif()
 
 set(_compile_res 0)
-if(_c_res OR _cxx_res)
+foreach(lang IN LISTS languages)
+  if(lang STREQUAL CXX OR lang STREQUAL C)
+    include(CheckSourceRuns)
+    set(CMAKE_REQUIRED_LIBRARIES clang_rt.fuzzer_MDd-x86_64 libsancovd)
+    check_source_runs(${lang} "${_source_code}" _${lang}_res)
+    if(_${lang}_res)
+      set(_compile_res 1)
+    endif()
+  endif()
+endforeach()
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_C_COMPILER_ID STREQUAL "MSVC")
   set(_compile_res 1)
 endif()
 
@@ -57,8 +60,8 @@ if(libFuzzer_FOUND)
     libFuzzer::libFuzzer INTERFACE
     $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$_cxx_res>>:${CMAKE_REQUIRED_FLAGS}>
     $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$_c_res>>:${CMAKE_REQUIRED_FLAGS}>)
+  target_link_libraries(
+    libFuzzer::libFuzzer INTERFACE $<$<CONFIG:Release>:clang_rt.fuzzer_MD-x86_64
+                                   libsancov>)
 endif()
-
-set(CMAKE_REQUIRED_FLAGS)
-unset(_c_res CACHE)
-unset(_cxx_res CACHE)
+cmake_pop_check_state()
