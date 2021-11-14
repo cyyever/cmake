@@ -131,13 +131,15 @@ function(add_test_with_runtime_analysis)
       ASAN_OPTIONS=protect_shadow_gap=0:check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true:detect_container_overflow=0
     )
   endif()
-  list(APPEND new_env
-       "LSAN_OPTIONS=suppressions=${sanitizer_suppression_dir}/lsan.supp")
-  list(
-    APPEND
-    new_env
-    "TSAN_OPTIONS=suppressions=${sanitizer_suppression_dir}/tsan.supp:force_seq_cst_atomics=1:history_size=7"
-  )
+  if(EXISTS "${sanitizer_suppression_dir}/lsan.supp")
+    list(APPEND new_env
+         "LSAN_OPTIONS=suppressions=${sanitizer_suppression_dir}/lsan.supp")
+  endif()
+  set(TSAN_OPTIONS "TSAN_OPTIONS=force_seq_cst_atomics=1:history_size=7")
+  if(EXISTS "${sanitizer_suppression_dir}/lsan.supp")
+    set(TSAN_OPTIONS "${TSAN_OPTIONS}:suppressions=${sanitizer_suppression_dir}/tsan.supp")
+  endif()
+  list(APPEND new_env "${TSAN_OPTIONS}")
 
   set(has_test FALSE)
   foreach(tool IN LISTS cpu_analysis_tools gpu_analysis_tools)
