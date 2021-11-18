@@ -9,10 +9,6 @@ if(TARGET valgrind::valgrind)
   return()
 endif()
 
-if(CMAKE_SYSTEM_NAME MATCHES FreeBSD)
-  return()
-endif()
-
 if(WIN32)
   return()
 endif()
