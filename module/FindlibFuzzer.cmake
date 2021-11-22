@@ -26,7 +26,8 @@ cmake_push_check_state(RESET)
 set(CMAKE_REQUIRED_FLAGS "-fsanitize=fuzzer")
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_C_COMPILER_ID STREQUAL "MSVC")
   set(CMAKE_REQUIRED_FLAGS "/fsanitize=fuzzer")
-  # set(CMAKE_REQUIRED_LIBRARIES clang_rt.fuzzer_MDd-x86_64 libsancovd)
+  set(CMAKE_TRY_COMPILE_CONFIGURATION "Release")
+  # set(CMAKE_REQUIRED_LIBRARIES libsancov)
   # else() find_program(llvm_config_BINARY NAMES llvm-config)
   # find_package_handle_standard_args(llvm_config DEFAULT_MSG
   # llvm_config_BINARY) if(llvm_config_FOUND) execute_process( COMMAND
