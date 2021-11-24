@@ -125,7 +125,7 @@ function(__test_impl)
          "LLVM_PROFILE_FILE=${CMAKE_BINARY_DIR}/profraw_dir/%p.profraw")
   endif()
   set(ASAN_OPTIONS
-      "ASAN_OPTIONS=detect_leaks=1:check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true:detect_container_overflow=0:fast_unwind_on_malloc=0"
+      "ASAN_OPTIONS=check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true:detect_container_overflow=0"
   )
   if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(ASAN_OPTIONS "${ASAN_OPTIONS}:protect_shadow_gap=0")
@@ -144,8 +144,9 @@ function(__test_impl)
   list(APPEND new_env "${TSAN_OPTIONS}")
 
   set(has_test FALSE)
-  if(FUZZING)
+  if(this_FUZZING)
     find_package(libFuzzer REQUIRED)
+    target_link_libraries(${this_TARGET} PRIVATE libFuzzer::libFuzzer)
   endif()
   foreach(tool IN LISTS cpu_analysis_tools gpu_analysis_tools)
     if(NOT ${this_${tool}})
@@ -208,7 +209,7 @@ function(__test_impl)
       set(new_target_command
           "${racecheck_command};$<TARGET_FILE:${new_target}>")
     endif()
-    if(FUZZING)
+    if(this_FUZZING)
       target_link_libraries(${new_target} PRIVATE libFuzzer::libFuzzer)
       set_target_properties(${new_target}
                             PROPERTIES INTERPROCEDURAL_OPTIMIZATION FALSE)
@@ -245,6 +246,7 @@ function(__test_impl)
   endforeach()
 
   if(NOT has_test)
+    message(STATUS "not has_test")
     set(name ${this_TARGET})
     add_test(
       NAME ${name}
