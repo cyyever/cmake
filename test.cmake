@@ -128,7 +128,7 @@ function(add_test_with_runtime_analysis)
     list(
       APPEND
       new_env
-      ASAN_OPTIONS=protect_shadow_gap=0:check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true:detect_container_overflow=0
+      ASAN_OPTIONS=detect_leaks=1:protect_shadow_gap=0:check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true:detect_container_overflow=0
     )
   endif()
   if(EXISTS "${sanitizer_suppression_dir}/lsan.supp")
