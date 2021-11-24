@@ -42,10 +42,16 @@ endfunction()
 function (get_all_sources_and_headers)
   set(get_all_sources_and_headers [=[
 #!/bin/sh
-for source_file in $(grep '"file":' $1 | sed -e 's/"file"://' | sed -e 's/[^"]*"\([^"]*\)"/\1/')
+if command -v gsed >/dev/null
+then
+  sed_cmd=gsed
+else
+  sed_cmd=sed
+fi
+for source_file in $(grep '"file":' $1 | ${sed_cmd} -e 's/"file"://' | ${sed_cmd} -e 's/[^"]*"\([^"]*\)"/\1/')
 do
   source_dir=$(dirname ${source_file})
-  for head in $(sed -n -e 's/^\s*#include[^"]*"\([^"]*\)"/\1/p' ${source_file})
+  for head in $(${sed_cmd} -n -e 's/^\s*#include[^"]*"\([^"]*\)"/\1/p' ${source_file})
   do
     if test -f "${source_dir}/${head}"
     then
