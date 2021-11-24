@@ -10,11 +10,11 @@ set(sanitizer_suppression_dir $ENV{HOME}/opt/cli_tool_configs/sanitizer_supp)
 
 option(DISABLE_RUNTIME_ANALYSIS "Disable all runtime analysis" OFF)
 
-function(add_test_with_runtime_analysis)
+function(__test_impl)
   set(cpu_analysis_tools MEMCHECK UBSAN HELGRIND ASAN TSAN)
   set(gpu_analysis_tools CUDA-MEMCHECK CUDA-SYNCCHECK CUDA-INITCHECK
                          CUDA-RACECHECK)
-  set(oneValueArgs TARGET WITH_CPU_ANALYSIS WITH_GPU_ANALYSIS
+  set(oneValueArgs TARGET WITH_CPU_ANALYSIS WITH_GPU_ANALYSIS FUZZING
                    ${cpu_analysis_tools} ${gpu_analysis_tools})
   cmake_parse_arguments(this "" "${oneValueArgs}" "ARGS" ${ARGN})
   separate_arguments(this_ARGS)
@@ -125,24 +125,28 @@ function(add_test_with_runtime_analysis)
          "LLVM_PROFILE_FILE=${CMAKE_BINARY_DIR}/profraw_dir/%p.profraw")
   endif()
   set(ASAN_OPTIONS
-      "ASAN_OPTIONS=detect_leaks=1:check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true:detect_container_overflow=0"
+      "ASAN_OPTIONS=detect_leaks=1:check_initialization_order=true:detect_stack_use_after_return=true:strict_init_order=true:detect_container_overflow=0:fast_unwind_on_malloc=0"
   )
   if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(ASAN_OPTIONS "${ASAN_OPTIONS}:protect_shadow_gap=0")
   endif()
   list(APPEND new_env "${ASAN_OPTIONS}")
+  set(LSAN_OPTIONS "LSAN_OPTIONS=fast_unwind_on_malloc=0")
   if(EXISTS "${sanitizer_suppression_dir}/lsan.supp")
-    list(APPEND new_env
-         "LSAN_OPTIONS=suppressions=${sanitizer_suppression_dir}/lsan.supp")
+    set(LSAN_OPTIONS
+        "${LSAN_OPTIONS}:suppressions=${sanitizer_suppression_dir}/lsan.supp")
   endif()
   set(TSAN_OPTIONS "TSAN_OPTIONS=force_seq_cst_atomics=1:history_size=7")
-  if(EXISTS "${sanitizer_suppression_dir}/lsan.supp")
+  if(EXISTS "${sanitizer_suppression_dir}/tsan.supp")
     set(TSAN_OPTIONS
         "${TSAN_OPTIONS}:suppressions=${sanitizer_suppression_dir}/tsan.supp")
   endif()
   list(APPEND new_env "${TSAN_OPTIONS}")
 
   set(has_test FALSE)
+  if(FUZZING)
+    find_package(libFuzzer REQUIRED)
+  endif()
   foreach(tool IN LISTS cpu_analysis_tools gpu_analysis_tools)
     if(NOT ${this_${tool}})
       continue()
@@ -204,7 +208,39 @@ function(add_test_with_runtime_analysis)
       set(new_target_command
           "${racecheck_command};$<TARGET_FILE:${new_target}>")
     endif()
-    add_test(NAME ${new_target} COMMAND ${new_target_command} ${this_ARGS})
+    if(FUZZING)
+      target_link_libraries(${new_target} PRIVATE libFuzzer::libFuzzer)
+      set_target_properties(${new_target}
+                            PROPERTIES INTERPROCEDURAL_OPTIMIZATION FALSE)
+      if(NOT DEFINED ENV{MAX_FUZZING_TIME})
+        set(ENV{MAX_FUZZING_TIME} 60)
+      endif()
+
+      if(NOT DEFINED ENV{FUZZING_TIMEOUT})
+        set(ENV{FUZZING_TIMEOUT} 60)
+      endif()
+
+      if(NOT DEFINED ENV{FUZZING_JOBS})
+        set(ENV{FUZZING_JOBS} 1)
+      endif()
+
+      if(NOT DEFINED ENV{FUZZING_RSS_LIMIT})
+        set(ENV{FUZZING_RSS_LIMIT} 4096)
+      endif()
+
+      if(NOT DEFINED ENV{FUZZING_MAX_LEN})
+        set(ENV{FUZZING_MAX_LEN} 4096)
+      endif()
+      add_test(
+        NAME ${new_target}
+        WORKING_DIRECTORY $<TARGET_FILE_DIR:${new_target}>
+        COMMAND
+          ${new_target_command} -jobs=$ENV{FUZZING_JOBS}
+          -max_total_time=$ENV{MAX_FUZZING_TIME} -timeout=$ENV{FUZZING_TIMEOUT}
+          -rss_limit_mb=$ENV{FUZZING_RSS_LIMIT} -max_len=$ENV{FUZZING_MAX_LEN})
+    else()
+      add_test(NAME ${new_target} COMMAND ${new_target_command} ${this_ARGS})
+    endif()
     set_tests_properties(${new_target} PROPERTIES ENVIRONMENT "${new_env}")
   endforeach()
 
@@ -216,4 +252,8 @@ function(add_test_with_runtime_analysis)
       COMMAND $<TARGET_FILE:${this_TARGET}> ${this_ARGS})
     set_tests_properties(${name} PROPERTIES ENVIRONMENT "${new_env}")
   endif()
+endfunction()
+
+function(add_test_with_runtime_analysis)
+  __test_impl("${ARGV};FUZZING;OFF")
 endfunction()
