@@ -246,7 +246,6 @@ function(__test_impl)
   endforeach()
 
   if(NOT has_test)
-    message(STATUS "not has_test")
     set(name ${this_TARGET})
     add_test(
       NAME ${name}
