@@ -23,6 +23,7 @@ set(_source_code
 include(CMakePushCheckState)
 cmake_push_check_state(RESET)
 
+set(CMAKE_REQUIRED_QUIET ON)
 set(CMAKE_REQUIRED_FLAGS "-fsanitize=fuzzer")
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_C_COMPILER_ID STREQUAL "MSVC")
   set(CMAKE_REQUIRED_FLAGS "/fsanitize=fuzzer")
@@ -65,11 +66,5 @@ if(libFuzzer_FOUND)
     libFuzzer::libFuzzer INTERFACE
     $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$_cxx_res>>:${CMAKE_REQUIRED_FLAGS}>
     $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$_c_res>>:${CMAKE_REQUIRED_FLAGS}>)
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_C_COMPILER_ID STREQUAL
-                                              "MSVC")
-    target_link_libraries(
-      libFuzzer::libFuzzer
-      INTERFACE $<$<CONFIG:Release>:clang_rt.fuzzer_MD-x86_64 libsancov>)
-  endif()
 endif()
 cmake_pop_check_state()
