@@ -11,7 +11,6 @@ set(sanitizer_suppression_dir $ENV{HOME}/opt/cli_tool_configs/sanitizer_supp)
 option(DISABLE_RUNTIME_ANALYSIS "Disable all runtime analysis" OFF)
 
 function(__add_fuzzing_test target target_command)
-  target_link_libraries(${target} PRIVATE libFuzzer::libFuzzer)
   set_target_properties(${target} PROPERTIES INTERPROCEDURAL_OPTIMIZATION FALSE)
   if(NOT DEFINED ENV{MAX_FUZZING_TIME})
     set(ENV{MAX_FUZZING_TIME} 60)
