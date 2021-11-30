@@ -1,4 +1,7 @@
 include_guard(GLOBAL)
+if(MSVC)
+  return()
+endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/module)
 find_package(ccache QUIET)

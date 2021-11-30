@@ -10,6 +10,36 @@ set(sanitizer_suppression_dir $ENV{HOME}/opt/cli_tool_configs/sanitizer_supp)
 
 option(DISABLE_RUNTIME_ANALYSIS "Disable all runtime analysis" OFF)
 
+function(__add_fuzzing_test target target_command)
+  target_link_libraries(${target} PRIVATE libFuzzer::libFuzzer)
+  set_target_properties(${target} PROPERTIES INTERPROCEDURAL_OPTIMIZATION FALSE)
+  if(NOT DEFINED ENV{MAX_FUZZING_TIME})
+    set(ENV{MAX_FUZZING_TIME} 60)
+  endif()
+
+  if(NOT DEFINED ENV{FUZZING_TIMEOUT})
+    set(ENV{FUZZING_TIMEOUT} 60)
+  endif()
+
+  if(NOT DEFINED ENV{FUZZING_JOBS})
+    set(ENV{FUZZING_JOBS} 1)
+  endif()
+
+  if(NOT DEFINED ENV{FUZZING_RSS_LIMIT})
+    set(ENV{FUZZING_RSS_LIMIT} 4096)
+  endif()
+
+  if(NOT DEFINED ENV{FUZZING_MAX_LEN})
+    set(ENV{FUZZING_MAX_LEN} 4096)
+  endif()
+  add_test(
+    NAME ${target}
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:${target}>
+    COMMAND
+      ${target_command} -jobs=$ENV{FUZZING_JOBS}
+      -max_total_time=$ENV{MAX_FUZZING_TIME} -timeout=$ENV{FUZZING_TIMEOUT}
+      -rss_limit_mb=$ENV{FUZZING_RSS_LIMIT} -max_len=$ENV{FUZZING_MAX_LEN})
+endfunction()
 function(__test_impl)
   set(cpu_analysis_tools MEMCHECK UBSAN HELGRIND ASAN TSAN)
   set(gpu_analysis_tools CUDA-MEMCHECK CUDA-SYNCCHECK CUDA-INITCHECK
@@ -91,7 +121,7 @@ function(__test_impl)
       endif()
     else()
       set(this_${sanitizer_name} FALSE)
-      message(WARNING "no ${sanitizer_name}")
+      # message(WARNING "no ${sanitizer_name}")
     endif()
   endforeach()
 
@@ -146,7 +176,7 @@ function(__test_impl)
   set(has_test FALSE)
   if(this_FUZZING)
     find_package(libFuzzer REQUIRED)
-    target_link_libraries(${this_TARGET} PRIVATE libFuzzer::libFuzzer)
+    # target_link_libraries(${this_TARGET} PRIVATE libFuzzer::libFuzzer)
   endif()
   foreach(tool IN LISTS cpu_analysis_tools gpu_analysis_tools)
     if(NOT ${this_${tool}})
@@ -210,35 +240,7 @@ function(__test_impl)
           "${racecheck_command};$<TARGET_FILE:${new_target}>")
     endif()
     if(this_FUZZING)
-      target_link_libraries(${new_target} PRIVATE libFuzzer::libFuzzer)
-      set_target_properties(${new_target}
-                            PROPERTIES INTERPROCEDURAL_OPTIMIZATION FALSE)
-      if(NOT DEFINED ENV{MAX_FUZZING_TIME})
-        set(ENV{MAX_FUZZING_TIME} 60)
-      endif()
-
-      if(NOT DEFINED ENV{FUZZING_TIMEOUT})
-        set(ENV{FUZZING_TIMEOUT} 60)
-      endif()
-
-      if(NOT DEFINED ENV{FUZZING_JOBS})
-        set(ENV{FUZZING_JOBS} 1)
-      endif()
-
-      if(NOT DEFINED ENV{FUZZING_RSS_LIMIT})
-        set(ENV{FUZZING_RSS_LIMIT} 4096)
-      endif()
-
-      if(NOT DEFINED ENV{FUZZING_MAX_LEN})
-        set(ENV{FUZZING_MAX_LEN} 4096)
-      endif()
-      add_test(
-        NAME ${new_target}
-        WORKING_DIRECTORY $<TARGET_FILE_DIR:${new_target}>
-        COMMAND
-          ${new_target_command} -jobs=$ENV{FUZZING_JOBS}
-          -max_total_time=$ENV{MAX_FUZZING_TIME} -timeout=$ENV{FUZZING_TIMEOUT}
-          -rss_limit_mb=$ENV{FUZZING_RSS_LIMIT} -max_len=$ENV{FUZZING_MAX_LEN})
+      __add_fuzzing_test(${new_target} ${new_target_command})
     else()
       add_test(NAME ${new_target} COMMAND ${new_target_command} ${this_ARGS})
     endif()
@@ -246,12 +248,11 @@ function(__test_impl)
   endforeach()
 
   if(NOT has_test)
-    set(name ${this_TARGET})
-    add_test(
-      NAME ${name}
-      WORKING_DIRECTORY $<TARGET_FILE_DIR:${this_TARGET}>
-      COMMAND $<TARGET_FILE:${this_TARGET}> ${this_ARGS})
-    set_tests_properties(${name} PROPERTIES ENVIRONMENT "${new_env}")
+    if(this_FUZZING)
+      __add_fuzzing_test(${this_TARGET} ${this_TARGET})
+    else()
+      add_test(NAME ${this_TARGET} COMMAND ${this_TARGET} ${this_ARGS})
+    endif()
   endif()
 endfunction()
 
