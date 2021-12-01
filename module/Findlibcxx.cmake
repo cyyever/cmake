@@ -69,7 +69,7 @@ set(_source_code
   }
   ]==])
 
-set(CMAKE_REQUIRED_QUIET OFF)
+set(CMAKE_REQUIRED_QUIET ON)
 include(CheckCXXSourceRuns)
 check_cxx_source_runs("${_source_code}" _run_res)
 

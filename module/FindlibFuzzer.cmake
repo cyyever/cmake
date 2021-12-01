@@ -28,13 +28,6 @@ set(CMAKE_REQUIRED_FLAGS "-fsanitize=fuzzer")
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_C_COMPILER_ID STREQUAL "MSVC")
   set(CMAKE_REQUIRED_FLAGS "/fsanitize=fuzzer")
   set(CMAKE_TRY_COMPILE_CONFIGURATION "Release")
-  # set(CMAKE_REQUIRED_LIBRARIES libsancov)
-  # else() find_program(llvm_config_BINARY NAMES llvm-config)
-  # find_package_handle_standard_args(llvm_config DEFAULT_MSG
-  # llvm_config_BINARY) if(llvm_config_FOUND) execute_process( COMMAND
-  # ${llvm_config_BINARY} --libdir RESULT_VARIABLE _exitcode OUTPUT_VARIABLE
-  # _path) # if(${_exitcode} EQUAL 0) #   set(CMAKE_REQUIRED_LINK_OPTIONS
-  # "-L${_path}") # endif() endif()
 endif()
 
 set(_c_res)
@@ -62,9 +55,13 @@ if(libFuzzer_FOUND)
     INTERFACE
       $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$_cxx_res>>:${CMAKE_REQUIRED_FLAGS}>
       $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$_c_res>>:${CMAKE_REQUIRED_FLAGS}>)
-  target_link_options(
-    libFuzzer::libFuzzer INTERFACE
-    $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$_cxx_res>>:${CMAKE_REQUIRED_FLAGS}>
-    $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$_c_res>>:${CMAKE_REQUIRED_FLAGS}>)
+  if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_C_COMPILER_ID
+                                                   STREQUAL "MSVC")
+    target_link_options(
+      libFuzzer::libFuzzer
+      INTERFACE
+      $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$_cxx_res>>:${CMAKE_REQUIRED_FLAGS}>
+      $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$_c_res>>:${CMAKE_REQUIRED_FLAGS}>)
+  endif()
 endif()
 cmake_pop_check_state()
