@@ -31,13 +31,21 @@ function(__add_fuzzing_test target target_command)
   if(NOT DEFINED ENV{FUZZING_MAX_LEN})
     set(ENV{FUZZING_MAX_LEN} 4096)
   endif()
+
+  add_custom_target(
+    __working_dir_for_${target}
+    COMMAND ${CMAKE_COMMAND} -E make_directory fuzz_test/__${target}
+    COMMAND
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
   add_test(
     NAME ${target}
-    WORKING_DIRECTORY $<TARGET_FILE_DIR:${target}>
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/fuzz_test/__${target}
     COMMAND
       ${target_command} -jobs=$ENV{FUZZING_JOBS}
       -max_total_time=$ENV{MAX_FUZZING_TIME} -timeout=$ENV{FUZZING_TIMEOUT}
       -rss_limit_mb=$ENV{FUZZING_RSS_LIMIT} -max_len=$ENV{FUZZING_MAX_LEN})
+  add_dependencies(${target} __working_dir_for_${target})
 endfunction()
 function(__test_impl)
   set(cpu_analysis_tools MEMCHECK UBSAN HELGRIND ASAN TSAN)
