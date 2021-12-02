@@ -17,9 +17,8 @@ if(clang-tidy_FOUND
     do_clang_tidy_fix
     COMMAND
       ClangTools::run-clang-tidy -fix -clang-tidy-binary
-      "$<TARGET_FILE:ClangTools::clang-tidy>" -clang-apply-replacements-binary
-      "$<TARGET_FILE:ClangTools::clang-apply-replacements>" -p
-      ${CMAKE_BINARY_DIR} "-quiet" ${CHECKES}
+      "$<TARGET_FILE:ClangTools::clang-tidy>" -p ${CMAKE_BINARY_DIR} "-quiet"
+      ${CHECKES}
     DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 endif()
