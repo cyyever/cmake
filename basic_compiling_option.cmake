@@ -58,7 +58,7 @@ if(CXX IN_LIST languages)
     set(CMAKE_CXX_FLAGS
         "${CMAKE_CXX_FLAGS} -Wno-unknown-cuda-version -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-weak-vtables -Wno-disabled-macro-expansion -Wno-reserved-id-macro -Wno-global-constructors -Wno-exit-time-destructors -Wno-double-promotion -Wno-padded -Wno-gnu-zero-variadic-macro-arguments -Wno-ctad-maybe-unsupported -Wno-reserved-identifier"
     )
-    add_compile_definitions($<$<CONFIG:Debug>:_LIBCPP_DEBUG=1>)
+    # add_compile_definitions($<$<CONFIG:Debug>:_LIBCPP_DEBUG=1>)
   elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS
         "${CMAKE_CXX_FLAGS} -Wshadow -Wnon-virtual-dtor -Wpedantic")
