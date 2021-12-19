@@ -49,7 +49,7 @@ endif()
 
 find_package_handle_standard_args(libFuzzer DEFAULT_MSG _compile_res)
 if(libFuzzer_FOUND)
-  add_library(libFuzzer::libFuzzer INTERFACE IMPORTED)
+  add_library(libFuzzer::libFuzzer INTERFACE IMPORTED GLOBAL)
   target_compile_options(
     libFuzzer::libFuzzer
     INTERFACE
