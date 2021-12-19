@@ -49,7 +49,8 @@ foreach(lang IN LISTS languages)
       endif()
     endif()
   elseif(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
-    set(CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} /MP /utf-8 /W4 /nologo /wd5072")
+    set(CMAKE_${lang}_FLAGS
+        "${CMAKE_${lang}_FLAGS} /MP /utf-8 /W4 /nologo /wd5072")
   endif()
 endforeach()
 
@@ -83,6 +84,7 @@ if(CXX IN_LIST languages)
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 19.26)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:preprocessor")
     endif()
+    add_compile_definitions($<$<CONFIG:Debug>:_CRT_SECURE_NO_WARNINGS>)
   endif()
 endif()
 
