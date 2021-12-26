@@ -18,6 +18,7 @@ set(ENABLE_LLVM_CODE_COVERAGE FALSE)
 foreach(lang IN ITEMS C CXX)
   if(lang IN_LIST languages)
     if(CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
+      enable_language(C)
       find_package(LLVM QUIET)
       if(NOT LLVM_FOUND)
         return()
@@ -83,8 +84,8 @@ elseif(ENABLE_LLVM_CODE_COVERAGE)
             '*.profraw'` -o default.profdata
     COMMAND
       llvm-cov show -instr-profile=default.profdata -format=html
-      -output-dir=./code_coverage_report -object `find ${CMAKE_BINARY_DIR} -wholename '*/test/*'
-      -executable -type f`
+      -output-dir=./code_coverage_report -object `find ${CMAKE_BINARY_DIR}
+      -wholename '*/test/*' -executable -type f`
     DEPENDS ${CMAKE_BINARY_DIR}/code_coverage
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/code_coverage
     BYPRODUCTS code_coverage_report)
