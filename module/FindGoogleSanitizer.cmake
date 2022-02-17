@@ -9,6 +9,8 @@
 include_guard(GLOBAL)
 include(FindPackageHandleStandardArgs)
 
+option(NO_VPTR "no vptr sanitizer" OFF)
+
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 
 set(_source_code
@@ -36,6 +38,9 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
     else()
       continue()
     endif()
+  endif()
+  if(sanitizer_name STREQUAL "undefined" AND NO_VPTR)
+    list(APPEND CMAKE_REQUIRED_FLAGS "-fno-sanitize=vptr")
   endif()
 
   set(CMAKE_REQUIRED_QUIET ON)
