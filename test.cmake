@@ -114,9 +114,11 @@ function(__test_impl)
   endif()
 
   find_package(GoogleSanitizer REQUIRED)
-  foreach(sanitizer_name IN ITEMS ASAN TSAN UBSAN)
+  foreach(sanitizer_name IN ITEMS ASAN TSAN UBSAN MSAN)
     if(sanitizer_name STREQUAL ASAN)
       set(sanitizer_target GoogleSanitizer::address)
+    elseif(sanitizer_name STREQUAL MSAN)
+      set(sanitizer_target GoogleSanitizer::memory)
     elseif(sanitizer_name STREQUAL UBSAN)
       set(sanitizer_target GoogleSanitizer::undefined)
     elseif(sanitizer_name STREQUAL TSAN)
@@ -128,7 +130,6 @@ function(__test_impl)
       endif()
     else()
       set(this_${sanitizer_name} FALSE)
-      # message(WARNING "no ${sanitizer_name}")
     endif()
   endforeach()
 
@@ -197,6 +198,16 @@ function(__test_impl)
 
     if(tool STREQUAL ASAN)
       target_link_libraries(${new_target} PRIVATE GoogleSanitizer::address)
+    elseif(tool STREQUAL MSAN)
+      target_link_libraries(${new_target} PRIVATE GoogleSanitizer::memory)
+      if(EXISTS "${sanitizer_suppression_dir}/msan.supp")
+        target_compile_options(
+          ${new_target} PRIVATE
+          -fsanitize-ignorelist=${sanitizer_suppression_dir}/msan.supp)
+        target_link_options(
+          ${new_target} PRIVATE
+          -fsanitize-ignorelist=${sanitizer_suppression_dir}/msan.supp)
+      endif()
     elseif(tool STREQUAL UBSAN)
       target_link_libraries(${new_target} PRIVATE GoogleSanitizer::undefined)
     elseif(tool STREQUAL TSAN)
