@@ -226,7 +226,7 @@ function(__test_impl)
     elseif(tool STREQUAL HELGRIND)
       set(helgrind_command
           $<TARGET_FILE:valgrind::valgrind> --tool=helgrind --error-exitcode=1
-          --trace-children=yes --gen-suppressions=all)
+          --trace-children=yes --gen-suppressions=all --max-threads=5000)
       foreach(suppression_file ${valgrind_suppression_files})
         set(helgrind_command
             "${helgrind_command} --suppressions=${suppression_file}")
