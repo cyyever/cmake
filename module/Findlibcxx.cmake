@@ -92,8 +92,6 @@ if(libcxx_FOUND)
 
   endif()
   target_compile_definitions(libcxx::libcxx
-                             INTERFACE $<$<CONFIG:Debug>:_LIBCPP_DEBUG=1>)
-  target_compile_definitions(libcxx::libcxx
                              INTERFACE _LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS)
 endif()
 cmake_pop_check_state()
