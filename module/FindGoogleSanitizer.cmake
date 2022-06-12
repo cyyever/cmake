@@ -41,6 +41,8 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
   endif()
   if(sanitizer_name STREQUAL "undefined" and NO_VPTR)
     LIST(APPEND CMAKE_REQUIRED_FLAGS "-fno-sanitize=vptr")
+  if(sanitizer_name STREQUAL "memory")
+    list(APPEND CMAKE_REQUIRED_FLAGS "-fsanitize-memory-track-origins=2")
   endif()
 
   set(CMAKE_REQUIRED_QUIET ON)

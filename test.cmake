@@ -114,9 +114,11 @@ function(__test_impl)
   endif()
 
   find_package(GoogleSanitizer REQUIRED)
-  foreach(sanitizer_name IN ITEMS ASAN TSAN UBSAN)
+  foreach(sanitizer_name IN ITEMS ASAN TSAN UBSAN MSAN)
     if(sanitizer_name STREQUAL ASAN)
       set(sanitizer_target GoogleSanitizer::address)
+    elseif(sanitizer_name STREQUAL MSAN)
+      set(sanitizer_target GoogleSanitizer::memory)
     elseif(sanitizer_name STREQUAL UBSAN)
       set(sanitizer_target GoogleSanitizer::undefined)
     elseif(sanitizer_name STREQUAL TSAN)
@@ -128,7 +130,6 @@ function(__test_impl)
       endif()
     else()
       set(this_${sanitizer_name} FALSE)
-      # message(WARNING "no ${sanitizer_name}")
     endif()
   endforeach()
 
@@ -173,7 +174,9 @@ function(__test_impl)
     set(LSAN_OPTIONS
         "${LSAN_OPTIONS}:suppressions=${sanitizer_suppression_dir}/lsan.supp")
   endif()
-  set(TSAN_OPTIONS "TSAN_OPTIONS=force_seq_cst_atomics=1:history_size=7")
+  set(TSAN_OPTIONS
+      "TSAN_OPTIONS=force_seq_cst_atomics=1:history_size=7:second_deadlock_stack=1"
+  )
   if(EXISTS "${sanitizer_suppression_dir}/tsan.supp")
     set(TSAN_OPTIONS
         "${TSAN_OPTIONS}:suppressions=${sanitizer_suppression_dir}/tsan.supp")
@@ -197,6 +200,16 @@ function(__test_impl)
 
     if(tool STREQUAL ASAN)
       target_link_libraries(${new_target} PRIVATE GoogleSanitizer::address)
+    elseif(tool STREQUAL MSAN)
+      target_link_libraries(${new_target} PRIVATE GoogleSanitizer::memory)
+      if(EXISTS "${sanitizer_suppression_dir}/msan.supp")
+        target_compile_options(
+          ${new_target}
+          PRIVATE -fsanitize-ignorelist=${sanitizer_suppression_dir}/msan.supp)
+        target_link_options(
+          ${new_target} PRIVATE
+          -fsanitize-ignorelist=${sanitizer_suppression_dir}/msan.supp)
+      endif()
     elseif(tool STREQUAL UBSAN)
       target_link_libraries(${new_target} PRIVATE GoogleSanitizer::undefined)
     elseif(tool STREQUAL TSAN)
@@ -205,7 +218,7 @@ function(__test_impl)
       set(memcheck_command
           $<TARGET_FILE:valgrind::valgrind> --tool=memcheck --error-exitcode=1
           --trace-children=yes --gen-suppressions=all --track-fds=yes
-          --leak-check=full)
+          --leak-check=full --max-threads=5000)
       foreach(suppression_file ${valgrind_suppression_files})
         set(memcheck_command
             "${memcheck_command} --suppressions=${suppression_file}")
@@ -215,7 +228,7 @@ function(__test_impl)
     elseif(tool STREQUAL HELGRIND)
       set(helgrind_command
           $<TARGET_FILE:valgrind::valgrind> --tool=helgrind --error-exitcode=1
-          --trace-children=yes --gen-suppressions=all)
+          --trace-children=yes --gen-suppressions=all --max-threads=5000)
       foreach(suppression_file ${valgrind_suppression_files})
         set(helgrind_command
             "${helgrind_command} --suppressions=${suppression_file}")
