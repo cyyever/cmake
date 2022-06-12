@@ -28,7 +28,7 @@ set(libcxx_ROOT_DIR
 include(FindPackageHandleStandardArgs)
 find_path(
   libcxx_include_dir
-  NAMES __libcpp_version
+  NAMES version
   PATHS ${libcxx_ROOT_DIR}
   PATH_SUFFIXES include/c++/v1/
   NO_DEFAULT_PATH)
@@ -37,7 +37,7 @@ find_library(
   libcxx_lib_path
   NAMES c++
   PATHS ${libcxx_ROOT_DIR}
-  PATH_SUFFIXES lib
+  PATH_SUFFIXES lib lib/x86_64-unknown-linux-gnu
   NO_DEFAULT_PATH)
 
 find_package_handle_standard_args(libcxx DEFAULT_MSG libcxx_include_dir
@@ -51,7 +51,9 @@ include(CMakePushCheckState)
 cmake_push_check_state(RESET)
 
 set(CMAKE_REQUIRED_FLAGS "-nostdinc++")
-set(CMAKE_REQUIRED_INCLUDES ${libcxx_include_dir})
+set(CMAKE_REQUIRED_INCLUDES
+    ${libcxx_include_dir}
+    ${libcxx_include_dir}/../../x86_64-unknown-linux-gnu/c++/v1)
 set(CMAKE_REQUIRED_LINK_OPTIONS -nodefaultlibs -L${libcxx_lib_dir})
 set(CMAKE_REQUIRED_LIBRARIES c++ m c gcc gcc_s)
 if(NOT CMAKE_SYSTEM_NAME MATCHES FreeBSD)
