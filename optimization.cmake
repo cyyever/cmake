@@ -1,19 +1,22 @@
 include_guard(GLOBAL)
-option(WITH_IPO "enable ipo" OFF)
+option(WITH_IPO "enable IPO" OFF)
 if(NOT WITH_IPO)
   return()
 endif()
 
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 include(CheckIPOSupported)
-set(c_or_cxx)
+set(c_family)
 if("C" IN_LIST languages)
-  list(APPEND c_or_cxx "C")
+  list(APPEND c_family "C")
 endif()
 if("CXX" IN_LIST languages)
-  list(APPEND c_or_cxx "CXX")
+  list(APPEND c_family "CXX")
 endif()
-check_ipo_supported(RESULT result OUTPUT output LANGUAGES ${c_or_cxx})
+check_ipo_supported(
+  RESULT result
+  OUTPUT output
+  LANGUAGES ${c_family})
 if(result)
   set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
 else()
