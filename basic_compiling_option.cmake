@@ -30,6 +30,7 @@ if(NOT DEFINED CMAKE_CUDA_EXTENSIONS)
   set(CMAKE_CUDA_EXTENSIONS OFF)
 endif()
 
+option(DEBUG_VECTORIZATION "debug vectorization failures" OFF)
 # add common options
 foreach(lang IN LISTS languages)
   set(c_languages "C;CXX")
@@ -39,6 +40,13 @@ foreach(lang IN LISTS languages)
   if(CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
     set(CMAKE_${lang}_FLAGS
         "${CMAKE_${lang}_FLAGS} -Weverything -ferror-limit=1")
+
+    if(DEBUG_VECTORIZATION)
+      set(CMAKE_${lang}_FLAGS
+          "${CMAKE_${lang}_FLAGS} -Rpass-analysis=loop-vectorize -Rpass-missed=loop-vectorize -Rpass=loop-vectorize"
+      )
+    endif()
+
   elseif(CMAKE_${lang}_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_${lang}_FLAGS
         "${CMAKE_${lang}_FLAGS} -Wall -Wextra -fmax-errors=1")
@@ -47,6 +55,11 @@ foreach(lang IN LISTS languages)
       if(ANALYSIS_ON_COMPILATION)
         set(CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} -fanalyzer")
       endif()
+    endif()
+    if(DEBUG_VECTORIZATION)
+      set(CMAKE_${lang}_FLAGS
+          "${CMAKE_${lang}_FLAGS} -fopt-info-vec-missed")
+      )
     endif()
   elseif(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_${lang}_FLAGS
