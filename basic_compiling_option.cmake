@@ -57,8 +57,7 @@ foreach(lang IN LISTS languages)
       endif()
     endif()
     if(DEBUG_VECTORIZATION)
-      set(CMAKE_${lang}_FLAGS
-          "${CMAKE_${lang}_FLAGS} -fopt-info-vec-missed")
+      set(CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} -fopt-info-vec-missed")
     endif()
   elseif(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_${lang}_FLAGS
