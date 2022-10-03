@@ -157,7 +157,8 @@ function(__test_impl)
     endif()
   endif()
 
-  get_target_property(new_env ${this_TARGET} ENVIRONMENT)
+  get_test_property(new_env ${this_TARGET} ENVIRONMENT)
+  list(APPEND new_env "DEBUGINFOD_URLS=$ENV{DEBUGINFOD_URLS}")
   if(ENABLE_LLVM_CODE_COVERAGE)
     list(APPEND new_env
          "LLVM_PROFILE_FILE=${CMAKE_BINARY_DIR}/profraw_dir/%p.profraw")
