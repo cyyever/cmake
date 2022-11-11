@@ -52,6 +52,7 @@ if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
       COMMAND
         ${Python3_EXECUTABLE} "$<TARGET_FILE:ClangTools::run-clang-tidy>"  -clang-tidy-binary
         "$<TARGET_FILE:ClangTools::clang-tidy>" -p ${CMAKE_BINARY_DIR} "-quiet"
+        -excluded-file-patterns "pb[.]cc"
         ${EXTRA-ARGS} ${CHECKES} | grep -v 'clang.*tidy.*checks' >
         ./run-clang-tidy.txt
       DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
