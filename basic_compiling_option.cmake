@@ -68,7 +68,7 @@ endforeach()
 if(CXX IN_LIST languages)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(CMAKE_CXX_FLAGS
-        "${CMAKE_CXX_FLAGS} -Wno-unknown-cuda-version -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-weak-vtables -Wno-disabled-macro-expansion -Wno-reserved-id-macro -Wno-global-constructors -Wno-exit-time-destructors -Wno-double-promotion -Wno-padded -Wno-gnu-zero-variadic-macro-arguments -Wno-ctad-maybe-unsupported -Wno-reserved-identifier"
+        "${CMAKE_CXX_FLAGS} -Wno-unknown-cuda-version -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-weak-vtables -Wno-disabled-macro-expansion -Wno-reserved-id-macro -Wno-global-constructors -Wno-exit-time-destructors -Wno-double-promotion -Wno-padded -Wno-gnu-zero-variadic-macro-arguments -Wno-ctad-maybe-unsupported -Wno-reserved-identifier -Wno-c++20-compat"
     )
     # add_compile_definitions($<$<CONFIG:Debug>:_LIBCPP_DEBUG=1>)
   elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
