@@ -6,7 +6,7 @@ endif()
 find_package(mold QUIET)
 if(TARGET mold::mold)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    add_link_options("-ld-path=$<TARGET_FILE:mold::mold>")
+    add_link_options("-fuse-ld=mold")
   elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION
                                                   VERSION_GREATER 12.0)
     add_link_options("-fuse-ld=mold")
