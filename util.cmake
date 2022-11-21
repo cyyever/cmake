@@ -48,7 +48,7 @@ then
 else
   sed_cmd=sed
 fi
-for source_file in $(grep '"file":' $1 | ${sed_cmd} -e 's/"file"://' | ${sed_cmd} -e 's/[^"]*"\([^"]*\)"/\1/')
+for source_file in $(grep '"file":' $1 | ${sed_cmd} -e 's/"file"://' | ${sed_cmd} -e 's/[^"]*"\([^"]*\)"/\1/' | grep -v 'pb.h' | grep -v 'pb.cc')
 do
   source_dir=$(dirname ${source_file})
   for head in $(${sed_cmd} -n -e 's/^\s*#include[^"]*"\([^"]*\)"/\1/p' ${source_file})
