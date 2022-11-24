@@ -67,7 +67,7 @@ if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
       do_cppcheck
       COMMAND
         cppcheck::cppcheck --project=${CMAKE_BINARY_DIR}/compile_commands.json
-        --std=c++20 --enable=all --inconclusive 2> ./do_cppcheck.txt
+        --std=c++20 --enable=all --check-config --template='{file}:{line},{severity},{id},{message}' --inconclusive 2> ./do_cppcheck.txt
       DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
   endif()
