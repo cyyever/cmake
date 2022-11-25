@@ -99,7 +99,7 @@ if(CXX IN_LIST languages)
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 19.26)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:preprocessor")
     endif()
-    add_compile_definitions($<$<CONFIG:Debug>:_CRT_SECURE_NO_WARNINGS>)
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
   endif()
 endif()
 
