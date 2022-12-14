@@ -15,17 +15,17 @@ function(clone_executable old_target new_target)
   add_executable(${new_target} ${source_files})
 
   # get all properties
-  execute_process(COMMAND ${CMAKE_COMMAND} --help-property-list OUTPUT_VARIABLE CMAKE_PROPERTY_LIST)
+  execute_process(COMMAND ${CMAKE_COMMAND} --help-property-list
+                  OUTPUT_VARIABLE CMAKE_PROPERTY_LIST)
   # Convert command output into a CMake list
-  string(REGEX REPLACE "[\n\r]" ";" CMAKE_PROPERTY_LIST "${CMAKE_PROPERTY_LIST}")
+  string(REGEX REPLACE "[\n\r]" ";" CMAKE_PROPERTY_LIST
+                       "${CMAKE_PROPERTY_LIST}")
 
   foreach(property IN LISTS CMAKE_PROPERTY_LIST)
-    if(
-	property STREQUAL ""
-	OR property STREQUAL "TYPE"
-	OR property MATCHES ".*LOCATION.*"
-	OR property STREQUAL "NAME"
-	)
+    if(property STREQUAL ""
+       OR property STREQUAL "TYPE"
+       OR property MATCHES ".*LOCATION.*"
+       OR property STREQUAL "NAME")
       continue()
     endif()
 
@@ -35,12 +35,14 @@ function(clone_executable old_target new_target)
       continue()
     endif()
 
-    set_target_properties(${new_target} PROPERTIES "${property}" "${property_value}")
-  ENDFOREACH()
+    set_target_properties(${new_target} PROPERTIES "${property}"
+                                                   "${property_value}")
+  endforeach()
 endfunction()
 
-function (get_all_sources_and_headers)
-  set(get_all_sources_and_headers [=[
+function(get_all_sources_and_headers)
+  set(get_all_sources_and_headers
+      [=[
 #!/bin/sh
 if command -v gsed >/dev/null
 then
@@ -64,5 +66,6 @@ do
   fi
 done
   ]=])
-  file(WRITE ${CMAKE_BINARY_DIR}/get_all_sources_and_headers.sh ${get_all_sources_and_headers})
+  file(WRITE ${CMAKE_BINARY_DIR}/get_all_sources_and_headers.sh
+       ${get_all_sources_and_headers})
 endfunction()
