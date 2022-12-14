@@ -1,10 +1,6 @@
 include_guard(GLOBAL)
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 
-if(NOT DEFINED CMAKE_COLOR_DIAGNOSTICS)
-  set(CMAKE_COLOR_DIAGNOSTICS ON)
-endif()
-
 if(C IN_LIST languages AND NOT DEFINED CMAKE_C_STANDARD)
   set(CMAKE_C_STANDARD 11)
   set(CMAKE_C_STANDARD_REQUIRED OFF)
@@ -68,6 +64,9 @@ foreach(lang IN LISTS languages)
         "${CMAKE_${lang}_FLAGS} /MP /utf-8 /W4 /nologo /wd5072")
   endif()
 endforeach()
+
+set(CMAKE_COLOR_DIAGNOSTICS ON)
+
 
 if(CXX IN_LIST languages)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
