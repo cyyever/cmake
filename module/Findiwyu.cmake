@@ -9,7 +9,7 @@ include_guard()
 include(FindPackageHandleStandardArgs)
 
 if(NOT TARGET iwyu::iwyu_tool)
-  find_program(iwyu_tool_BINARY NAMES iwyu_tool.py iwyu.py iwyu iwyu-tool)
+  find_program(iwyu_tool_BINARY NAMES iwyu_tool.py iwyu-tool iwyu_tool)
   find_package_handle_standard_args(iwyu_tool DEFAULT_MSG iwyu_tool_BINARY)
   if(iwyu_tool_FOUND)
     add_executable(iwyu::iwyu_tool IMPORTED)
