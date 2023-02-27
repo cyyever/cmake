@@ -30,31 +30,29 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/module)
 
-if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+option(CLANG_TIDY_CONFIG ".clang-tidy path" OFF)
+if(NOT TARGET do_run_clang_tidy AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   find_package(ClangTools QUIET)
   find_package(Python3 QUIET COMPONENTS Interpreter)
-  if(clang-tidy_FOUND
-     AND run-clang-tidy_FOUND
-     AND Python3_FOUND
-     AND NOT TARGET do_run_clang_tidy)
-    set(EXTRA-ARGS -extra-arg='-std=c++2b' -extra-arg='-Qunused-arguments')
-    set(CHECKES
-      "-checks='*,-cert-err58-cpp,-clang-analyzer-cplusplus.NewDeleteLeaks,-clang-diagnostic*,-clang-diagnostic-ctad-maybe-unsupported,-clang-diagnostic-gnu-zero-variadic-macro-arguments,-clang-diagnostic-ignored-optimization-argument,-cppcoreguidelines-avoid-magic-numbers,-cppcoreguidelines-init-variables,-cppcoreguidelines-non-private-member-variables-in-classes,-cppcoreguidelines-owning-memory,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-vararg,-fuchsia-default-arguments*,-fuchsia-default-arguments-calls,-fuchsia-default-arguments-declarations,-fuchsia-overloaded-operator,-fuchsia-statically-constructed-objects,-google-build-using-namespace,-google-readability*,-google-readability-namespace-comments,-hicpp-braces-around-statements,-hicpp-no-array-decay,-hicpp-signed-bitwise,-hicpp-vararg,-llvm-else-after-return,-llvm-header-guard,-llvm-include-order,-llvmlibc*,-llvm-namespace-comment,-llvm-qualified-auto,-misc-non-private-member-variables-in-classes,-misc-no-recursion,-modernize-use-nodiscard,-modernize-use-trailing-return-type,-readability*,-readability-implicit-bool-conversion,-readability-magic-numbers,-readability-redundant-access-specifiers,-misc-const-correctness'"
-    )
-    if(C IN_LIST languages AND NOT CXX IN_LIST languages)
-      set(EXTRA-ARGS)
-      set(CHECKES
-          "-checks='*,-modernize*,-*readability*,-hicpp-braces*,-cppcoreguidelines*,-misc-non-private-member-variables-in-classes,-hicpp-no-malloc,-*uppercase-literal-suffix*,-llvm-include-order,-bugprone-narrowing-conversions,-performance-type-promotion-in-math-fn,-hicpp-signed-bitwise'"
-      )
+  if(TARGET ClangTools::run-clang-tidy
+     AND TARGET ClangTools::clang-tidy
+     AND TARGET Python3::Interpreter)
+    if(NOT CLANG_TIDY_CONFIG)
+      if(EXISTS "${CMAKE_SOURCE_DIR}/.clang-tidy")
+        set(CLANG_TIDY_CONFIG "${CMAKE_SOURCE_DIR}/.clang-tidy")
+      elseif(CXX IN_LIST languages
+             AND EXISTS "$ENV{HOME}/opt/cli_tool_configs/cpp-clang-tidy")
+        set(CLANG_TIDY_CONFIG "$ENV{HOME}/opt/cli_tool_configs/cpp-clang-tidy")
+      endif()
     endif()
     add_custom_target(
       do_run_clang_tidy
       COMMAND
-        ${Python3_EXECUTABLE} "$<TARGET_FILE:ClangTools::run-clang-tidy>"  -clang-tidy-binary
-        "$<TARGET_FILE:ClangTools::clang-tidy>" -p ${CMAKE_BINARY_DIR} "-quiet"
-        -excluded-file-patterns "pb[.]cc"
-        ${EXTRA-ARGS} ${CHECKES} | grep -v 'clang.*tidy.*checks' >
-        ./run-clang-tidy.txt
+        Python3::Interpreter "$<TARGET_FILE:ClangTools::run-clang-tidy>"
+        -clang-tidy-binary "$<TARGET_FILE:ClangTools::clang-tidy>" -p
+        ${CMAKE_BINARY_DIR} "-quiet" -excluded-file-patterns
+        "'(.*/third_party/.*)|(.*[.]pb[.])|(.*/test/.*)|(.*/build/.*)'"
+        -format-style=file -timeout=7200 -config-file "${CLANG_TIDY_CONFIG}"  > ./run-clang-tidy.txt
       DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
   endif()
@@ -67,7 +65,9 @@ if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
       do_cppcheck
       COMMAND
         cppcheck::cppcheck --project=${CMAKE_BINARY_DIR}/compile_commands.json
-        --std=c++20 --enable=all --check-config --template='{file}:{line},{severity},{id},{message}' --inconclusive 2> ./do_cppcheck.txt
+        --std=c++20 --enable=all --check-config
+        --template='{file}:{line},{severity},{id},{message}' --inconclusive 2>
+        ./do_cppcheck.txt
       DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
   endif()
@@ -91,7 +91,8 @@ if(PVS-Studio_FOUND)
   if(NOT WIN32)
     add_custom_target(
       do_pvs_studio_analysis
-      COMMAND PVS-Studio::analyzer analyze --intermodular -a 31 -o ./pvs-studio.log -j8 || true
+      COMMAND PVS-Studio::analyzer analyze --intermodular -a 31 -o
+              ./pvs-studio.log -j8 || true
       COMMAND
         PVS-Studio::plog-converter -t tasklist -a
         'GA:1,2,3;64:1,2,3;OP:1,2,3;CS:1,2,3' -o ./pvs-studio-report.txt

@@ -66,7 +66,7 @@ foreach(lang IN LISTS languages)
 endforeach()
 
 set(CMAKE_COLOR_DIAGNOSTICS ON)
-
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(CXX IN_LIST languages)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")

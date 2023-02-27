@@ -93,5 +93,7 @@ if(libcxx_FOUND)
   endif()
   target_compile_definitions(libcxx::libcxx
                              INTERFACE _LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS)
+  target_compile_definitions(libcxx::libcxx
+                             INTERFACE _LIBCPP_ENABLE_EXPERIMENTAL)
 endif()
 cmake_pop_check_state()
