@@ -19,14 +19,11 @@ endforeach()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  add_custom_target(
-    copy_compile_commands_json
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/compile_commands.json
-            ${CMAKE_SOURCE_DIR}
-    DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-endif()
+# if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") add_custom_target(
+# copy_compile_commands_json COMMAND ${CMAKE_COMMAND} -E copy
+# ${CMAKE_BINARY_DIR}/compile_commands.json ${CMAKE_SOURCE_DIR} DEPENDS
+# ${CMAKE_BINARY_DIR}/compile_commands.json WORKING_DIRECTORY
+# ${CMAKE_BINARY_DIR}) endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/module)
 
@@ -52,7 +49,8 @@ if(NOT TARGET do_run_clang_tidy AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         -clang-tidy-binary "$<TARGET_FILE:ClangTools::clang-tidy>" -p
         ${CMAKE_BINARY_DIR} "-quiet" -excluded-file-patterns
         "'(.*/third_party/.*)|(.*[.]pb[.])|(.*/test/.*)|(.*/build/.*)'"
-        -format-style=file -timeout=7200 -config-file "${CLANG_TIDY_CONFIG}"  > ./run-clang-tidy.txt
+        -format-style=file -timeout=7200 -config-file "${CLANG_TIDY_CONFIG}" >
+        ./run-clang-tidy.txt
       DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
   endif()
@@ -66,7 +64,7 @@ if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
       COMMAND
         cppcheck::cppcheck --project=${CMAKE_BINARY_DIR}/compile_commands.json
         --std=c++20 --enable=all --check-config
-        --template='{file}:{line},{severity},{id},{message}' --inconclusive 2>
+        --template="'{file}:{line},{severity},{id},{message}'" --inconclusive 2>
         ./do_cppcheck.txt
       DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -91,11 +89,13 @@ if(PVS-Studio_FOUND)
   if(NOT WIN32)
     add_custom_target(
       do_pvs_studio_analysis
-      COMMAND PVS-Studio::analyzer analyze --intermodular -a 31 -o
-              ./pvs-studio.log -j8 || true
+      COMMAND
+        PVS-Studio::analyzer analyze --intermodular --file
+        "${CMAKE_BINARY_DIR}/compile_commands.json" -a 31 -o ./pvs-studio.log
+        -j8 || true
       COMMAND
         PVS-Studio::plog-converter -t tasklist -a
-        'GA:1,2,3;64:1,2,3;OP:1,2,3;CS:1,2,3' -o ./pvs-studio-report.txt
+        "'GA:1,2,3;64:1,2,3;OP:1,2,3;CS:1,2,3'" -o ./pvs-studio-report.txt
         ./pvs-studio.log
       DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
