@@ -8,7 +8,7 @@
 #  GoogleSanitizer::memory
 include_guard(GLOBAL)
 
-option(NO_SANITIZE_VPTR "no vptr sanitizer" OFF)
+option(ADDITIONAL_UBSAN_OPTIONS "additional UBSAN options" OFF)
 
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 
@@ -38,8 +38,14 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
       continue()
     endif()
   endif()
-  if(sanitizer_name STREQUAL "undefined" AND NO_SANITIZE_VPTR)
-    list(APPEND CMAKE_REQUIRED_FLAGS "-fno-sanitize=vptr")
+  if(sanitizer_name STREQUAL "address")
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL
+                                                 "Clang")
+      list(APPEND CMAKE_REQUIRED_FLAGS "-shared-libasan")
+    endif()
+  endif()
+  if(sanitizer_name STREQUAL "undefined" AND ADDITIONAL_UBSAN_OPTIONS)
+    list(APPEND CMAKE_REQUIRED_FLAGS "${ADDITIONAL_UBSAN_OPTIONS}")
   endif()
   if(sanitizer_name STREQUAL "memory")
     list(APPEND CMAKE_REQUIRED_FLAGS "-fsanitize-memory-track-origins=2")
