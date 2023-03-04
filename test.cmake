@@ -35,7 +35,8 @@ function(__add_fuzzing_test target target_command)
   add_custom_target(
     __working_dir_for_${target}
     COMMAND ${CMAKE_COMMAND} -E make_directory fuzz_test/__${target}
-    COMMAND
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            $<PATH:APPEND,${CMAKE_BINARY_DIR},$<CONFIG>> fuzz_test/__${target}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
   add_test(
