@@ -9,6 +9,12 @@ set(valgrind_suppression_dir $ENV{HOME}/opt/cli_tool_configs/valgrind_supp)
 set(sanitizer_suppression_dir $ENV{HOME}/opt/cli_tool_configs/sanitizer_supp)
 
 option(DISABLE_RUNTIME_ANALYSIS "Disable all runtime analysis" OFF)
+get_property(isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(NOT isMultiConfig)
+  set(LIB_DIRECTORY "${CMAKE_BINARY_DIR}")
+else()
+  set(LIB_DIRECTORY $<PATH:APPEND,${CMAKE_BINARY_DIR},$<CONFIG>>)
+endif()
 
 function(__add_fuzzing_test target target_command)
   set_target_properties(${target} PROPERTIES INTERPROCEDURAL_OPTIMIZATION FALSE)
@@ -35,9 +41,9 @@ function(__add_fuzzing_test target target_command)
   add_custom_target(
     __working_dir_for_${target}
     COMMAND ${CMAKE_COMMAND} -E make_directory fuzz_test/__${target}
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-            $<PATH:APPEND,${CMAKE_BINARY_DIR},$<CONFIG>> fuzz_test/__${target}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${LIB_DIRECTORY}"
+            fuzz_test/__${target}
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
   add_test(
     NAME ${target}
@@ -223,7 +229,7 @@ function(__test_impl)
       set(memcheck_command
           $<TARGET_FILE:valgrind::valgrind> --tool=memcheck --error-exitcode=1
           --trace-children=yes --gen-suppressions=all --track-fds=yes
-          --leak-check=full --max-threads=5000)
+          --leak-check=full)
       foreach(suppression_file ${valgrind_suppression_files})
         set(memcheck_command
             "${memcheck_command} --suppressions=${suppression_file}")
@@ -270,7 +276,7 @@ function(__test_impl)
       add_test(
         NAME ${new_target}
         COMMAND ${new_target_command} ${this_ARGS}
-        WORKING_DIRECTORY $<PATH:APPEND,${CMAKE_BINARY_DIR},$<CONFIG>>)
+        WORKING_DIRECTORY "${LIB_DIRECTORY}")
     endif()
     set_tests_properties(${new_target} PROPERTIES ENVIRONMENT "${new_env}")
   endforeach()
@@ -282,7 +288,7 @@ function(__test_impl)
       add_test(
         NAME ${this_TARGET}
         COMMAND ${this_TARGET} ${this_ARGS}
-        WORKING_DIRECTORY $<PATH:APPEND,${CMAKE_BINARY_DIR},$<CONFIG>>)
+        WORKING_DIRECTORY "${LIB_DIRECTORY}")
     endif()
   endif()
 endfunction()
