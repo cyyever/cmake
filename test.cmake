@@ -184,7 +184,7 @@ function(__test_impl)
         "${LSAN_OPTIONS}:suppressions=${sanitizer_suppression_dir}/lsan.supp")
   endif()
   set(TSAN_OPTIONS
-      "TSAN_OPTIONS=force_seq_cst_atomics=1:history_size=7:second_deadlock_stack=1"
+      "TSAN_OPTIONS=ignore_noninstrumented_modules=1:force_seq_cst_atomics=1:history_size=7:second_deadlock_stack=1"
   )
   if(EXISTS "${sanitizer_suppression_dir}/tsan.supp")
     set(TSAN_OPTIONS
