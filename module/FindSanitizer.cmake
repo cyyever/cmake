@@ -22,19 +22,17 @@ set(_source_code
   ]==])
 
 include(CMakePushCheckState)
-cmake_push_check_state(RESET)
 foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
   if(TARGET Sanitizer::${sanitizer_name})
     continue()
   endif()
+  cmake_push_check_state(RESET)
 
   set(CMAKE_REQUIRED_QUIET ON)
   foreach(lang IN LISTS languages)
     if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
       if(sanitizer_name STREQUAL "address")
         set(SANITIZER_FLAGS "/fsanitize=${sanitizer_name}")
-        # ASAN is supported only on Release builds
-        set(SANITIZER_FLAGS "/MD")
       else()
         continue()
       endif()
@@ -59,11 +57,23 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
     set(CMAKE_REQUIRED_LINK_OPTIONS "${SANITIZER_LINK_FLAGS}")
 
     if(lang STREQUAL C)
-      include(CheckCSourceRuns)
-      check_c_source_runs("${_source_code}" __res)
+      # ASAN is supported only on Release builds
+      if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
+        include(CheckCSourceCompiles)
+        check_c_source_compiles("${_source_code}" __res)
+      else()
+        include(CheckCSourceRuns)
+        check_c_source_runs("${_source_code}" __res)
+      endif()
     elseif(lang STREQUAL CXX)
-      include(CheckCXXSourceRuns)
-      check_cxx_source_runs("${_source_code}" __res)
+      # ASAN is supported only on Release builds
+      if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
+        include(CheckCXXSourceCompiles)
+        check_cxx_source_compiles("${_source_code}" __res)
+      else()
+        include(CheckCXXSourceRuns)
+        check_cxx_source_runs("${_source_code}" __res)
+      endif()
     else()
       continue()
     endif()
@@ -74,13 +84,29 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
       add_library(Sanitizer::${sanitizer_name} INTERFACE IMPORTED GLOBAL)
     endif()
     foreach(SANITIZER_FLAG IN LISTS SANITIZER_FLAGS)
-      target_compile_options(
-        Sanitizer::${sanitizer_name}
-        INTERFACE $<$<COMPILE_LANGUAGE:${lang}>:${SANITIZER_FLAG}>)
+      if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
+        target_compile_options(
+          Sanitizer::${sanitizer_name}
+          INTERFACE
+            $<$<AND:$<COMPILE_LANGUAGE:${lang}>,$<CONFIG:Release,RelWithDebInfo,MinSizeRel>>:${SANITIZER_FLAG}>
+        )
+      else()
+        target_compile_options(
+          Sanitizer::${sanitizer_name}
+          INTERFACE $<$<COMPILE_LANGUAGE:${lang}>:${SANITIZER_FLAG}>)
+      endif()
     endforeach()
     foreach(SANITIZER_FLAG IN LISTS SANITIZER_LINK_FLAGS)
-      target_link_options(Sanitizer::${sanitizer_name} INTERFACE
-                          $<$<COMPILE_LANGUAGE:${lang}>:${SANITIZER_FLAG}>)
+      if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
+        target_link_options(
+          Sanitizer::${sanitizer_name}
+          INTERFACE
+          $<$<AND:$<COMPILE_LANGUAGE:${lang}>,$<CONFIG:Release,RelWithDebInfo,MinSizeRel>>:${SANITIZER_FLAG}>
+        )
+      else()
+        target_link_options(Sanitizer::${sanitizer_name} INTERFACE
+                            $<$<COMPILE_LANGUAGE:${lang}>:${SANITIZER_FLAG}>)
+      endif()
     endforeach()
 
     if(sanitizer_name STREQUAL "address")
@@ -93,6 +119,5 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
       endif()
     endif()
   endforeach()
+  cmake_pop_check_state()
 endforeach()
-
-cmake_pop_check_state()
