@@ -30,11 +30,17 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
 
   set(CMAKE_REQUIRED_QUIET ON)
   foreach(lang IN LISTS languages)
-    set(SANITIZER_FLAGS "-fsanitize=${sanitizer_name};-fno-omit-frame-pointer")
-    if(sanitizer_name STREQUAL "address")
-      if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
+    if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
+      if(sanitizer_name STREQUAL "address")
         set(SANITIZER_FLAGS "/fsanitize=${sanitizer_name}")
+        # ASAN is supported only on Release builds
+        set(SANITIZER_FLAGS "/MD")
+      else()
+        continue()
       endif()
+    else()
+      set(SANITIZER_FLAGS
+          "-fsanitize=${sanitizer_name};-fno-omit-frame-pointer")
     endif()
     if(sanitizer_name STREQUAL "undefined" AND UBSAN_FLAGS)
       list(APPEND SANITIZER_FLAGS "${UBSAN_FLAGS}")
@@ -43,6 +49,14 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
       list(APPEND SANITIZER_FLAGS "-fsanitize-memory-track-origins=2")
     endif()
     string(REPLACE ";" " " CMAKE_REQUIRED_FLAGS "${SANITIZER_FLAGS}")
+
+    set(SANITIZER_LINK_FLAGS)
+    if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
+      list(APPEND SANITIZER_LINK_FLAGS "/INCREMENTAL:NO")
+    elseif(CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
+      list(APPEND SANITIZER_LINK_FLAGS "-shared-libasan")
+    endif()
+    set(CMAKE_REQUIRED_LINK_OPTIONS "${SANITIZER_LINK_FLAGS}")
 
     if(lang STREQUAL C)
       include(CheckCSourceRuns)
@@ -63,17 +77,11 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
       target_compile_options(
         Sanitizer::${sanitizer_name}
         INTERFACE $<$<COMPILE_LANGUAGE:${lang}>:${SANITIZER_FLAG}>)
-      target_link_options(
-        Sanitizer::${sanitizer_name}
-        INTERFACE
-        $<$<AND:$<NOT:$<${lang}_COMPILER_ID:MSVC>>,$<COMPILE_LANGUAGE:${lang}>>:${SANITIZER_FLAG}>
-      )
     endforeach()
-    target_link_options(
-      Sanitizer::${sanitizer_name}
-      INTERFACE
-      $<$<AND:$<${lang}_COMPILER_ID:MSVC>,$<COMPILE_LANGUAGE:${lang}>>:/INCREMENTAL:NO>
-    )
+    foreach(SANITIZER_FLAG IN LISTS SANITIZER_LINK_FLAGS)
+      target_link_options(Sanitizer::${sanitizer_name} INTERFACE
+                          $<$<COMPILE_LANGUAGE:${lang}>:${SANITIZER_FLAG}>)
+    endforeach()
 
     if(sanitizer_name STREQUAL "address")
       if(lang STREQUAL CXX)
@@ -83,21 +91,7 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
             $<$<COMPILE_LANGUAGE:${lang}>:_GLIBCXX_SANITIZE_VECTOR>
             $<$<COMPILE_LANGUAGE:${lang}>:_GLIBCXX_SANITIZE_STD_ALLOCATOR>)
       endif()
-      # target_link_options(
-      #   Sanitizer::${sanitizer_name} INTERFACE
-      #   $<$<AND:$<COMPILE_LANGUAGE:${lang}>,$<${lang}_COMPILER_ID:GNU>>:-lasan>)
-      target_link_options(
-        Sanitizer::${sanitizer_name}
-        INTERFACE
-        $<$<AND:$<COMPILE_LANGUAGE:${lang}>,$<${lang}_COMPILER_ID:Clang>>:-shared-libasan>
-      )
     endif()
-    # if(sanitizer_name STREQUAL "undefined")
-    #   target_link_options(
-    #     Sanitizer::${sanitizer_name} INTERFACE
-    #     $<$<AND:$<COMPILE_LANGUAGE:${lang}>,$<${lang}_COMPILER_ID:GNU>>:-lubsan>
-    #   )
-    # endif()
   endforeach()
 endforeach()
 
