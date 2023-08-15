@@ -66,13 +66,13 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
       target_link_options(
         Sanitizer::${sanitizer_name}
         INTERFACE
-        $<AND:$<NOT:$<${lang}_COMPILER_ID:MSVC>>,$<COMPILE_LANGUAGE:${lang}>>:${SANITIZER_FLAG}>
+        $<$<AND:$<NOT:$<${lang}_COMPILER_ID:MSVC>>,$<COMPILE_LANGUAGE:${lang}>>:${SANITIZER_FLAG}>
       )
     endforeach()
     target_link_options(
       Sanitizer::${sanitizer_name}
       INTERFACE
-      $<AND:$<${lang}_COMPILER_ID:MSVC>,$<COMPILE_LANGUAGE:${lang}>>:/INCREMENTAL:NO>
+      $<$<AND:$<${lang}_COMPILER_ID:MSVC>,$<COMPILE_LANGUAGE:${lang}>>:/INCREMENTAL:NO>
     )
 
     if(sanitizer_name STREQUAL "address")
@@ -83,21 +83,21 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
             $<$<COMPILE_LANGUAGE:${lang}>:_GLIBCXX_SANITIZE_VECTOR>
             $<$<COMPILE_LANGUAGE:${lang}>:_GLIBCXX_SANITIZE_STD_ALLOCATOR>)
       endif()
-      target_link_options(
-        Sanitizer::${sanitizer_name} INTERFACE
-        $<$<AND:$<COMPILE_LANGUAGE:${lang}>,$<${lang}_COMPILER_ID:GNU>>:-lasan>)
+      # target_link_options(
+      #   Sanitizer::${sanitizer_name} INTERFACE
+      #   $<$<AND:$<COMPILE_LANGUAGE:${lang}>,$<${lang}_COMPILER_ID:GNU>>:-lasan>)
       target_link_options(
         Sanitizer::${sanitizer_name}
         INTERFACE
         $<$<AND:$<COMPILE_LANGUAGE:${lang}>,$<${lang}_COMPILER_ID:Clang>>:-shared-libasan>
       )
     endif()
-    if(sanitizer_name STREQUAL "undefined")
-      target_link_options(
-        Sanitizer::${sanitizer_name} INTERFACE
-        $<$<AND:$<COMPILE_LANGUAGE:${lang}>,$<${lang}_COMPILER_ID:GNU>>:-lubsan>
-      )
-    endif()
+    # if(sanitizer_name STREQUAL "undefined")
+    #   target_link_options(
+    #     Sanitizer::${sanitizer_name} INTERFACE
+    #     $<$<AND:$<COMPILE_LANGUAGE:${lang}>,$<${lang}_COMPILER_ID:GNU>>:-lubsan>
+    #   )
+    # endif()
   endforeach()
 endforeach()
 
