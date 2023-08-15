@@ -43,7 +43,7 @@ function(__add_fuzzing_test target target_command)
     COMMAND ${CMAKE_COMMAND} -E make_directory
             ${CMAKE_CURRENT_BINARY_DIR}/fuzz_test/__${target}
     # COMMAND ${CMAKE_COMMAND} -E copy_directory "${LIB_DIRECTORY}"
-    #         ${CMAKE_CURRENT_BINARY_DIR}/fuzz_test/__${target}
+    # ${CMAKE_CURRENT_BINARY_DIR}/fuzz_test/__${target}
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
   add_test(
@@ -121,16 +121,16 @@ function(__test_impl)
     endforeach()
   endif()
 
-  find_package(GoogleSanitizer REQUIRED)
+  find_package(Sanitizer REQUIRED)
   foreach(sanitizer_name IN ITEMS ASAN TSAN UBSAN MSAN)
     if(sanitizer_name STREQUAL ASAN)
-      set(sanitizer_target GoogleSanitizer::address)
+      set(sanitizer_target Sanitizer::address)
     elseif(sanitizer_name STREQUAL MSAN)
-      set(sanitizer_target GoogleSanitizer::memory)
+      set(sanitizer_target Sanitizer::memory)
     elseif(sanitizer_name STREQUAL UBSAN)
-      set(sanitizer_target GoogleSanitizer::undefined)
+      set(sanitizer_target Sanitizer::undefined)
     elseif(sanitizer_name STREQUAL TSAN)
-      set(sanitizer_target GoogleSanitizer::thread)
+      set(sanitizer_target Sanitizer::thread)
     endif()
     if(TARGET ${sanitizer_target})
       if("${this_${sanitizer_name}}" STREQUAL "" OR "${this_${sanitizer_name}}")
@@ -197,7 +197,7 @@ function(__test_impl)
     find_package(libFuzzer REQUIRED)
     target_link_libraries(${this_TARGET} PRIVATE libFuzzer::libFuzzer)
     if(MSVC)
-      target_link_libraries(${this_TARGET} PRIVATE GoogleSanitizer::address)
+      target_link_libraries(${this_TARGET} PRIVATE Sanitizer::address)
     endif()
   endif()
   foreach(tool IN LISTS cpu_analysis_tools gpu_analysis_tools)
@@ -211,9 +211,9 @@ function(__test_impl)
     set(new_target_command $<TARGET_FILE:${new_target}>)
 
     if(tool STREQUAL ASAN)
-      target_link_libraries(${new_target} PRIVATE GoogleSanitizer::address)
+      target_link_libraries(${new_target} PRIVATE Sanitizer::address)
     elseif(tool STREQUAL MSAN)
-      target_link_libraries(${new_target} PRIVATE GoogleSanitizer::memory)
+      target_link_libraries(${new_target} PRIVATE Sanitizer::memory)
       if(EXISTS "${sanitizer_suppression_dir}/msan.supp")
         target_compile_options(
           ${new_target}
@@ -223,14 +223,14 @@ function(__test_impl)
           -fsanitize-ignorelist=${sanitizer_suppression_dir}/msan.supp)
       endif()
     elseif(tool STREQUAL UBSAN)
-      target_link_libraries(${new_target} PRIVATE GoogleSanitizer::undefined)
+      target_link_libraries(${new_target} PRIVATE Sanitizer::undefined)
     elseif(tool STREQUAL TSAN)
-      target_link_libraries(${new_target} PRIVATE GoogleSanitizer::thread)
+      target_link_libraries(${new_target} PRIVATE Sanitizer::thread)
     elseif(tool STREQUAL MEMCHECK)
       set(memcheck_command
           $<TARGET_FILE:valgrind::valgrind> --tool=memcheck --error-exitcode=1
-          --trace-children=yes --gen-suppressions=all --track-fds=yes
-          --leak-check=full)
+          --max-threads=10000 --trace-children=yes --gen-suppressions=all
+          --track-fds=yes --leak-check=full)
       foreach(suppression_file ${valgrind_suppression_files})
         set(memcheck_command
             "${memcheck_command} --suppressions=${suppression_file}")
