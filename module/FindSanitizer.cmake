@@ -64,7 +64,6 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
 
     unset(__res)
     if(lang STREQUAL C)
-      # ASAN is supported only on Release builds
       if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
         include(CheckCSourceCompiles)
         check_c_source_compiles("${_source_code}" __res)
@@ -73,7 +72,6 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
         check_c_source_runs("${_source_code}" __res)
       endif()
     else()
-      # ASAN is supported only on Release builds
       if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
         include(CheckCXXSourceCompiles)
         check_cxx_source_compiles("${_source_code}" __res)
@@ -89,38 +87,29 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
       add_library(Sanitizer::${sanitizer_name} INTERFACE IMPORTED GLOBAL)
     endif()
     foreach(SANITIZER_FLAG IN LISTS SANITIZER_FLAGS)
-      if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
-        target_compile_options(
-          Sanitizer::${sanitizer_name}
-          INTERFACE
-            $<$<AND:$<COMPILE_LANGUAGE:${lang}>,$<CONFIG:Release,RelWithDebInfo,MinSizeRel>>:${SANITIZER_FLAG}>
-        )
-      else()
-        target_compile_options(
-          Sanitizer::${sanitizer_name}
-          INTERFACE $<$<COMPILE_LANGUAGE:${lang}>:${SANITIZER_FLAG}>)
-      endif()
+      target_compile_options(
+        Sanitizer::${sanitizer_name}
+        INTERFACE $<$<COMPILE_LANGUAGE:${lang}>:${SANITIZER_FLAG}>)
     endforeach()
     foreach(SANITIZER_FLAG IN LISTS SANITIZER_LINK_FLAGS)
-      if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
-        target_link_options(
-          Sanitizer::${sanitizer_name}
-          INTERFACE
-          $<$<AND:$<COMPILE_LANGUAGE:${lang}>,$<CONFIG:Release,RelWithDebInfo,MinSizeRel>>:${SANITIZER_FLAG}>
-        )
-      else()
-        target_link_options(Sanitizer::${sanitizer_name} INTERFACE
-                            $<$<COMPILE_LANGUAGE:${lang}>:${SANITIZER_FLAG}>)
-      endif()
+      target_link_options(Sanitizer::${sanitizer_name} INTERFACE
+                          $<$<COMPILE_LANGUAGE:${lang}>:${SANITIZER_FLAG}>)
     endforeach()
 
     if(sanitizer_name STREQUAL "address")
       if(lang STREQUAL CXX)
-        target_compile_definitions(
-          Sanitizer::${sanitizer_name}
-          INTERFACE
-            $<$<COMPILE_LANGUAGE:${lang}>:_GLIBCXX_SANITIZE_VECTOR>
-            $<$<COMPILE_LANGUAGE:${lang}>:_GLIBCXX_SANITIZE_STD_ALLOCATOR>)
+        if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
+          target_compile_definitions(
+            Sanitizer::${sanitizer_name}
+            INTERFACE $<$<COMPILE_LANGUAGE:${lang}>:_DISABLE_VECTOR_ANNOTATION>
+                      $<$<COMPILE_LANGUAGE:${lang}>:_DISABLE_STRING_ANNOTATION>)
+        else()
+          target_compile_definitions(
+            Sanitizer::${sanitizer_name}
+            INTERFACE
+              $<$<COMPILE_LANGUAGE:${lang}>:_GLIBCXX_SANITIZE_VECTOR>
+              $<$<COMPILE_LANGUAGE:${lang}>:_GLIBCXX_SANITIZE_STD_ALLOCATOR>)
+        endif()
       endif()
     endif()
   endforeach()
