@@ -11,7 +11,7 @@ if(NOT DEFINED CMAKE_C_EXTENSIONS)
 endif()
 
 if(CXX IN_LIST languages AND NOT DEFINED CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 23)
+  set(CMAKE_CXX_STANDARD 20)
   if(CMAKE_CXX_STANDARD LESS 17)
     message(FATAL_ERROR "only C++17 or above is supported")
   endif()
