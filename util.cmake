@@ -22,13 +22,16 @@ function(clone_executable old_target new_target)
                        "${CMAKE_PROPERTY_LIST}")
 
   foreach(property IN LISTS CMAKE_PROPERTY_LIST)
-    if(property STREQUAL ""
-       OR property STREQUAL "TYPE"
-       OR property MATCHES ".*LOCATION.*"
-       OR property STREQUAL "NAME")
+    if(property STREQUAL "" OR property MATCHES ".*LOCATION.*")
       continue()
     endif()
 
+    set(SKIPPED_PROPERTIES
+        "TYPE;NAME;ALIAS_GLOBAL;BINARY_DIR;CXX_MODULE_SETS;IMPORTED;INTERFACE_CXX_MODULE_SETS;LOCATION;SOURCE_DIR"
+    )
+    if(property IN_LIST SKIPPED_PROPERTIES)
+      continue()
+    endif()
     get_target_property(property_value ${old_target} "${property}")
 
     if(NOT property_value)
