@@ -9,6 +9,7 @@
 include_guard(GLOBAL)
 
 option(UBSAN_FLAGS "additional UBSAN flags" OFF)
+option(MSAN_FLAGS "additional UBSAN flags" OFF)
 
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 
@@ -48,6 +49,9 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
     endif()
     if(sanitizer_name STREQUAL "memory")
       list(APPEND SANITIZER_FLAGS "-fsanitize-memory-track-origins=2")
+      if(MSAN_FLAGS)
+          list(APPEND SANITIZER_FLAGS "${MSAN_FLAGS}")
+      endif()
     endif()
     string(REPLACE ";" " " CMAKE_REQUIRED_FLAGS "${SANITIZER_FLAGS}")
 
@@ -83,9 +87,7 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
     if(NOT __res)
       continue()
     endif()
-    if(NOT TARGET Sanitizer::${sanitizer_name})
-      add_library(Sanitizer::${sanitizer_name} INTERFACE IMPORTED GLOBAL)
-    endif()
+    add_library(Sanitizer::${sanitizer_name} INTERFACE IMPORTED GLOBAL)
     foreach(SANITIZER_FLAG IN LISTS SANITIZER_FLAGS)
       target_compile_options(
         Sanitizer::${sanitizer_name}
