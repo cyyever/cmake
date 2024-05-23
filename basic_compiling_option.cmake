@@ -39,7 +39,7 @@ foreach(lang IN LISTS languages)
   endif()
   if(CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
     set(CMAKE_${lang}_FLAGS
-        "${CMAKE_${lang}_FLAGS} -Weverything -ferror-limit=1")
+        "${CMAKE_${lang}_FLAGS} -Weverything -ferror-limit=1 -fexperimental-library")
 
     if(DEBUG_VECTORIZATION)
       set(CMAKE_${lang}_FLAGS
