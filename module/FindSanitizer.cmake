@@ -24,13 +24,13 @@ set(_source_code
 
 include(CMakePushCheckState)
 foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
-  if(TARGET Sanitizer::${sanitizer_name})
-    continue()
-  endif()
   cmake_push_check_state(RESET)
 
   set(CMAKE_REQUIRED_QUIET ON)
   foreach(lang IN LISTS languages)
+    if(TARGET Sanitizer::${sanitizer_name})
+      continue()
+    endif()
     if(NOT lang STREQUAL C AND NOT lang STREQUAL CXX)
       continue()
     endif()
