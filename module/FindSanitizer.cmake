@@ -28,7 +28,7 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
 
   set(CMAKE_REQUIRED_QUIET ON)
   foreach(lang IN LISTS languages)
-    if(TARGET Sanitizer::${sanitizer_name})
+    if(TARGET Sanitizer::${sanitizer_name}_${lang})
       continue()
     endif()
     if(NOT lang STREQUAL C AND NOT lang STREQUAL CXX)
@@ -43,6 +43,22 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
     else()
       set(SANITIZER_FLAGS
           "-fsanitize=${sanitizer_name};-fno-omit-frame-pointer")
+      if(CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
+        execute_process(
+          COMMAND ${CMAKE_${lang}_COMPILER} "--print-file-name"
+                  "libclang_rt.asan-x86_64.so"
+          ERROR_VARIABLE
+          error_variable
+          OUTPUT_VARIABLE
+          output_variable
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if(NOT error_variable)
+          if(output_variable)
+            cmake_path(GET output_variable PARENT_PATH asan_dir)
+            list(APPEND SANITIZER_FLAGS "-L${asan_dir}")
+          endif()
+        endif()
+      endif()
     endif()
     if(sanitizer_name STREQUAL "undefined" AND UBSAN_FLAGS)
       list(APPEND SANITIZER_FLAGS "${UBSAN_FLAGS}")
@@ -60,8 +76,23 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
       list(APPEND SANITIZER_LINK_FLAGS "/INCREMENTAL:NO")
     else()
       list(APPEND SANITIZER_LINK_FLAGS "-fsanitize=${sanitizer_name}")
-      if(CMAKE_${lang}_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
-        list(APPEND SANITIZER_LINK_FLAGS "-shared-libasan")
+      if(CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
+        if(CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
+          execute_process(
+            COMMAND ${CMAKE_${lang}_COMPILER} "--print-file-name"
+                    "libclang_rt.asan-x86_64.so"
+            ERROR_VARIABLE
+            error_variable
+            OUTPUT_VARIABLE
+            output_variable
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+          if(NOT error_variable)
+            if(output_variable)
+              cmake_path(GET output_variable PARENT_PATH asan_dir)
+              list(APPEND SANITIZER_LINK_FLAGS "-L${asan_dir}")
+            endif()
+          endif()
+        endif()
       endif()
     endif()
     set(CMAKE_REQUIRED_LINK_OPTIONS "${SANITIZER_LINK_FLAGS}")
@@ -87,14 +118,19 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
     if(NOT __res)
       continue()
     endif()
-    add_library(Sanitizer::${sanitizer_name} INTERFACE IMPORTED GLOBAL)
+    add_library(Sanitizer::${sanitizer_name}_${lang} INTERFACE IMPORTED GLOBAL)
+    if(NOT TARGET Sanitizer::${sanitizer_name})
+      add_library(Sanitizer::${sanitizer_name} INTERFACE IMPORTED GLOBAL)
+    endif()
+    target_link_libraries(Sanitizer::${sanitizer_name}
+                          INTERFACE Sanitizer::${sanitizer_name}_${lang})
     foreach(SANITIZER_FLAG IN LISTS SANITIZER_FLAGS)
       target_compile_options(
-        Sanitizer::${sanitizer_name}
+        Sanitizer::${sanitizer_name}_${lang}
         INTERFACE $<$<COMPILE_LANGUAGE:${lang}>:${SANITIZER_FLAG}>)
     endforeach()
     foreach(SANITIZER_FLAG IN LISTS SANITIZER_LINK_FLAGS)
-      target_link_options(Sanitizer::${sanitizer_name} INTERFACE
+      target_link_options(Sanitizer::${sanitizer_name}_${lang} INTERFACE
                           $<$<COMPILE_LANGUAGE:${lang}>:${SANITIZER_FLAG}>)
     endforeach()
 
@@ -102,12 +138,12 @@ foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
       if(lang STREQUAL CXX)
         if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
           target_compile_definitions(
-            Sanitizer::${sanitizer_name}
+            Sanitizer::${sanitizer_name}_${lang}
             INTERFACE $<$<COMPILE_LANGUAGE:${lang}>:_DISABLE_VECTOR_ANNOTATION>
                       $<$<COMPILE_LANGUAGE:${lang}>:_DISABLE_STRING_ANNOTATION>)
         else()
           target_compile_definitions(
-            Sanitizer::${sanitizer_name}
+            Sanitizer::${sanitizer_name}_${lang}
             INTERFACE
               $<$<COMPILE_LANGUAGE:${lang}>:_GLIBCXX_SANITIZE_VECTOR>
               $<$<COMPILE_LANGUAGE:${lang}>:_GLIBCXX_SANITIZE_STD_ALLOCATOR>)
