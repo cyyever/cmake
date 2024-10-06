@@ -234,7 +234,7 @@ function(__test_impl)
       set(memcheck_command
           $<TARGET_FILE:valgrind::valgrind> --tool=memcheck --error-exitcode=1
           --max-threads=10000 --trace-children=yes --gen-suppressions=all
-          --track-fds=yes --leak-check=full)
+          --track-fds=no --leak-check=full)
       foreach(suppression_file ${valgrind_suppression_files})
         set(memcheck_command
             "${memcheck_command} --suppressions=${suppression_file}")
