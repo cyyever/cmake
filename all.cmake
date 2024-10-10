@@ -1,4 +1,4 @@
-cmake_policy(VERSION 3.25.0)
+cmake_policy(VERSION 3.28.0)
 if(DEFINED cyy_cmake_module_include_guard)
   return()
 endif()
