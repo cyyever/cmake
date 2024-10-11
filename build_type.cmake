@@ -10,11 +10,31 @@ if(NOT isMultiConfig)
 endif()
 
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
-function(add_custom_build_type build_type)
+
+function(has_build_type build_type out_var)
+  set(out_var OFF)
   if(isMultiConfig)
     if(${build_type} IN_LIST CMAKE_CONFIGURATION_TYPES)
-      return()
+      set(out_var ON)
     endif()
+  else()
+    get_property(
+      build_type_strings
+      CACHE CMAKE_BUILD_TYPE
+      PROPERTY STRINGS)
+    if(${build_type} IN_LIST build_type_strings)
+      set(out_var ON)
+    endif()
+  endif()
+  return(PROPAGATE ${out_var})
+endfunction()
+
+function(add_custom_build_type build_type)
+  has_build_type(build_type result)
+  if(result)
+    return()
+  endif()
+  if(isMultiConfig)
     list(APPEND CMAKE_CONFIGURATION_TYPES ${build_type})
     set(CMAKE_CONFIGURATION_TYPES
         "${CMAKE_CONFIGURATION_TYPES}"
@@ -24,9 +44,6 @@ function(add_custom_build_type build_type)
       build_type_strings
       CACHE CMAKE_BUILD_TYPE
       PROPERTY STRINGS)
-    if(${build_type} IN_LIST build_type_strings)
-      return()
-    endif()
     list(APPEND build_type_strings ${build_type})
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
                                                  "${build_type_strings}")
