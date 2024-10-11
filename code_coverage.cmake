@@ -34,15 +34,25 @@ add_custom_target(
     -DCMAKE_BUILD_PARALLEL_LEVEL=${CMAKE_BUILD_PARALLEL_LEVEL}
     ${CMAKE_SOURCE_DIR}
   COMMAND ${CMAKE_COMMAND} --build .
-  COMMAND ${CMAKE_CTEST_COMMAND} -T Test -T Coverage
+  COMMAND ${CMAKE_CTEST_COMMAND} -T Test
   DEPENDS ${CMAKE_BINARY_DIR}
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # --gcov-object-directory ${CMAKE_BINARY_DIR}
-add_custom_target(
-  generate_code_coverage_report
-  COMMAND
-    gcovr --root ${CMAKE_SOURCE_DIR} --html-details code_coverage_report.html
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-  BYPRODUCTS code_coverage_report)
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_custom_target(
+    generate_code_coverage_report
+    COMMAND gcovr --root ${CMAKE_SOURCE_DIR} --gcov-executable "llvm-cov gcov"
+            --html-details code_coverage_report.html
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    BYPRODUCTS code_coverage_report)
+else()
+  add_custom_target(
+    generate_code_coverage_report
+    COMMAND gcovr --root ${CMAKE_SOURCE_DIR} --html-details
+            code_coverage_report.html
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    BYPRODUCTS code_coverage_report)
+
+endif()
 add_dependencies(generate_code_coverage_report do_test_for_code_coverage)
