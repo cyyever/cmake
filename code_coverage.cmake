@@ -1,24 +1,32 @@
 include_guard(GLOBAL)
 
+if(NOT PROJECT_IS_TOP_LEVEL)
+  return()
+endif()
 if(TARGET generate_code_coverage_report)
   return()
 endif()
+
+get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 include(${CMAKE_CURRENT_LIST_DIR}/build_type.cmake)
 
-if(PROJECT_IS_TOP_LEVEL AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-  add_custom_build_type_like(coverage debug)
-  set(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_COVERAGE} -g -O0 --coverage")
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    string(APPEND CMAKE_CXX_FLAGS_COVERAGE
-           "${CMAKE_CXX_FLAGS_COVERAGE} -fprofile-abs-path")
+add_custom_build_type_like(coverage debug)
+set(CMAKE_EXE_LINKER_FLAGS_COVERAGE
+    "${CMAKE_EXE_LINKER_FLAGS_COVERAGE} --coverage")
+set(CMAKE_SHARED_LINKER_FLAGS_COVERAGE
+    "${CMAKE_SHARED_LINKER_FLAGS_COVERAGE} --coverage")
+set(CMAKE_MODULE_LINKER_FLAGS_COVERAGE
+    "${CMAKE_MODULE_LINKER_FLAGS_COVERAGE} --coverage")
+foreach(lang IN ITEMS C CXX)
+  if(CMAKE_${lang}_COMPILER_ID MATCHES "GNU|Clang")
+    set(CMAKE_${lang}_FLAGS_COVERAGE
+        "${CMAKE_${lang}_FLAGS_COVERAGE} -g -O0 --coverage")
+    if(CMAKE_${lang}_COMPILER_ID STREQUAL "GNU")
+      string(APPEND CMAKE_${lang}_FLAGS_COVERAGE
+             "${CMAKE_${lang}_FLAGS_COVERAGE} -fprofile-abs-path")
+    endif()
   endif()
-  set(CMAKE_EXE_LINKER_FLAGS_COVERAGE
-      "${CMAKE_EXE_LINKER_FLAGS_COVERAGE} --coverage")
-  set(CMAKE_SHARED_LINKER_FLAGS_COVERAGE
-      "${CMAKE_SHARED_LINKER_FLAGS_COVERAGE} --coverage")
-  set(CMAKE_MODULE_LINKER_FLAGS_COVERAGE
-      "${CMAKE_MODULE_LINKER_FLAGS_COVERAGE} --coverage")
-endif()
+endforeach()
 
 add_custom_command(
   OUTPUT ${CMAKE_BINARY_DIR}/code_coverage
@@ -38,7 +46,6 @@ add_custom_target(
   DEPENDS ${CMAKE_BINARY_DIR}
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
-# --gcov-object-directory ${CMAKE_BINARY_DIR}
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_custom_target(
     generate_code_coverage_report
