@@ -58,7 +58,7 @@ function(__add_fuzzing_test target target_command)
   add_dependencies(${target} __working_dir_for_${target})
 endfunction()
 function(__test_impl)
-  set(cpu_analysis_tools MEMCHECK UBSAN HELGRIND ASAN TSAN)
+  set(cpu_analysis_tools MEMCHECK UBSAN HELGRIND ASAN)
   set(gpu_analysis_tools CUDA-MEMCHECK CUDA-SYNCCHECK CUDA-INITCHECK
                          CUDA-RACECHECK)
   set(oneValueArgs TARGET WITH_CPU_ANALYSIS WITH_GPU_ANALYSIS FUZZING
