@@ -11,12 +11,12 @@ get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 include(${CMAKE_CURRENT_LIST_DIR}/build_type.cmake)
 
 add_custom_build_type_like(coverage debug)
-set(CMAKE_EXE_LINKER_FLAGS_COVERAGE
-    "${CMAKE_EXE_LINKER_FLAGS_COVERAGE} --coverage")
-set(CMAKE_SHARED_LINKER_FLAGS_COVERAGE
-    "${CMAKE_SHARED_LINKER_FLAGS_COVERAGE} --coverage")
-set(CMAKE_MODULE_LINKER_FLAGS_COVERAGE
-    "${CMAKE_MODULE_LINKER_FLAGS_COVERAGE} --coverage")
+
+foreach(targettype IN ITEMS EXE SHARED STATIC MODULE)
+  set(CMAKE_${targettype}_LINKER_FLAGS_${build_type}
+      "${CMAKE_${targettype}_LINKER_FLAGS_${build_type}} --coverage")
+endforeach()
+
 foreach(lang IN ITEMS C CXX)
   if(CMAKE_${lang}_COMPILER_ID MATCHES "GNU|Clang")
     set(CMAKE_${lang}_FLAGS_COVERAGE
