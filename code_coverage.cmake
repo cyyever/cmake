@@ -56,5 +56,5 @@ add_custom_target(
           code_coverage_report.html
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   BYPRODUCTS code_coverage_report)
-endif()
+
 add_dependencies(generate_code_coverage_report do_test_for_code_coverage)
