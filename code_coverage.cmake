@@ -46,20 +46,15 @@ add_custom_target(
   DEPENDS ${CMAKE_BINARY_DIR}
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
+set(gcov-executable "")
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_custom_target(
-    generate_code_coverage_report
-    COMMAND gcovr --root ${CMAKE_SOURCE_DIR} --gcov-executable "llvm-cov gcov"
-            --html-details code_coverage_report.html
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    BYPRODUCTS code_coverage_report)
-else()
-  add_custom_target(
-    generate_code_coverage_report
-    COMMAND gcovr --root ${CMAKE_SOURCE_DIR} --html-details
-            code_coverage_report.html
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    BYPRODUCTS code_coverage_report)
-
+  set(gcov-executable "--gcov-executable  'llvm-cov gcov'")
+endif()
+add_custom_target(
+  generate_code_coverage_report
+  COMMAND gcovr --root ${CMAKE_SOURCE_DIR} "${gcov-executable}" --html-details
+          code_coverage_report.html
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  BYPRODUCTS code_coverage_report)
 endif()
 add_dependencies(generate_code_coverage_report do_test_for_code_coverage)
