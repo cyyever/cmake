@@ -9,7 +9,7 @@
 include_guard(GLOBAL)
 
 option(UBSAN_FLAGS "additional UBSAN flags" OFF)
-option(MSAN_FLAGS "additional UBSAN flags" OFF)
+option(MSAN_FLAGS "additional MSAN flags" OFF)
 
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 
@@ -22,6 +22,17 @@ set(_source_code
   }
   ]==])
 
+set(_bug_cxx_code
+    [==[
+int main(int argc, char **argv) {
+  int *array = new int[100];
+  array[0] = 0;
+  int res = array[argc + 100];  // BOOM
+  delete [] array;
+  return res;
+}
+]==])
+
 include(CMakePushCheckState)
 foreach(lang IN LISTS languages)
   if(lang STREQUAL C)
@@ -31,6 +42,7 @@ foreach(lang IN LISTS languages)
     include(CheckCXXSourceCompiles)
     include(CheckCXXSourceRuns)
   else()
+    message(WARNING "Unsupported language ${lang}")
     continue()
   endif()
   foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
@@ -50,20 +62,20 @@ foreach(lang IN LISTS languages)
       set(SANITIZER_FLAGS
           "-fsanitize=${sanitizer_name};-fno-omit-frame-pointer")
     endif()
-    if(CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
-      unset(err_var)
-      unset(out_var)
-      execute_process(
-        COMMAND ${CMAKE_${lang}_COMPILER} "--print-file-name"
-                "libclang_rt.asan-x86_64.so"
-        ERROR_VARIABLE err_var
-        OUTPUT_VARIABLE out_var
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-      if(NOT err_var AND out_var)
-        cmake_path(GET out_var PARENT_PATH asan_dir)
-        list(APPEND SANITIZER_FLAGS "-L${asan_dir}")
-      endif()
-    endif()
+    # if(CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
+    #   unset(err_var)
+    #   unset(out_var)
+    #   execute_process(
+    #     COMMAND ${CMAKE_${lang}_COMPILER} "--print-file-name"
+    #             "libclang_rt.asan-x86_64.so"
+    #     ERROR_VARIABLE err_var
+    #     OUTPUT_VARIABLE out_var
+    #     OUTPUT_STRIP_TRAILING_WHITESPACE)
+    #   if(NOT err_var AND out_var)
+    #     cmake_path(GET out_var PARENT_PATH asan_dir)
+    #     list(APPEND SANITIZER_FLAGS "-L${asan_dir}")
+    #   endif()
+    # endif()
     if(sanitizer_name STREQUAL "undefined" AND UBSAN_FLAGS)
       list(APPEND SANITIZER_FLAGS "${UBSAN_FLAGS}")
     endif()
@@ -83,7 +95,7 @@ foreach(lang IN LISTS languages)
     endif()
     set(CMAKE_REQUIRED_LINK_OPTIONS "${SANITIZER_LINK_FLAGS}")
 
-    unset(__res)
+    unset(__res CACHE)
     if(lang STREQUAL C)
       if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
         check_c_source_compiles("${_source_code}" __res)
@@ -95,6 +107,20 @@ foreach(lang IN LISTS languages)
         check_cxx_source_compiles("${_source_code}" __res)
       else()
         check_cxx_source_runs("${_source_code}" __res)
+        if(NOT __res)
+          cmake_pop_check_state()
+          continue()
+        endif()
+        if(sanitizer_name STREQUAL "address")
+          unset(__res CACHE)
+          check_cxx_source_runs("${_bug_cxx_code}" __res)
+          if(__res)
+            message(WARNING "C++ bug was not detected")
+            cmake_pop_check_state()
+            continue()
+          endif()
+          set(__res ON)
+        endif()
       endif()
     endif()
     if(NOT __res)
