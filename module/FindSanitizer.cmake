@@ -61,20 +61,6 @@ foreach(lang IN LISTS languages)
       set(SANITIZER_FLAGS
           "-fsanitize=${sanitizer_name};-fno-omit-frame-pointer")
     endif()
-    # if(CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
-    #   unset(err_var)
-    #   unset(out_var)
-    #   execute_process(
-    #     COMMAND ${CMAKE_${lang}_COMPILER} "--print-file-name"
-    #             "libclang_rt.asan-x86_64.so"
-    #     ERROR_VARIABLE err_var
-    #     OUTPUT_VARIABLE out_var
-    #     OUTPUT_STRIP_TRAILING_WHITESPACE)
-    #   if(NOT err_var AND out_var)
-    #     cmake_path(GET out_var PARENT_PATH asan_dir)
-    #     list(APPEND SANITIZER_FLAGS "-L${asan_dir}")
-    #   endif()
-    # endif()
     if(sanitizer_name STREQUAL "undefined" AND UBSAN_FLAGS)
       list(APPEND SANITIZER_FLAGS "${UBSAN_FLAGS}")
     endif()
@@ -141,6 +127,12 @@ foreach(lang IN LISTS languages)
       target_link_options(Sanitizer::${sanitizer_name}_${lang} INTERFACE
                           $<$<COMPILE_LANGUAGE:${lang}>:${SANITIZER_FLAG}>)
     endforeach()
+
+    if(CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
+      target_compile_options(
+        Sanitizer::${sanitizer_name}_${lang}
+        INTERFACE $<$<COMPILE_LANGUAGE:${lang}>:-shared-libsan>)
+    endif()
 
     if(sanitizer_name STREQUAL "address" AND lang STREQUAL CXX)
       if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
