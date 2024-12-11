@@ -1,4 +1,7 @@
 include_guard(GLOBAL)
+if(TARGET copy_compile_commands_json)
+  return()
+endif()
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 
 foreach(lang IN ITEMS C CXX)
