@@ -1,5 +1,11 @@
 cmake_policy(VERSION 3.28.0)
 include_guard(GLOBAL)
+if(DEFINED __INCLUDED_CYY_CMAKE_MODULES)
+  return()
+endif()
+set(__INCLUDED_CYY_CMAKE_MODULES
+    TRUE
+    CACHE INTERNAL "INCLUDED_CYY_CMAKE_MODULES_MARK")
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/module)
 include(${CMAKE_CURRENT_LIST_DIR}/build_type.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/basic_compiling_option.cmake)
