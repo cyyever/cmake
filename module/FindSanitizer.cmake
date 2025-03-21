@@ -24,6 +24,7 @@ set(_source_code
 
 set(_bug_c_code
     [==[
+#include <stdlib.h>
 int main(int argc, char **argv) {
   int *array = (int*)malloc(100*sizeof(int));
   array[0] = 0;
@@ -48,13 +49,10 @@ foreach(lang IN LISTS languages)
     if(TARGET Sanitizer::${sanitizer_name}_${lang})
       continue()
     endif()
-    cmake_push_check_state(RESET)
-    set(CMAKE_REQUIRED_QUIET ON)
     if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
       if(sanitizer_name STREQUAL "address")
         set(SANITIZER_FLAGS "/fsanitize=${sanitizer_name}")
       else()
-        cmake_pop_check_state()
         continue()
       endif()
     else()
@@ -70,6 +68,8 @@ foreach(lang IN LISTS languages)
         list(APPEND SANITIZER_FLAGS "${MSAN_FLAGS}")
       endif()
     endif()
+    cmake_push_check_state(RESET)
+    set(CMAKE_REQUIRED_QUIET ON)
     string(REPLACE ";" " " CMAKE_REQUIRED_FLAGS "${SANITIZER_FLAGS}")
 
     set(SANITIZER_LINK_FLAGS)
