@@ -22,13 +22,13 @@ set(_source_code
   }
   ]==])
 
-set(_bug_cxx_code
+set(_bug_c_code
     [==[
 int main(int argc, char **argv) {
-  int *array = new int[100];
+  int *array = (int*)malloc(100*sizeof(int));
   array[0] = 0;
   int res = array[argc + 100];  // BOOM
-  delete [] array;
+  free(array);
   return res;
 }
 ]==])
@@ -85,26 +85,28 @@ foreach(lang IN LISTS languages)
       if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
         check_c_source_compiles("${_source_code}" __res)
       else()
-        check_c_source_runs("${_source_code}" __res)
+        if(sanitizer_name STREQUAL "address")
+          check_c_source_runs("${_bug_c_code}" __res)
+          if(__res)
+            message(WARNING "C bug was not detected")
+            set(__res OFF)
+          endif()
+        else()
+          check_c_source_runs("${_source_code}" __res)
+        endif()
       endif()
     else()
       if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
         check_cxx_source_compiles("${_source_code}" __res)
       else()
-        check_cxx_source_runs("${_source_code}" __res)
-        if(NOT __res)
-          cmake_pop_check_state()
-          continue()
-        endif()
         if(sanitizer_name STREQUAL "address")
-          unset(__res CACHE)
-          check_cxx_source_runs("${_bug_cxx_code}" __res)
+          check_cxx_source_runs("${_bug_c_code}" __res)
           if(__res)
             message(WARNING "C++ bug was not detected")
-            cmake_pop_check_state()
-            continue()
+            set(__res OFF)
           endif()
-          set(__res ON)
+        else()
+          check_cxx_source_runs("${_source_code}" __res)
         endif()
       endif()
     endif()
