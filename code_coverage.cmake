@@ -15,11 +15,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/build_type.cmake)
 
 add_custom_build_type_like(coverage debug)
 
-foreach(targettype IN ITEMS EXE SHARED STATIC MODULE)
-  set(CMAKE_${targettype}_LINKER_FLAGS_${build_type}
-      "${CMAKE_${targettype}_LINKER_FLAGS_${build_type}} --coverage")
-endforeach()
-
 foreach(lang IN ITEMS C CXX)
   if(CMAKE_${lang}_COMPILER_ID MATCHES "GNU|Clang")
     set(CMAKE_${lang}_FLAGS_COVERAGE
@@ -28,12 +23,16 @@ foreach(lang IN ITEMS C CXX)
       string(APPEND CMAKE_${lang}_FLAGS_COVERAGE
              "${CMAKE_${lang}_FLAGS_COVERAGE} -fprofile-abs-path")
     endif()
+    foreach(targettype IN ITEMS EXE SHARED STATIC MODULE)
+      set(CMAKE_${targettype}_LINKER_FLAGS_${build_type}
+          "${CMAKE_${targettype}_LINKER_FLAGS_${build_type}} --coverage")
+    endforeach()
   endif()
 endforeach()
 
 add_custom_command(
   OUTPUT ${CMAKE_BINARY_DIR}/code_coverage
-  COMMAND mkdir -p code_coverage
+  COMMAND ${CMAKE_COMMAND} -E make_directory code_coverage
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
 add_custom_target(
