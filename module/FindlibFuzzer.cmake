@@ -7,8 +7,6 @@ if(TARGET libFuzzer::libFuzzer)
   return()
 endif()
 
-include(FindPackageHandleStandardArgs)
-
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 
 include(CMakePushCheckState)
@@ -28,7 +26,7 @@ foreach(lang IN LISTS languages)
   if(lang STREQUAL CXX OR lang STREQUAL C)
     include(CheckSourceCompiles)
     set(_fuzzer_${lang}_res 0)
-    if("${CMAKE_${lang}_COMPILER_ID}" STREQUAL "MSVC")
+    if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
       set(CMAKE_TRY_COMPILE_CONFIGURATION "Release")
       set(CMAKE_REQUIRED_FLAGS "/fsanitize=fuzzer")
     else()
@@ -44,7 +42,7 @@ foreach(lang IN LISTS languages)
         INTERFACE
           $<$<AND:$<COMPILE_LANGUAGE:${lang}>,$<BOOL:${_fuzzer_${lang}_res}>>:${CMAKE_REQUIRED_FLAGS}>
       )
-      if("${CMAKE_${lang}_COMPILER_ID}" STREQUAL "MSVC")
+      if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
         target_link_options(
           libFuzzer::libFuzzer
           INTERFACE
