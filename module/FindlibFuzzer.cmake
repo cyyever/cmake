@@ -22,7 +22,6 @@ set(_source_code
   }
   ]==])
 
-set(_compile_res 0)
 foreach(lang IN LISTS languages)
   cmake_push_check_state(RESET)
   set(CMAKE_REQUIRED_QUIET ON)
@@ -52,10 +51,7 @@ foreach(lang IN LISTS languages)
           $<$<AND:$<COMPILE_LANGUAGE:${lang}>,$<BOOL:${_fuzzer_${lang}_res}>>:${CMAKE_REQUIRED_FLAGS}>
         )
       endif()
-      set(_compile_res 1)
     endif()
   endif()
   cmake_pop_check_state()
 endforeach()
-
-find_package_handle_standard_args(libFuzzer DEFAULT_MSG _compile_res)
