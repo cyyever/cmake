@@ -24,8 +24,8 @@ foreach(lang IN ITEMS C CXX)
              "${CMAKE_${lang}_FLAGS_COVERAGE} -fprofile-abs-path")
     endif()
     foreach(targettype IN ITEMS EXE SHARED STATIC MODULE)
-      set(CMAKE_${targettype}_LINKER_FLAGS_${build_type}
-          "${CMAKE_${targettype}_LINKER_FLAGS_${build_type}} --coverage")
+      set(CMAKE_${targettype}_LINKER_FLAGS_COVERAGE
+          "${CMAKE_${targettype}_LINKER_FLAGS_COVERAGE} --coverage")
     endforeach()
   endif()
 endforeach()
