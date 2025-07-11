@@ -30,11 +30,6 @@ foreach(lang IN ITEMS C CXX)
   endif()
 endforeach()
 
-add_custom_command(
-  OUTPUT ${CMAKE_BINARY_DIR}/code_coverage
-  COMMAND ${CMAKE_COMMAND} -E make_directory code_coverage
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-
 add_custom_target(
   do_test_for_code_coverage
   COMMAND
@@ -50,7 +45,10 @@ add_custom_target(
 
 set(gcov-executable "")
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  set(gcov-executable "--gcov-executable  'llvm-cov gcov'")
+  find_program(llvmcov_BINARY llvm-cov)
+  if(llvmcov_BINARY)
+    set(gcov-executable "--gcov-executable  '${llvmcov_BINARY} gcov'")
+  endif()
 endif()
 add_custom_target(
   generate_code_coverage_report
