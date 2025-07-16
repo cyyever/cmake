@@ -7,9 +7,9 @@ if(TARGET libFuzzer::libFuzzer)
   return()
 endif()
 
-include(FindPackageHandleStandardArgs)
-
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+
+include(CMakePushCheckState)
 
 set(_source_code
     [==[
@@ -20,48 +20,36 @@ set(_source_code
   }
   ]==])
 
-include(CMakePushCheckState)
-cmake_push_check_state(RESET)
-
-set(CMAKE_REQUIRED_QUIET ON)
-set(CMAKE_REQUIRED_FLAGS "-fsanitize=fuzzer")
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_C_COMPILER_ID STREQUAL "MSVC")
-  set(CMAKE_REQUIRED_FLAGS "/fsanitize=fuzzer")
-  set(CMAKE_TRY_COMPILE_CONFIGURATION "Release")
-endif()
-
-set(_c_res)
-set(_cxx_res)
-
-set(_compile_res 0)
 foreach(lang IN LISTS languages)
+  cmake_push_check_state(RESET)
+  set(CMAKE_REQUIRED_QUIET ON)
   if(lang STREQUAL CXX OR lang STREQUAL C)
     include(CheckSourceCompiles)
-    check_source_compiles(${lang} "${_source_code}" _${lang}_res)
-    if(_${lang}_res)
-      set(_compile_res 1)
+    set(_fuzzer_${lang}_res 0)
+    if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
+      set(CMAKE_TRY_COMPILE_CONFIGURATION "Release")
+      set(CMAKE_REQUIRED_FLAGS "/fsanitize=fuzzer")
+    else()
+      set(CMAKE_REQUIRED_FLAGS "-fsanitize=fuzzer")
+    endif()
+    check_source_compiles(${lang} "${_source_code}" _fuzzer_${lang}_res)
+    if(_fuzzer_${lang}_res)
+      if(NOT TARGET libFuzzer::libFuzzer)
+        add_library(libFuzzer::libFuzzer INTERFACE IMPORTED GLOBAL)
+      endif()
+      target_compile_options(
+        libFuzzer::libFuzzer
+        INTERFACE
+          $<$<AND:$<COMPILE_LANGUAGE:${lang}>,$<BOOL:${_fuzzer_${lang}_res}>>:${CMAKE_REQUIRED_FLAGS}>
+      )
+      if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
+        target_link_options(
+          libFuzzer::libFuzzer
+          INTERFACE
+          $<$<AND:$<COMPILE_LANGUAGE:${lang}>,$<BOOL:${_fuzzer_${lang}_res}>>:${CMAKE_REQUIRED_FLAGS}>
+        )
+      endif()
     endif()
   endif()
+  cmake_pop_check_state()
 endforeach()
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_C_COMPILER_ID STREQUAL "MSVC")
-  set(_compile_res 1)
-endif()
-
-find_package_handle_standard_args(libFuzzer DEFAULT_MSG _compile_res)
-if(libFuzzer_FOUND)
-  add_library(libFuzzer::libFuzzer INTERFACE IMPORTED GLOBAL)
-  target_compile_options(
-    libFuzzer::libFuzzer
-    INTERFACE
-      $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$_cxx_res>>:${CMAKE_REQUIRED_FLAGS}>
-      $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$_c_res>>:${CMAKE_REQUIRED_FLAGS}>)
-  if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_C_COMPILER_ID
-                                                   STREQUAL "MSVC")
-    target_link_options(
-      libFuzzer::libFuzzer
-      INTERFACE
-      $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:$_cxx_res>>:${CMAKE_REQUIRED_FLAGS}>
-      $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:$_c_res>>:${CMAKE_REQUIRED_FLAGS}>)
-  endif()
-endif()
-cmake_pop_check_state()

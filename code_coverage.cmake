@@ -15,11 +15,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/build_type.cmake)
 
 add_custom_build_type_like(coverage debug)
 
-foreach(targettype IN ITEMS EXE SHARED STATIC MODULE)
-  set(CMAKE_${targettype}_LINKER_FLAGS_${build_type}
-      "${CMAKE_${targettype}_LINKER_FLAGS_${build_type}} --coverage")
-endforeach()
-
 foreach(lang IN ITEMS C CXX)
   if(CMAKE_${lang}_COMPILER_ID MATCHES "GNU|Clang")
     set(CMAKE_${lang}_FLAGS_COVERAGE
@@ -28,13 +23,12 @@ foreach(lang IN ITEMS C CXX)
       string(APPEND CMAKE_${lang}_FLAGS_COVERAGE
              "${CMAKE_${lang}_FLAGS_COVERAGE} -fprofile-abs-path")
     endif()
+    foreach(targettype IN ITEMS EXE SHARED STATIC MODULE)
+      set(CMAKE_${targettype}_LINKER_FLAGS_COVERAGE
+          "${CMAKE_${targettype}_LINKER_FLAGS_COVERAGE} --coverage")
+    endforeach()
   endif()
 endforeach()
-
-add_custom_command(
-  OUTPUT ${CMAKE_BINARY_DIR}/code_coverage
-  COMMAND mkdir -p code_coverage
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
 add_custom_target(
   do_test_for_code_coverage
@@ -51,7 +45,10 @@ add_custom_target(
 
 set(gcov-executable "")
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  set(gcov-executable "--gcov-executable  'llvm-cov gcov'")
+  find_program(llvmcov_BINARY llvm-cov)
+  if(llvmcov_BINARY)
+    set(gcov-executable "--gcov-executable  '${llvmcov_BINARY} gcov'")
+  endif()
 endif()
 add_custom_target(
   generate_code_coverage_report

@@ -4,7 +4,6 @@
 #  Sanitizer::address
 #  Sanitizer::thread
 #  Sanitizer::undefined
-#  Sanitizer::leak
 #  Sanitizer::memory
 include_guard(GLOBAL)
 
@@ -22,8 +21,9 @@ set(_source_code
   }
   ]==])
 
-set(_bug_c_code
+set(_bug_address_code
     [==[
+#include <stdlib.h>
 int main(int argc, char **argv) {
   int *array = (int*)malloc(100*sizeof(int));
   array[0] = 0;
@@ -33,18 +33,24 @@ int main(int argc, char **argv) {
 }
 ]==])
 
+set(_bug_undefined_code
+    [==[
+int main(int argc, char **argv) {
+  int k = 0x7fffffff;
+  k += argc;
+  return 0;
+}
+]==])
+
 include(CMakePushCheckState)
 foreach(lang IN LISTS languages)
-  if(lang STREQUAL C)
-    include(CheckCSourceCompiles)
-    include(CheckCSourceRuns)
-  elseif(lang STREQUAL CXX)
-    include(CheckCXXSourceCompiles)
-    include(CheckCXXSourceRuns)
+  if(lang STREQUAL C OR lang STREQUAL CXX)
+    include(CheckSourceCompiles)
+    include(CheckSourceRuns)
   else()
     continue()
   endif()
-  foreach(sanitizer_name IN ITEMS address thread undefined leak memory)
+  foreach(sanitizer_name IN ITEMS address thread undefined memory)
     if(TARGET Sanitizer::${sanitizer_name}_${lang})
       continue()
     endif()
@@ -80,39 +86,31 @@ foreach(lang IN LISTS languages)
     set(CMAKE_REQUIRED_LINK_OPTIONS "${SANITIZER_LINK_FLAGS}")
 
     unset(__res CACHE)
-    if(lang STREQUAL C)
-      if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
-        check_c_source_compiles("${_source_code}" __res)
-      else()
-        if(sanitizer_name STREQUAL "address")
-          check_c_source_runs("${_bug_c_code}" __res)
-          if(__res)
-            message(WARNING "C bug was not detected")
-            set(__res OFF)
-          endif()
-        else()
-          check_c_source_runs("${_source_code}" __res)
-        endif()
-      endif()
+    if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
+      check_source_compiles(${lang} "${_source_code}" __res)
     else()
-      if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
-        check_cxx_source_compiles("${_source_code}" __res)
-      else()
-        if(sanitizer_name STREQUAL "address")
-          check_cxx_source_runs("${_bug_c_code}" __res)
-          if(__res)
-            message(WARNING "C++ bug was not detected")
-            set(__res OFF)
-          endif()
-        else()
-          check_cxx_source_runs("${_source_code}" __res)
-        endif()
-      endif()
+      check_source_runs(${lang} "${_source_code}" __res)
     endif()
     if(NOT __res)
+      # no memory sanitizer is common
+      if(NOT sanitizer_name STREQUAL "memory")
+        message(WARNING "Can't find ${sanitizer_name} in ${lang}")
+      endif()
       cmake_pop_check_state()
       continue()
     endif()
+
+    unset(__res CACHE)
+    if(NOT CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC" AND (sanitizer_name STREQUAL "address") OR (sanitizer_name STREQUAL "undefined"))
+      set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -fno-sanitize-recover=all")
+      check_source_runs(${lang} "${_bug_${sanitizer_name}_code}" __res)
+      if(__res)
+        message(WARNING "Buffer overflow bug is not detected in ${lang} ${sanitizer_name}")
+        cmake_pop_check_state()
+        continue()
+      endif()
+    endif()
+
     add_library(Sanitizer::${sanitizer_name}_${lang} INTERFACE IMPORTED GLOBAL)
     if(NOT TARGET Sanitizer::${sanitizer_name})
       add_library(Sanitizer::${sanitizer_name} INTERFACE IMPORTED GLOBAL)

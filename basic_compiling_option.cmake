@@ -13,7 +13,7 @@ endif()
 if(CXX IN_LIST languages AND NOT DEFINED CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 20)
   if(CMAKE_CXX_STANDARD LESS 17)
-    message(FATAL_ERROR "only C++17 or above is supported")
+    message(FATAL_ERROR "Only C++17 or newer standard is supported.")
   endif()
 endif()
 
@@ -30,7 +30,7 @@ if(NOT DEFINED CMAKE_CUDA_EXTENSIONS)
   set(CMAKE_CUDA_EXTENSIONS OFF)
 endif()
 
-option(DEBUG_VECTORIZATION "debug vectorization failures" OFF)
+option(DEBUG_VECTORIZATION "debug vectorization optimization" OFF)
 # add common options
 foreach(lang IN LISTS languages)
   set(c_family "C;CXX")
@@ -39,7 +39,8 @@ foreach(lang IN LISTS languages)
   endif()
   if(CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
     set(CMAKE_${lang}_FLAGS
-        "${CMAKE_${lang}_FLAGS} -Weverything -ferror-limit=1 -fexperimental-library")
+        "${CMAKE_${lang}_FLAGS} -Weverything -ferror-limit=1 -fexperimental-library"
+    )
 
     if(DEBUG_VECTORIZATION)
       set(CMAKE_${lang}_FLAGS
