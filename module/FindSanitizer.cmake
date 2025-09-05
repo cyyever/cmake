@@ -43,6 +43,18 @@ int main(int argc, char **argv) {
 }
 ]==])
 
+set(_bug_memory_code
+    [==[
+int main(int argc, char** argv) {
+  int* a = new int[10];
+  a[5] = 0;
+  volatile int b = a[argc];
+  if (b)
+    printf("xx\n");
+  return 0;
+}
+]==])
+
 include(CMakePushCheckState)
 foreach(lang IN LISTS languages)
   if(lang STREQUAL C OR lang STREQUAL CXX)
