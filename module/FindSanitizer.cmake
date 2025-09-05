@@ -7,8 +7,9 @@
 #  Sanitizer::memory
 include_guard(GLOBAL)
 
-option(UBSAN_FLAGS "additional UBSAN flags" OFF)
-option(MSAN_FLAGS "additional MSAN flags" OFF)
+option(ASAN_FLAGS "additional ASAN flags" "")
+option(UBSAN_FLAGS "additional UBSAN flags" "")
+option(MSAN_FLAGS "additional MSAN flags" "-fsanitize-memory-track-origins=2")
 
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 
@@ -64,14 +65,17 @@ foreach(lang IN LISTS languages)
       set(SANITIZER_FLAGS
           "-fsanitize=${sanitizer_name};-fno-omit-frame-pointer")
     endif()
+    if(sanitizer_name STREQUAL "address" AND ASAN_FLAGS)
+      list(APPEND SANITIZER_FLAGS "${ASAN_FLAGS}")
+    endif()
+    if(sanitizer_name STREQUAL "thread" AND TSAN_FLAGS)
+      list(APPEND SANITIZER_FLAGS "${TSAN_FLAGS}")
+    endif()
     if(sanitizer_name STREQUAL "undefined" AND UBSAN_FLAGS)
       list(APPEND SANITIZER_FLAGS "${UBSAN_FLAGS}")
     endif()
-    if(sanitizer_name STREQUAL "memory")
-      list(APPEND SANITIZER_FLAGS "-fsanitize-memory-track-origins=2")
-      if(MSAN_FLAGS)
-        list(APPEND SANITIZER_FLAGS "${MSAN_FLAGS}")
-      endif()
+    if(sanitizer_name STREQUAL "memory" AND MSAN_FLAGS)
+      list(APPEND SANITIZER_FLAGS "${MSAN_FLAGS}")
     endif()
     cmake_push_check_state(RESET)
     set(CMAKE_REQUIRED_QUIET ON)
@@ -101,11 +105,16 @@ foreach(lang IN LISTS languages)
     endif()
 
     unset(__res CACHE)
-    if(NOT CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC" AND (sanitizer_name STREQUAL "address") OR (sanitizer_name STREQUAL "undefined"))
-      set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -fno-sanitize-recover=all")
+    if(NOT CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC"
+       AND (sanitizer_name STREQUAL "address")
+       OR (sanitizer_name STREQUAL "undefined"))
+      set(CMAKE_REQUIRED_FLAGS
+          "${CMAKE_REQUIRED_FLAGS} -fno-sanitize-recover=all")
       check_source_runs(${lang} "${_bug_${sanitizer_name}_code}" __res)
       if(__res)
-        message(WARNING "Buffer overflow bug is not detected in ${lang} ${sanitizer_name}")
+        message(
+          WARNING
+            "Buffer overflow bug is not detected in ${lang} ${sanitizer_name}")
         cmake_pop_check_state()
         continue()
       endif()
