@@ -43,6 +43,30 @@ int main(int argc, char **argv) {
 }
 ]==])
 
+set(_bug_thread_code
+    [==[
+#include <pthread.h>
+#include <stdio.h>
+#include <string>
+#include <map>
+
+typedef std::map<std::string, std::string> map_t;
+
+void *threadfunc(void *p) {
+  map_t& m = *(map_t*)p;
+  m["foo"] = "bar";
+  return 0;
+}
+
+int main() {
+  map_t m;
+  pthread_t t;
+  pthread_create(&t, 0, threadfunc, &m);
+  printf("foo=%s\n", m["foo"].c_str());
+  pthread_join(t, 0);
+}
+]==])
+
 set(_bug_memory_code
     [==[
 int main(int argc, char** argv) {
@@ -117,9 +141,7 @@ foreach(lang IN LISTS languages)
     endif()
 
     unset(__res CACHE)
-    if(NOT CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC"
-       AND (sanitizer_name STREQUAL "address")
-       OR (sanitizer_name STREQUAL "undefined"))
+    if(NOT CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
       set(CMAKE_REQUIRED_FLAGS
           "${CMAKE_REQUIRED_FLAGS} -fno-sanitize-recover=all")
       check_source_runs(${lang} "${_bug_${sanitizer_name}_code}" __res)
