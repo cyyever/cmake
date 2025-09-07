@@ -5,6 +5,7 @@
 #  Sanitizer::thread
 #  Sanitizer::undefined
 #  Sanitizer::memory
+#  Sanitizer::type
 include_guard(GLOBAL)
 
 option(ASAN_FLAGS "additional ASAN flags" "")
@@ -87,7 +88,7 @@ foreach(lang IN LISTS languages)
   else()
     continue()
   endif()
-  foreach(sanitizer_name IN ITEMS address thread undefined memory)
+  foreach(sanitizer_name IN ITEMS address thread undefined memory type)
     if(TARGET Sanitizer::${sanitizer_name}_${lang})
       continue()
     endif()
