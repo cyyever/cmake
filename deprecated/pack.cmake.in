@@ -1,6 +1,0 @@
-include(BundleUtilities)
-FOREACH(ADDTIONAL_LIB $ENV{LIBS})
-  get_filename_component(real_path ${ADDTIONAL_LIB} REALPATH)
-  file(COPY ${real_path} DESTINATION $ENV{DEST_DIR})
-ENDFOREACH()
-FIXUP_BUNDLE($ENV{APP} "$ENV{LIBS}" "")

@@ -41,12 +41,12 @@ if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
      AND Python3_FOUND
      AND NOT TARGET do_run_clang_tidy)
     set(EXTRA-ARGS -extra-arg='-std=c++2b' -extra-arg='-Qunused-arguments')
-    set(CHECKES
+    set(CHECKS
         "-checks='*,-cert-err58-cpp,-clang-analyzer-cplusplus.NewDeleteLeaks,-clang-diagnostic*,-clang-diagnostic-ctad-maybe-unsupported,-clang-diagnostic-gnu-zero-variadic-macro-arguments,-clang-diagnostic-ignored-optimization-argument,-cppcoreguidelines-avoid-magic-numbers,-cppcoreguidelines-init-variables,-cppcoreguidelines-non-private-member-variables-in-classes,-cppcoreguidelines-owning-memory,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-vararg,-fuchsia-default-arguments*,-fuchsia-default-arguments-calls,-fuchsia-default-arguments-declarations,-fuchsia-overloaded-operator,-fuchsia-statically-constructed-objects,-google-build-using-namespace,-google-readability*,-google-readability-namespace-comments,-hicpp-braces-around-statements,-hicpp-no-array-decay,-hicpp-signed-bitwise,-hicpp-vararg,-llvm-else-after-return,-llvm-header-guard,-llvm-include-order,-llvmlibc*,-llvm-namespace-comment,-llvm-qualified-auto,-misc-non-private-member-variables-in-classes,-misc-no-recursion,-modernize-use-nodiscard,-modernize-use-trailing-return-type,-readability*,-readability-implicit-bool-conversion,-readability-magic-numbers,-readability-redundant-access-specifiers,-misc-const-correctness'"
     )
     if(C IN_LIST languages AND NOT CXX IN_LIST languages)
       set(EXTRA-ARGS)
-      set(CHECKES
+      set(CHECKS
           "-checks='*,-modernize*,-*readability*,-hicpp-braces*,-cppcoreguidelines*,-misc-non-private-member-variables-in-classes,-hicpp-no-malloc,-*uppercase-literal-suffix*,-llvm-include-order,-bugprone-narrowing-conversions,-performance-type-promotion-in-math-fn,-hicpp-signed-bitwise'"
       )
     endif()
@@ -56,7 +56,7 @@ if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         ${Python3_EXECUTABLE} "$<TARGET_FILE:ClangTools::run-clang-tidy>"
         -clang-tidy-binary "$<TARGET_FILE:ClangTools::clang-tidy>" -p
         ${CMAKE_BINARY_DIR} "-quiet" -excluded-file-patterns "pb[.]cc"
-        ${EXTRA-ARGS} ${CHECKES} | grep -v 'clang.*tidy.*checks' >
+        ${EXTRA-ARGS} ${CHECKS} | grep -v 'clang.*tidy.*checks' >
         ./run-clang-tidy.txt
       DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
