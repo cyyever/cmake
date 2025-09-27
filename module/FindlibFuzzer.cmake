@@ -22,10 +22,9 @@ set(_source_code
 
 foreach(lang IN LISTS languages)
   cmake_push_check_state(RESET)
-  set(CMAKE_REQUIRED_QUIET ON)
+  set(CMAKE_REQUIRED_QUIET OFF)
   if(lang STREQUAL CXX OR lang STREQUAL C)
     include(CheckSourceCompiles)
-    set(_fuzzer_${lang}_res 0)
     if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
       set(CMAKE_TRY_COMPILE_CONFIGURATION "Release")
       set(CMAKE_REQUIRED_FLAGS "/fsanitize=fuzzer")
