@@ -56,9 +56,8 @@ set(CMAKE_REQUIRED_INCLUDES
     ${libcxx_include_dir}/../../x86_64-unknown-linux-gnu/c++/v1)
 set(CMAKE_REQUIRED_LINK_OPTIONS -nodefaultlibs -L${libcxx_lib_dir})
 set(CMAKE_REQUIRED_LIBRARIES c++ m c gcc gcc_s)
-if(NOT CMAKE_SYSTEM_NAME MATCHES FreeBSD)
-  list(APPEND CMAKE_REQUIRED_LIBRARIES c++abi)
-else()
+list(APPEND CMAKE_REQUIRED_LIBRARIES c++abi)
+if(CMAKE_SYSTEM_NAME MATCHES FreeBSD)
   list(PREPEND CMAKE_REQUIRED_LIBRARIES pthread)
 endif()
 
